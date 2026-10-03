@@ -342,7 +342,7 @@ $('#job-form').onsubmit = e => {
     e.preventDefault();
     guarded(async () => {
         const f = e.target,
-            b = Object.fromEntries(new FormData(f));
+            b = {...(editing?.body || {}), ...Object.fromEntries(new FormData(f))};
         b.grandfathered = f.elements.grandfathered.checked;
         ['base_min', 'base_max'].forEach(k => b[k] = b[k] ? Number(b[k]) : null);
         if (b.grandfathered && !b.exception_reason) throw Error('Explain the grandfathered exception.');
