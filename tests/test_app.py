@@ -66,6 +66,10 @@ def test_auth_csrf_fail_closed(env, tmp_path, monkeypatch):
     production = TestClient(create_app(tmp_path / "prod"))
     assert production.post("/auth/demo").status_code == 403
     assert production.get("/auth/apple").status_code == 503
+    monkeypatch.setenv("APPLE_CLIENT_ID", "inert-service")
+    monkeypatch.setenv("APPLE_OWNER_SUB", "inert-sub")
+    assert production.get("/auth/info").json()["configured"] is False
+    assert production.get("/auth/apple").status_code == 503
 
 
 def test_versions_idempotency_audit(env):

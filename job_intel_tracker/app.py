@@ -121,7 +121,18 @@ def create_app(data_dir=None, demo=False):
 
     @app.get("/auth/info")
     def info():
-        return {"demo": demo, "configured": bool(os.getenv("APPLE_CLIENT_ID") and os.getenv("APPLE_OWNER_SUB"))}
+        configured = all(
+            os.getenv(k)
+            for k in (
+                "APPLE_CLIENT_ID",
+                "APPLE_REDIRECT_URI",
+                "APPLE_OWNER_SUB",
+                "APPLE_TEAM_ID",
+                "APPLE_KEY_ID",
+                "APPLE_PRIVATE_KEY_FILE",
+            )
+        ) and os.getenv("APPLE_REDIRECT_URI", "").startswith("https://")
+        return {"demo": demo, "configured": configured}
 
     @app.post("/auth/demo")
     def demo_login(req: Request):
