@@ -1,0 +1,19 @@
+services:
+  tracker:
+    build: .
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      APP_ENV: production
+      DATA_DIR: /data
+      APPLE_CLIENT_ID: ${APPLE_CLIENT_ID:-}
+      APPLE_REDIRECT_URI: ${APPLE_REDIRECT_URI:-}
+      APPLE_OWNER_SUB: ${APPLE_OWNER_SUB:-}
+    volumes:
+      - tracker-data:/data
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+volumes:
+  tracker-data:

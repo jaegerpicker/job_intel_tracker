@@ -1,0 +1,907 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "job_intel_tracker",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "Index",
+        "operationId": "index__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/info": {
+      "get": {
+        "summary": "Info",
+        "operationId": "info_auth_info_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/demo": {
+      "post": {
+        "summary": "Demo Login",
+        "operationId": "demo_login_auth_demo_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/apple": {
+      "get": {
+        "summary": "Apple",
+        "operationId": "apple_auth_apple_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/callback": {
+      "post": {
+        "summary": "Callback",
+        "operationId": "callback_auth_callback_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/me": {
+      "get": {
+        "summary": "Me",
+        "operationId": "me_api_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "AgentBearer": []
+          },
+          {
+            "OwnerSession": []
+          }
+        ]
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "summary": "Logout",
+        "operationId": "logout_auth_logout_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/records": {
+      "get": {
+        "summary": "Records",
+        "operationId": "records_api_records_get",
+        "parameters": [
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Kind"
+            }
+          },
+          {
+            "name": "job",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Job"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Q"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "AgentBearer": []
+          },
+          {
+            "OwnerSession": []
+          }
+        ]
+      }
+    },
+    "/api/records/{rid}": {
+      "put": {
+        "summary": "Write",
+        "operationId": "write_api_records__rid__put",
+        "parameters": [
+          {
+            "name": "rid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Rid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Record"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "AgentBearer": []
+          },
+          {
+            "OwnerSession": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Delete",
+        "operationId": "delete_api_records__rid__delete",
+        "parameters": [
+          {
+            "name": "rid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Rid"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Version"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "AgentBearer": []
+          },
+          {
+            "OwnerSession": []
+          }
+        ]
+      }
+    },
+    "/api/records/{rid}/revisions": {
+      "get": {
+        "summary": "Revisions",
+        "operationId": "revisions_api_records__rid__revisions_get",
+        "parameters": [
+          {
+            "name": "rid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Rid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "AgentBearer": []
+          },
+          {
+            "OwnerSession": []
+          }
+        ]
+      }
+    },
+    "/api/audit": {
+      "get": {
+        "summary": "Logs",
+        "operationId": "logs_api_audit_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "AgentBearer": []
+          },
+          {
+            "OwnerSession": []
+          }
+        ]
+      }
+    },
+    "/api/jobs/{job}/attachments": {
+      "post": {
+        "summary": "Upload",
+        "operationId": "upload_api_jobs__job__attachments_post",
+        "parameters": [
+          {
+            "name": "job",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_upload_api_jobs__job__attachments_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "AgentBearer": []
+          },
+          {
+            "OwnerSession": []
+          }
+        ]
+      },
+      "get": {
+        "summary": "Files",
+        "operationId": "files_api_jobs__job__attachments_get",
+        "parameters": [
+          {
+            "name": "job",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "AgentBearer": []
+          },
+          {
+            "OwnerSession": []
+          }
+        ]
+      }
+    },
+    "/api/attachments/{aid}": {
+      "get": {
+        "summary": "Download",
+        "operationId": "download_api_attachments__aid__get",
+        "parameters": [
+          {
+            "name": "aid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Aid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "AgentBearer": []
+          },
+          {
+            "OwnerSession": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Remove Attachment",
+        "operationId": "remove_attachment_api_attachments__aid__delete",
+        "parameters": [
+          {
+            "name": "aid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Aid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "AgentBearer": []
+          },
+          {
+            "OwnerSession": []
+          }
+        ]
+      }
+    },
+    "/api/agents": {
+      "get": {
+        "summary": "Agents",
+        "operationId": "agents_api_agents_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "AgentBearer": []
+          },
+          {
+            "OwnerSession": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "Issue",
+        "operationId": "issue_api_agents_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Credential"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "AgentBearer": []
+          },
+          {
+            "OwnerSession": []
+          }
+        ]
+      }
+    },
+    "/api/agents/{name}": {
+      "delete": {
+        "summary": "Revoke",
+        "operationId": "revoke_api_agents__name__delete",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "AgentBearer": []
+          },
+          {
+            "OwnerSession": []
+          }
+        ]
+      }
+    },
+    "/api/export": {
+      "get": {
+        "summary": "Export",
+        "operationId": "export_api_export_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "AgentBearer": []
+          },
+          {
+            "OwnerSession": []
+          }
+        ]
+      }
+    },
+    "/api/policy": {
+      "get": {
+        "summary": "Policy",
+        "operationId": "policy_api_policy_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "AgentBearer": []
+          },
+          {
+            "OwnerSession": []
+          }
+        ]
+      }
+    },
+    "/api/schema": {
+      "get": {
+        "summary": "Schema",
+        "operationId": "schema_api_schema_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "AgentBearer": []
+          },
+          {
+            "OwnerSession": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Body_upload_api_jobs__job__attachments_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_upload_api_jobs__job__attachments_post"
+      },
+      "Credential": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,39}$",
+            "title": "Name"
+          },
+          "scopes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Scopes"
+          },
+          "jobs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Jobs",
+            "default": []
+          },
+          "days": {
+            "type": "integer",
+            "maximum": 90.0,
+            "minimum": 1.0,
+            "title": "Days",
+            "default": 30
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "scopes"
+        ],
+        "title": "Credential"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "Record": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "title": "Kind"
+          },
+          "job": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Job"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Version"
+          },
+          "body": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Body"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "version",
+          "body"
+        ],
+        "title": "Record"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "AgentBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      },
+      "OwnerSession": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "session"
+      }
+    }
+  }
+}

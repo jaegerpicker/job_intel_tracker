@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>
+      Job Intel Tracker
+    </title>
+    <link rel="stylesheet" href="/static/style.css">
+  </head>
+  <body>
+    <aside>
+      <div class="brand">
+        ◈
+        <span>
+          JOB INTEL
+          <br>
+          <small>
+            Command your next move.
+          </small>
+        </span>
+      </div>
+      <nav>
+        <button data-view="board">
+          Opportunities
+        </button>
+        <button data-view="filters">
+          Search policy
+        </button>
+        <button data-view="audit">
+          Activity trail
+        </button>
+        <button data-view="agents">
+          Agent access
+        </button>
+      </nav>
+      <div class="sidebar-foot">
+        One owner. Many perspectives.
+        <br>
+        <span id="mode">
+          Private by design
+        </span>
+      </div>
+    </aside>
+    <main>
+      <header>
+        <div>
+          <p class="eyebrow">
+            YOUR NEXT CHAPTER
+          </p>
+          <h1 id="heading">
+            Opportunity command center
+          </h1>
+          <p class="muted">
+            Keep the pipeline focused. Make evidence visible.
+          </p>
+        </div>
+        <button id="logout" class="quiet" hidden>
+          Sign out
+        </button>
+      </header>
+      <div id="message" role="status" aria-live="polite">
+      </div>
+      <section id="login">
+        <div class="empty">
+          <h2>
+            A private workspace for your search
+          </h2>
+          <p>
+            Your board is accessible only to its owner and explicitly authorized agents.
+          </p>
+          <a class="button" href="/auth/apple">
+            Sign in with Apple
+          </a>
+          <button id="demo" hidden>
+            Enter isolated local demo
+          </button>
+          <p id="auth-status" class="muted">
+          </p>
+        </div>
+      </section>
+      <section id="workspace" hidden>
+        <div id="board">
+          <div id="stats" class="stats">
+          </div>
+          <div class="toolbar">
+            <input id="search" placeholder="Search company, role or evidence…" aria-label="Search opportunities">
+            <select id="stage" aria-label="Filter stage">
+              <option value="">
+                All stages
+              </option>
+            </select>
+            <select id="lane" aria-label="Filter search lane">
+              <option value="">
+                All search lanes
+              </option>
+            </select>
+            <button id="new">
+              + Add opportunity
+            </button>
+            <button id="export" class="quiet">
+              Export
+            </button>
+            <label class="button quiet">
+              Import JSON
+              <input type="file" id="import" accept="application/json" hidden>
+            </label>
+            <button id="seed" class="quiet" hidden>
+              Load synthetic examples
+            </button>
+          </div>
+          <div class="board-layout">
+            <section>
+              <h2>
+                Active pipeline
+                <small id="active-count">
+                </small>
+              </h2>
+              <div id="active" class="cards">
+              </div>
+              <h2>
+                Promising backlog
+              </h2>
+              <div id="backlog" class="cards">
+              </div>
+              <details>
+                <summary>
+                  Closed opportunities
+                </summary>
+                <div id="closed" class="cards">
+                </div>
+              </details>
+            </section>
+            <section id="detail" class="detail">
+              <div class="empty">
+                <span class="big-icon">
+                  ◎
+                </span>
+                <h2>
+                  Choose an opportunity
+                </h2>
+                <p>
+                  Research, ratings, materials and interview preparation stay together.
+                </p>
+              </div>
+            </section>
+          </div>
+        </div>
+        <section id="filters" hidden>
+          <h2>
+            Search policy
+          </h2>
+          <p>
+            Agents read this structured policy through the API. Changes are versioned and audited.
+          </p>
+          <form id="policy">
+            <label>
+              Maximum active opportunities
+              <input name="active_cap" type="number" min="1" max="100" required>
+            </label>
+            <label>
+              New-target base salary floor (USD)
+              <input name="base_floor" type="number" min="0" required>
+            </label>
+            <label>
+              Search lanes (one per line)
+              <textarea name="lanes" rows="4" required>
+              </textarea>
+            </label>
+            <label>
+              Additional criteria and priorities
+              <textarea name="priorities" rows="5">
+              </textarea>
+            </label>
+            <button>
+              Save policy
+            </button>
+          </form>
+          <p class="muted">
+            Unknown base and ranges spanning below the floor require qualification. Grandfathered exceptions must be recorded explicitly. A flexible slot can go to the strongest fit.
+          </p>
+        </section>
+        <section id="audit" hidden>
+          <h2>
+            Attributed activity
+          </h2>
+          <div id="activity">
+          </div>
+        </section>
+        <section id="agents" hidden>
+          <h2>
+            Agent access
+          </h2>
+          <p>
+            Credential creation is an explicit owner action. Each credential is revocable, expires within 90 days, and has separate scopes and job restrictions.
+          </p>
+          <div id="agent-list">
+          </div>
+          <p class="muted">
+            Use the authenticated API to issue credentials after approval. Tokens are never placed in this UI or URLs. Demo mode cannot issue credentials.
+          </p>
+        </section>
+      </section>
+    </main>
+    <dialog id="editor">
+      <form id="job-form">
+        <div class="dialog-header">
+          <h2 id="edit-title">
+            Add opportunity
+          </h2>
+          <button type="button" id="cancel" class="quiet">
+            Close
+          </button>
+        </div>
+        <p id="editor-message" role="status" class="warn">
+        </p>
+        <div class="form-grid">
+          <label>
+            Actual employer job title
+            <input name="title" required maxlength="200">
+          </label>
+          <label>
+            Employer
+            <input name="company" required maxlength="200">
+          </label>
+          <label>
+            Search lane
+            <select name="lane">
+            </select>
+          </label>
+          <label>
+            Stage
+            <select name="stage">
+            </select>
+          </label>
+          <label>
+            Entry route
+            <select name="route">
+              <option>
+                Direct application
+              </option>
+              <option>
+                Recruiter introduction
+              </option>
+              <option>
+                Referral
+              </option>
+              <option>
+                Discovered
+              </option>
+            </select>
+          </label>
+          <label>
+            Job URL
+            <input name="url" type="url">
+          </label>
+          <label>
+            Base salary minimum
+            <input name="base_min" type="number" min="0">
+          </label>
+          <label>
+            Base salary maximum
+            <input name="base_max" type="number" min="0">
+          </label>
+          <label>
+            Compensation confidence
+            <select name="comp_status">
+              <option>
+                Unknown
+              </option>
+              <option>
+                Unverified
+              </option>
+              <option>
+                Verified
+              </option>
+            </select>
+          </label>
+          <label>
+            Compensation source
+            <input name="comp_source">
+          </label>
+          <label>
+            Compensation checked date
+            <input name="comp_checked" type="date">
+          </label>
+          <label>
+            Deadline
+            <input name="deadline" type="date">
+          </label>
+          <label>
+            Deadline status
+            <select name="deadline_status">
+              <option>
+                Tentative
+              </option>
+              <option>
+                Verified
+              </option>
+            </select>
+          </label>
+          <label>
+            Alternative to primary opportunity ID
+            <input name="primary_id">
+          </label>
+          <label>
+            Claim source / author
+            <input name="claim_author" placeholder="Owner or authorized agent">
+          </label>
+          <label>
+            Location / work arrangement
+            <input name="location">
+          </label>
+        </div>
+        <label>
+          <input name="grandfathered" type="checkbox">
+          Existing conversation: grandfathered salary exception
+        </label>
+        <label>
+          Exception rationale
+          <textarea name="exception_reason">
+          </textarea>
+        </label>
+        <label>
+          Owner assessment / override
+          <textarea name="owner_assessment">
+          </textarea>
+        </label>
+        <button type="submit">
+          Save opportunity
+        </button>
+      </form>
+    </dialog>
+    <script src="/static/app.js" defer>
+    </script>
+  </body>
+</html>

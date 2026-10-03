@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+data/
+.demo-data/
+.env
+*.sqlite3*
+*.pem
+*.p8
+*.key
+private-*
+build/
+dist/
+*.egg-info/
+.mypy_cache/

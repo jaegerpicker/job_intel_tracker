@@ -1,0 +1,5 @@
+*
+!pyproject.toml
+!job_intel_tracker/
+!job_intel_tracker/**
+**/__pycache__
