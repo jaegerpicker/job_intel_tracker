@@ -134,7 +134,7 @@ def connection(root: Path):
 
 
 def fresh(c) -> None:
-    for table in ("records", "attachments", "tokens", "sessions", "revisions"):
+    for table in ("records", "attachments", "tokens", "sessions", "revisions", "idem", "audit", "flows"):
         if c.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]:
             raise ValueError("Enrollment requires a fresh empty board with no credentials or sessions")
     prior = c.execute("SELECT phase FROM owner_enrollment WHERE id=1").fetchone()

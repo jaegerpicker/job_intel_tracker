@@ -195,3 +195,13 @@ def test_candidate_binding_expiry_and_approval_race(tmp_path, monkeypatch):
         assert sorted(pool.map(approve, range(2))) == [False, True]
     with pytest.raises(ValueError):
         enrollment.cancel(tmp_path)
+
+
+def test_deleted_board_remnants_prevent_enrollment(tmp_path, monkeypatch):
+    app, _ = setup(tmp_path, monkeypatch)
+    enrollment.cancel(tmp_path)
+    with app.state.db() as db:
+        db.execute("INSERT INTO idem VALUES('fixture','deleted-job','fixture','private-remnant-fixture')")
+    with pytest.raises(ValueError):
+        enrollment.begin(tmp_path, tmp_path / "new.json")
+    assert not (tmp_path / "new.json").exists()
