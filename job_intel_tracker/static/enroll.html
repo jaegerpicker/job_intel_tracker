@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Owner identity verification</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <section class="empty">
+    <h1>Verify an owner candidate</h1>
+    <p>This requires a one-time code created by the local operator.</p>
+    <p>Apple verification does not grant access. Local approval and a service restart are still required.</p>
+    <form action="/auth/enroll/start" method="post" autocomplete="off">
+      <label>One-time operator code
+        <input name="code" type="password" required maxlength="128" autocomplete="off" spellcheck="false">
+      </label>
+      <button>Verify with Apple</button>
+    </form>
+  </section>
+</body>
+</html>

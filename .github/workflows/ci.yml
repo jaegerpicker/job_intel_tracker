@@ -21,3 +21,23 @@ jobs:
       - run: node --check job_intel_tracker/static/app.js
       - run: python -m build
       - run: docker build -t job-intel-tracker:ci .
+      - name: Verify root-owned disk, runtime privileges, PORT and restart
+        run: |
+          docker volume create tracker-ci
+          docker run -d --name tracker-ci -p 18080:10000 -e PORT=10000 -e DATA_DIR=/var/data/tracker -v tracker-ci:/var/data job-intel-tracker:ci
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://localhost:18080/healthz; then break; fi
+            sleep 1
+          done
+          curl -fsS http://localhost:18080/healthz
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:18080/api/records)" = 401
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:18080/auth/apple)" = 503
+          docker exec tracker-ci python -c "from pathlib import Path; assert 'Uid:\t10001\t10001\t10001\t10001' in Path('/proc/1/status').read_text(); p=Path('/var/data/tracker'); assert p.stat().st_uid==10001 and p.stat().st_mode&511==448"
+          docker restart tracker-ci
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://localhost:18080/healthz; then break; fi
+            sleep 1
+          done
+          curl -fsS http://localhost:18080/healthz
+          docker rm -f tracker-ci
+          docker volume rm tracker-ci

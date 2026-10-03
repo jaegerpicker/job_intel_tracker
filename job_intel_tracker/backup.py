@@ -38,6 +38,10 @@ def restore(source: Path, destination: Path):
         c.execute("DELETE FROM sessions")
         c.execute("DELETE FROM flows")
         c.execute("UPDATE tokens SET revoked=1")
+        if c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='owner_enrollment'").fetchone():
+            c.execute(
+                "UPDATE owner_enrollment SET phase='cancelled',code_hash=NULL,state_hash=NULL,nonce=NULL,candidate_sub=NULL,expires=0 WHERE phase!='approved'"
+            )
     return destination
 
 

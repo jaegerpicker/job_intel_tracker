@@ -55,3 +55,5 @@ Production needs HTTPS, a private persistent volume, Apple configuration and an 
 ```
 
 CI also validates browser-JavaScript syntax and Docker image construction. See [QA evidence](docs/QA.md). Live Apple authentication requires real configuration and has **not** been validated end to end; protocol tests use locally generated inert keys and mocked Apple endpoints.
+
+Render setup: [exact service fields](docs/RENDER_SETUP.md). Optional [operator-approved owner enrollment](docs/OWNER_ENROLLMENT.md) discovers a verified Apple subject without granting a session.

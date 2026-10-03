@@ -32,3 +32,5 @@ Used the connected in-app browser against a loopback-only isolated demo:
 ![Mobile synthetic board](mobile.jpg)
 
 Independent read-only review found a caller-supplied parent scope bypass and missing create-time owner exception protection. Both were fixed and covered by regression tests before publication. This is scoped code review, not a security certification.
+
+Locked production-mode localhost UI verified with no Apple settings: private workspace screen, no demo entry, unavailable Apple setup message; screenshot locked-deployment.png. Enrollment integration tests use inert capability fixtures and ephemeral signing keys, never live Apple credentials.

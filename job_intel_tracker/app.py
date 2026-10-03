@@ -17,6 +17,8 @@ from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
+from . import enrollment
+
 STAGES = ["Prospect", "Applied", "Screening", "Interview", "Offer", "Closed", "Rejected", "Withdrawn"]
 
 
@@ -46,6 +48,12 @@ def create_app(data_dir=None, demo=False):
         CREATE TABLE IF NOT EXISTS idem(actor TEXT, key TEXT, digest TEXT, result TEXT, PRIMARY KEY(actor,key));
         CREATE TABLE IF NOT EXISTS attachments(id TEXT PRIMARY KEY, job TEXT REFERENCES records(id), author TEXT, filename TEXT, mime TEXT, version INTEGER, timestamp REAL);
         """)
+    with db() as c:
+        c.execute(enrollment.TABLE)
+    try:
+        configured_owner = enrollment.owner_subject()
+    except (ValueError, TypeError, OSError):
+        raise RuntimeError("Invalid owner allowlist; service refuses to start") from None
     app = FastAPI(title="job_intel_tracker", version="0.1.0", docs_url=None, redoc_url=None, openapi_url=None)
     app.state.db = db
 
@@ -126,13 +134,12 @@ def create_app(data_dir=None, demo=False):
             for k in (
                 "APPLE_CLIENT_ID",
                 "APPLE_REDIRECT_URI",
-                "APPLE_OWNER_SUB",
                 "APPLE_TEAM_ID",
                 "APPLE_KEY_ID",
                 "APPLE_PRIVATE_KEY_FILE",
             )
         ) and os.getenv("APPLE_REDIRECT_URI", "").startswith("https://")
-        return {"demo": demo, "configured": configured}
+        return {"demo": demo, "configured": bool(configured and configured_owner)}
 
     @app.post("/auth/demo")
     def demo_login(req: Request):
@@ -142,7 +149,8 @@ def create_app(data_dir=None, demo=False):
 
     @app.get("/auth/apple")
     def apple():
-        client, redirect, sub = [os.getenv(x) for x in ("APPLE_CLIENT_ID", "APPLE_REDIRECT_URI", "APPLE_OWNER_SUB")]
+        client, redirect = [os.getenv(x) for x in ("APPLE_CLIENT_ID", "APPLE_REDIRECT_URI")]
+        sub = configured_owner
         if not all(
             (
                 client,
@@ -173,18 +181,7 @@ def create_app(data_dir=None, demo=False):
         r.set_cookie("flow", state, secure=True, httponly=True, samesite="none", max_age=300)
         return r
 
-    @app.post("/auth/callback")
-    async def callback(req: Request):
-        form = await req.form()
-        state = str(form.get("state", ""))
-        if not state or not secrets.compare_digest(state, req.cookies.get("flow", "")):
-            raise HTTPException(401, "Invalid state")
-        with db() as c:
-            c.execute("BEGIN IMMEDIATE")
-            flow = c.execute("SELECT * FROM flows WHERE hash=? AND expires>?", (digest(state), time.time())).fetchone()
-            c.execute("DELETE FROM flows WHERE hash=?", (digest(state),))
-        if not flow:
-            raise HTTPException(401, "Expired login")
+    async def verified_apple_subject(form, nonce):
         try:
             code = str(form.get("code", ""))
             if not code:
@@ -223,13 +220,162 @@ def create_app(data_dir=None, demo=False):
                 issuer="https://appleid.apple.com",
                 options={"require": ["exp", "iat", "sub", "nonce", "aud", "iss"]},
             )
-            if claims["nonce"] != flow["nonce"] or claims["sub"] != os.environ["APPLE_OWNER_SUB"]:
+            if (
+                not secrets.compare_digest(str(claims["nonce"]), nonce)
+                or not isinstance(claims["sub"], str)
+                or not claims["sub"]
+                or len(claims["sub"]) > 256
+            ):
                 raise ValueError("Identity denied")
+            return claims["sub"]
         except (jwt.PyJWTError, httpx.HTTPError, ValueError, KeyError, OSError):
             raise HTTPException(401, "Identity verification failed") from None
+
+    @app.post("/auth/callback")
+    async def callback(req: Request):
+        form = await req.form()
+        if req.cookies.get("enroll_flow"):
+            return await enrollment_callback(req, form)
+        state = str(form.get("state", ""))
+        if not state or not secrets.compare_digest(state, req.cookies.get("flow", "")):
+            raise HTTPException(401, "Invalid state")
+        with db() as c:
+            c.execute("BEGIN IMMEDIATE")
+            flow = c.execute("SELECT * FROM flows WHERE hash=? AND expires>?", (digest(state), time.time())).fetchone()
+            c.execute("DELETE FROM flows WHERE hash=?", (digest(state),))
+        if not flow:
+            raise HTTPException(401, "Expired login")
+        subject = await verified_apple_subject(form, flow["nonce"])
+        if not configured_owner or subject != configured_owner:
+            raise HTTPException(401, "Identity verification failed")
         r = session(RedirectResponse("/", status_code=303))
         r.delete_cookie("flow")
         return r
+
+    def enrollment_enabled():
+        owner_file = os.getenv("APPLE_OWNER_SUB_FILE")
+        return (
+            not demo
+            and os.getenv("APPLE_ENROLLMENT_ENABLED") == "1"
+            and bool(owner_file)
+            and not configured_owner
+            and not os.getenv("APPLE_OWNER_SUB")
+            and not os.path.lexists(owner_file or "")
+        )
+
+    @app.get("/auth/enroll")
+    def enrollment_page():
+        if not enrollment_enabled():
+            raise HTTPException(404)
+        return FileResponse(Path(__file__).parent / "static/enroll.html")
+
+    @app.post("/auth/enroll/start")
+    async def enrollment_start(req: Request):
+        if not enrollment_enabled():
+            raise HTTPException(404)
+        try:
+            client_id, redirect, _ = enrollment.apple_binding()
+            from urllib.parse import urlparse
+
+            u = urlparse(redirect)
+            origin = f"{u.scheme}://{u.netloc}"
+            if (
+                req.url.scheme != "https"
+                or req.headers.get("origin") != origin
+                or str(req.base_url).rstrip("/") != origin
+            ):
+                raise ValueError("Origin denied")
+            form = await req.form()
+            code = str(form.get("code", ""))
+            if not 43 <= len(code) <= 128:
+                raise ValueError("Invalid capability")
+            state, nonce = secrets.token_urlsafe(32), secrets.token_urlsafe(32)
+            with enrollment.connection(root) as c:
+                c.execute("BEGIN IMMEDIATE")
+                enrollment.fresh(c)
+                ticket = c.execute(
+                    "SELECT * FROM owner_enrollment WHERE id=1 AND phase='pending' AND expires>?", (time.time(),)
+                ).fetchone()
+                if (
+                    not ticket
+                    or not enrollment.bound(ticket)
+                    or not secrets.compare_digest(digest(code), ticket["code_hash"])
+                ):
+                    raise ValueError("Invalid capability")
+                c.execute(
+                    "UPDATE owner_enrollment SET phase='flow',code_hash=NULL,state_hash=?,nonce=?,expires=? WHERE id=1",
+                    (digest(state), nonce, time.time() + 300),
+                )
+            r = RedirectResponse(
+                "https://appleid.apple.com/auth/authorize?"
+                + urlencode(
+                    {
+                        "client_id": client_id,
+                        "redirect_uri": redirect,
+                        "response_type": "code",
+                        "response_mode": "form_post",
+                        "state": state,
+                        "nonce": nonce,
+                    }
+                ),
+                status_code=303,
+            )
+            r.set_cookie("enroll_flow", state, secure=True, httponly=True, samesite="none", max_age=300)
+            return r
+        except (ValueError, OSError, sqlite3.Error):
+            raise HTTPException(401, "Enrollment unavailable or capability invalid") from None
+
+    async def enrollment_callback(req, form):
+        if not enrollment_enabled():
+            raise HTTPException(401, "Enrollment unavailable")
+        state = str(form.get("state", ""))
+        if not state or not secrets.compare_digest(state, req.cookies.get("enroll_flow", "")):
+            raise HTTPException(401, "Invalid enrollment state")
+        try:
+            with enrollment.connection(root) as c:
+                c.execute("BEGIN IMMEDIATE")
+                enrollment.fresh(c)
+                ticket = c.execute(
+                    "SELECT * FROM owner_enrollment WHERE id=1 AND phase='flow' AND state_hash=? AND expires>?",
+                    (digest(state), time.time()),
+                ).fetchone()
+                if not ticket or not enrollment.bound(ticket):
+                    raise ValueError("Invalid enrollment state")
+                c.execute("UPDATE owner_enrollment SET phase='verifying',state_hash=NULL,nonce=NULL WHERE id=1")
+            subject = await verified_apple_subject(form, ticket["nonce"])
+            with enrollment.connection(root) as c:
+                c.execute("BEGIN IMMEDIATE")
+                enrollment.fresh(c)
+                if not enrollment_enabled() or not enrollment.bound(ticket):
+                    raise ValueError("Configuration changed")
+                result = c.execute(
+                    "UPDATE owner_enrollment SET phase='candidate',candidate_sub=?,expires=? WHERE id=1 AND instance=? AND phase='verifying' AND expires>?",
+                    (subject, time.time() + 300, ticket["instance"], time.time()),
+                )
+                if result.rowcount != 1:
+                    raise ValueError("Enrollment cancelled or expired")
+            r = JSONResponse(
+                {
+                    "message": "Identity verified for local operator review. No board access granted. Complete local approval and restart before regular sign-in."
+                }
+            )
+            r.delete_cookie("enroll_flow", secure=True, httponly=True, samesite="none")
+            return r
+        except HTTPException:
+            with db() as c:
+                c.execute(
+                    "UPDATE owner_enrollment SET phase='failed',candidate_sub=NULL WHERE id=1 AND instance=? AND phase='verifying'",
+                    (ticket["instance"],),
+                )
+            raise
+        except (ValueError, OSError, sqlite3.Error):
+            raise HTTPException(401, "Enrollment unavailable or expired") from None
+
+    @app.get("/healthz")
+    def health():
+        with db() as c:
+            c.execute("SELECT 1").fetchone()
+        return {"status": "ok"}
 
     @app.get("/api/me")
     def me(req: Request):
