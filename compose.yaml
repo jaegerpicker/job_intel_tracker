@@ -15,5 +15,6 @@ services:
     security_opt:
       - no-new-privileges:true
     cap_drop: [ALL]
+    cap_add: [CHOWN, FOWNER, SETGID, SETUID]
 volumes:
   tracker-data:

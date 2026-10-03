@@ -24,7 +24,7 @@ jobs:
       - name: Verify root-owned disk, runtime privileges, PORT and restart
         run: |
           docker volume create tracker-ci
-          docker run -d --name tracker-ci -p 18080:10000 -e PORT=10000 -e DATA_DIR=/var/data/tracker -v tracker-ci:/var/data job-intel-tracker:ci
+          docker run --cap-drop ALL --cap-add CHOWN --cap-add FOWNER --cap-add SETGID --cap-add SETUID --security-opt no-new-privileges:true -d --name tracker-ci -p 18080:10000 -e PORT=10000 -e DATA_DIR=/var/data/tracker -v tracker-ci:/var/data job-intel-tracker:ci
           for attempt in $(seq 1 30); do
             if curl -fsS http://localhost:18080/healthz; then break; fi
             sleep 1
