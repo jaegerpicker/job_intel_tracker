@@ -1,5 +1,5 @@
 import { Platform } from "react-native";
-import { createNativeAuth } from "../src/native-auth";
+import { createNativeAuth, browserDiagnostic } from "../src/native-auth";
 import * as SecureStore from "expo-secure-store";
 import * as WebBrowser from "expo-web-browser";
 import * as Crypto from "expo-crypto";
@@ -20,6 +20,35 @@ jest.mock("expo-crypto", () => ({
   digestStringAsync: jest.fn(async () => "a".repeat(64)),
   getRandomBytesAsync: jest.fn(async () => new Uint8Array(32)),
 }));
+test("browser diagnostics allow only outcome, error enum and coarse duration", () => {
+  const secret =
+    "https://private.example/callback?code=private-ticket&token=private-token";
+  const diagnostic = browserDiagnostic(
+    {
+      type: "cancel",
+      url: secret,
+      error:
+        "The operation failed (com.apple.AuthenticationServices.WebAuthenticationSession error 3.) " +
+        secret,
+    },
+    40,
+  );
+  expect(diagnostic).toEqual({
+    event: "browser-result",
+    type: "cancel",
+    platformCode: 3,
+    hasPlatformError: true,
+    elapsed: "under-one-second",
+  });
+  expect(JSON.stringify(diagnostic)).not.toContain("private");
+  expect(browserDiagnostic({ type: secret, error: secret }, 20000)).toEqual({
+    event: "browser-result",
+    type: "unknown",
+    platformCode: null,
+    hasPlatformError: true,
+    elapsed: "over-ten-seconds",
+  });
+});
 test("native secrets use device-only unlocked Keychain options and origin namespace", async () => {
   const original = Platform.OS;
   Object.defineProperty(Platform, "OS", { configurable: true, value: "ios" });
