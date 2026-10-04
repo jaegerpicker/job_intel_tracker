@@ -1,13 +1,15 @@
 import { ApiRepository } from "./api";
 import { DemoRepository } from "./demo";
 import { BoardError, PendingWrite, Repository } from "./domain";
+import { JournalRepository, WriteJournal } from "./journal";
 export type AppMode = "demo" | "live";
 /** Supplied only by a future approved owner-session exchange. Never read credentials from build variables. */
 export interface OwnerSessionSource {
   readonly origin: string;
-  readonly expiresAt: number; // Unix milliseconds, at most eight hours from now
+  readonly expiresAt: number; // Unix milliseconds, at most fifteen minutes from now
   headers(): Promise<{ Authorization: string }>;
   invalidate(): void;
+  isCurrent?(): boolean;
 }
 export interface AppRuntime {
   mode: AppMode;
@@ -26,7 +28,7 @@ const locked = (message: string): Repository => ({
     throw new BoardError("forbidden", message);
   },
 });
-class OwnerReadRepository implements Repository {
+class OwnerRepository implements Repository {
   constructor(
     private api: ApiRepository,
     private session: OwnerSessionSource,
@@ -55,11 +57,8 @@ class OwnerReadRepository implements Repository {
   async attachments(job: string) {
     return this.read(() => this.api.attachments(job));
   }
-  async save(_write: PendingWrite): Promise<never> {
-    throw new BoardError(
-      "forbidden",
-      "Live writes are disabled until an encrypted persistent operation journal and conflict review are implemented.",
-    );
+  async save(write: PendingWrite) {
+    return this.read(() => this.api.save(write));
   }
 }
 /** No configuration defaults to synthetic demo. Explicit live and unknown modes fail closed; live never falls back to demo. */
@@ -69,6 +68,7 @@ export function createRuntime(options: {
   session?: OwnerSessionSource;
   transport?: typeof fetch;
   now?: () => number;
+  journal?: WriteJournal;
 }): AppRuntime {
   if (options.mode === undefined || options.mode === "demo")
     return { mode: "demo", repository: new DemoRepository(), canWrite: true };
@@ -88,7 +88,7 @@ export function createRuntime(options: {
     );
   if (!options.session)
     return lock(
-      "Live mode is locked. An approved native owner-session exchange is not implemented. No credential entry or browser-session copying is available.",
+      "Live mode is locked. Sign in through the configured owner browser flow. Credentials cannot be entered or copied manually.",
     );
   const session = options.session;
   const now = options.now ?? Date.now;
@@ -107,7 +107,7 @@ export function createRuntime(options: {
       session.origin !== origin ||
       !Number.isFinite(session.expiresAt) ||
       session.expiresAt <= now() ||
-      session.expiresAt - now() > 8 * 60 * 60 * 1000
+      session.expiresAt - now() > 15 * 60 * 1000
     )
       return lock("Owner session origin or expiry is invalid.");
     const api = new ApiRepository(
@@ -132,8 +132,35 @@ export function createRuntime(options: {
     );
     return {
       mode: "live",
-      repository: new OwnerReadRepository(api, source),
-      canWrite: false,
+      repository:
+        options.journal && session.isCurrent
+          ? new JournalRepository(
+              new OwnerRepository(api, source),
+              options.journal,
+              () => {
+                if (
+                  revoked ||
+                  now() >= session.expiresAt ||
+                  !session.isCurrent?.()
+                )
+                  throw new BoardError(
+                    "unauthorized",
+                    "Session ended. Pending work cannot be sent.",
+                  );
+              },
+            )
+          : {
+              list: () => new OwnerRepository(api, source).list(),
+              attachments: (id) =>
+                new OwnerRepository(api, source).attachments(id),
+              save: async () => {
+                throw new BoardError(
+                  "forbidden",
+                  "Secure pending-work storage is required for live writes.",
+                );
+              },
+            },
+      canWrite: !!options.journal && !!session.isCurrent,
     };
   } catch {
     return lock(

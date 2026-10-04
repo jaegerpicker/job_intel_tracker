@@ -121,3 +121,50 @@ test("no mode configuration defaults only to synthetic demo without transport", 
   await runtime.repository.list();
   expect(transport).not.toHaveBeenCalled();
 });
+test("secure journal enables only current owner writes, recording exact idempotency boundary", async () => {
+  const source = { ...session(), isCurrent: () => true };
+  let pending: ReturnType<typeof prepareWrite> | null = null;
+  const journal = {
+    read: async () => pending,
+    put: async (w: ReturnType<typeof prepareWrite>) => {
+      pending = w;
+    },
+    clear: async () => {
+      pending = null;
+    },
+  };
+  const write = prepareWrite(
+    fixtures[0],
+    { stage: "Offer" },
+    "synthetic-retry-key",
+  );
+  const transport = jest
+    .fn()
+    .mockResolvedValueOnce(response({ actor: "owner" }))
+    .mockResolvedValueOnce(response(fixtures))
+    .mockResolvedValueOnce(response({ actor: "owner" }))
+    .mockResolvedValueOnce(
+      response({
+        ...fixtures[0],
+        version: fixtures[0].version + 1,
+        body: write.payload.body,
+      }),
+    );
+  const runtime = createRuntime({
+    mode: "live",
+    origin,
+    session: source,
+    journal,
+    transport,
+    now: () => now,
+  });
+  expect(runtime.canWrite).toBe(true);
+  await runtime.repository.save(write);
+  expect(transport.mock.calls[3][1]).toMatchObject({
+    method: "PUT",
+    credentials: "omit",
+    headers: { "Idempotency-Key": write.key },
+  });
+  expect(JSON.parse(transport.mock.calls[3][1].body)).toEqual(write.payload);
+  expect(pending).toBeNull();
+});

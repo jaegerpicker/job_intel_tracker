@@ -14,11 +14,13 @@ from urllib.parse import urlencode, urlparse
 import httpx
 import jwt
 from fastapi import FastAPI, HTTPException, Request, UploadFile
+from fastapi.exception_handlers import request_validation_exception_handler
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from . import enrollment
+from . import enrollment, mobile_auth
 
 STAGES = ["Prospect", "Applied", "Screening", "Interview", "Offer", "Closed", "Rejected", "Withdrawn"]
 
@@ -83,10 +85,17 @@ def create_app(data_dir=None, demo=False):
             "INSERT INTO audit(actor,action,resource,timestamp) VALUES(?,?,?,?)", (actor, action, resource, time.time())
         )
 
-    def principal(req, scope="read", job=None):
+    def principal(req, scope="read", job=None, csrf=None):
         bearer = req.headers.get("authorization", "")
         with db() as c:
             if bearer.startswith("Bearer "):
+                mobile = c.execute("SELECT * FROM mobile_sessions WHERE hash=?", (digest(bearer[7:]),)).fetchone()
+                if mobile:
+                    if not app.state.mobile_enabled or mobile["revoked"] or mobile["expires"] <= time.time():
+                        raise HTTPException(401, "Invalid credential")
+                    if scope not in mobile_auth.SCOPES:
+                        raise HTTPException(403, "Scope denied")
+                    return "owner", []
                 t = c.execute("SELECT * FROM tokens WHERE hash=?", (digest(bearer[7:]),)).fetchone()
                 if not t or t["revoked"] or t["expires"] < time.time():
                     raise HTTPException(401, "Invalid credential")
@@ -104,13 +113,23 @@ def create_app(data_dir=None, demo=False):
         if req.method not in ("GET", "HEAD") and req.headers.get("origin") not in (None, str(req.base_url).rstrip("/")):
             raise HTTPException(403, "Origin check failed")
         if req.method not in ("GET", "HEAD") and not secrets.compare_digest(
-            req.headers.get("x-csrf-token", ""), s["csrf"]
+            csrf if csrf is not None else req.headers.get("x-csrf-token", ""), s["csrf"]
         ):
             raise HTTPException(403, "CSRF check failed")
         return "owner", []
 
-    def owner(req):
-        if principal(req)[0] != "owner":
+    def is_mobile(req):
+        bearer = req.headers.get("authorization", "")
+        with db() as c:
+            return bool(
+                bearer.startswith("Bearer ")
+                and c.execute("SELECT 1 FROM mobile_sessions WHERE hash=?", (digest(bearer[7:]),)).fetchone()
+            )
+
+    def owner(req, csrf=None):
+        if req.headers.get("authorization"):
+            raise HTTPException(403, "Browser owner session required")
+        if principal(req, csrf=csrf)[0] != "owner":
             raise HTTPException(403, "Owner required")
 
     def session(response):
@@ -119,6 +138,14 @@ def create_app(data_dir=None, demo=False):
             c.execute("INSERT INTO sessions VALUES(?,?,?)", (digest(raw), csrf, time.time() + 28800))
         response.set_cookie("session", raw, httponly=True, secure=not demo, samesite="lax", max_age=28800)
         return response
+
+    mobile_auth.configure(app, db, public_origin, owner, configured_owner)
+
+    @app.exception_handler(RequestValidationError)
+    async def validation_error(req, error):
+        if req.url.path.startswith("/auth/mobile/"):
+            return JSONResponse({"detail": "Invalid native login request"}, status_code=422)
+        return await request_validation_exception_handler(req, error)
 
     @app.middleware("http")
     async def headers(req, call):
@@ -142,7 +169,9 @@ def create_app(data_dir=None, demo=False):
                 "X-Content-Type-Options": "nosniff",
                 # Native form POSTs redact Origin under no-referrer. Preserve it
                 # for enrollment's strict check, while suppressing cross-site referrers.
-                "Referrer-Policy": "same-origin" if req.url.path == "/auth/enroll" else "no-referrer",
+                "Referrer-Policy": "same-origin"
+                if req.url.path in ("/auth/enroll", "/auth/mobile/authorize")
+                else "no-referrer",
                 "Cache-Control": "no-store",
                 "Content-Security-Policy": "default-src 'self'; script-src 'self'; style-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self' https://appleid.apple.com",
             }
@@ -174,7 +203,11 @@ def create_app(data_dir=None, demo=False):
         return session(JSONResponse({"ok": True}))
 
     @app.get("/auth/apple")
-    def apple():
+    def apple(req: Request, mobile_ticket: str | None = None):
+        if mobile_ticket:
+            if not app.state.mobile_enabled:
+                raise HTTPException(404)
+            app.state.mobile_ticket(mobile_ticket)
         client, redirect = [os.getenv(x) for x in ("APPLE_CLIENT_ID", "APPLE_REDIRECT_URI")]
         sub = configured_owner
         if not all(
@@ -191,6 +224,8 @@ def create_app(data_dir=None, demo=False):
         state, nonce = secrets.token_urlsafe(32), secrets.token_urlsafe(32)
         with db() as c:
             c.execute("INSERT INTO flows VALUES(?,?,?)", (digest(state), nonce, time.time() + 300))
+            if mobile_ticket:
+                c.execute("INSERT INTO mobile_apple_flows VALUES(?,?)", (digest(state), mobile_ticket))
         r = RedirectResponse(
             "https://appleid.apple.com/auth/authorize?"
             + urlencode(
@@ -293,12 +328,15 @@ def create_app(data_dir=None, demo=False):
             c.execute("BEGIN IMMEDIATE")
             flow = c.execute("SELECT * FROM flows WHERE hash=? AND expires>?", (digest(state), time.time())).fetchone()
             c.execute("DELETE FROM flows WHERE hash=?", (digest(state),))
+            mobile = c.execute("SELECT ticket FROM mobile_apple_flows WHERE hash=?", (digest(state),)).fetchone()
+            c.execute("DELETE FROM mobile_apple_flows WHERE hash=?", (digest(state),))
         if not flow:
             raise HTTPException(401, "Expired login")
         subject = await verified_apple_subject(form, flow["nonce"])
         if not configured_owner or subject != configured_owner:
             raise HTTPException(401, "Identity verification failed")
-        r = session(RedirectResponse("/", status_code=303))
+        destination = "/auth/mobile/authorize?ticket=" + mobile["ticket"] if mobile else "/"
+        r = session(RedirectResponse(destination, status_code=303))
         r.delete_cookie("flow")
         return r
 
@@ -432,11 +470,15 @@ def create_app(data_dir=None, demo=False):
             s = c.execute(
                 "SELECT csrf FROM sessions WHERE hash=?", (digest(req.cookies.get("session", "")),)
             ).fetchone()
-        return {"actor": actor, "csrf": s["csrf"] if s else None, "stages": STAGES}
+        return {
+            "actor": actor,
+            "csrf": s["csrf"] if s and not req.headers.get("authorization") else None,
+            "stages": STAGES,
+        }
 
     @app.post("/auth/logout")
     def logout(req: Request):
-        principal(req)
+        owner(req)
         with db() as c:
             c.execute("DELETE FROM sessions WHERE hash=?", (digest(req.cookies.get("session", "")),))
         r = JSONResponse({"ok": True})
@@ -520,6 +562,10 @@ def create_app(data_dir=None, demo=False):
         validate(p)
         if p.kind in ("job", "filters") and p.job is not None:
             raise HTTPException(422, "Top-level record cannot have parent job")
+        if is_mobile(req) and (
+            p.kind not in ("job", "note", "interview") or req.headers.get("x-owner-cap-override") is not None
+        ):
+            raise HTTPException(403, "Native write scope denied")
         scope = "jobs:write" if p.kind == "job" else "contribute"
         actor, _jobs = principal(req, scope, rid if p.kind in ("job", "filters") else p.job)
         if p.kind == "filters" and rid != "search-policy":
@@ -702,7 +748,7 @@ def create_app(data_dir=None, demo=False):
 
     @app.get("/api/jobs/{job}/attachments")
     def files(job: str, req: Request):
-        principal(req, "attachments:read", job)
+        principal(req, "attachments:metadata" if is_mobile(req) else "attachments:read", job)
         with db() as c:
             return [dict(r) for r in c.execute("SELECT * FROM attachments WHERE job=? ORDER BY timestamp DESC", (job,))]
 

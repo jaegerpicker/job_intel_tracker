@@ -121,7 +121,11 @@ export function BoardApp({ selectedId, creating = false }: ScreenProps) {
       setDraft("");
       if (creating)
         router.replace({ pathname: "/job/[id]", params: { id: result.id } });
-      setMessage("Saved to this demo session.");
+      setMessage(
+        mode === "demo"
+          ? "Saved to this demo session."
+          : "Saved to your owner board.",
+      );
     } catch (e) {
       setSaveError(e instanceof Error ? e.message : "Unable to save");
       if (e instanceof BoardError && e.code !== "network") setPending(null);
@@ -212,7 +216,9 @@ export function BoardApp({ selectedId, creating = false }: ScreenProps) {
           <Text style={s.badge}>
             {mode === "demo"
               ? "DEMO · SYNTHETIC DATA · RESETS ON RESTART"
-              : "LIVE · OWNER READ ONLY · WRITES DISABLED"}
+              : canWrite
+                ? "LIVE · OWNER SESSION · SECURE PENDING WORK"
+                : "LIVE · OWNER READ ONLY · WRITES DISABLED"}
           </Text>
         </View>
         {selected || creating ? (
@@ -623,7 +629,7 @@ export function BoardApp({ selectedId, creating = false }: ScreenProps) {
               <Text style={[s.label, { textAlign: "center" }]}>
                 {mode === "demo"
                   ? "Private by design · Live sign-in awaits secure mobile integration"
-                  : "Owner read only · No live writes or private-file transfers"}
+                  : "Owner board · Private file transfers remain unavailable"}
               </Text>
             </View>
           </>
