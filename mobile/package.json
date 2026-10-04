@@ -1,0 +1,62 @@
+{
+  "name": "job-intel-mobile",
+  "version": "1.0.0",
+  "main": "expo-router/entry",
+  "dependencies": {
+    "expo": "~57.0.26",
+    "expo-constants": "~57.0.20",
+    "expo-crypto": "~57.0.3",
+    "expo-linking": "~57.0.11",
+    "expo-router": "~57.0.24",
+    "expo-secure-store": "~57.0.4",
+    "expo-status-bar": "~57.0.1",
+    "expo-web-browser": "~57.0.3",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-reanimated": "4.5.1",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-screens": "~4.26.0",
+    "react-native-web": "^0.21.2",
+    "react-native-worklets": "0.10.1",
+    "decode-uri-component": "file:./vendor/decode-uri-component"
+  },
+  "devDependencies": {
+    "@testing-library/react-native": "13.3.3",
+    "@types/jest": "29.5.14",
+    "@types/react": "~19.2.2",
+    "eslint": "^9.39.5",
+    "eslint-config-expo": "^57.0.2",
+    "jest": "~29.7.0",
+    "jest-expo": "~57.0.5",
+    "prettier": "^3.9.9",
+    "react-test-renderer": "19.2.3",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "start": "expo start --localhost",
+    "android": "expo start --android --localhost",
+    "ios": "expo start --ios --localhost",
+    "web": "expo start --web --localhost",
+    "test": "jest --runInBand",
+    "typecheck": "tsc --noEmit",
+    "lint": "expo lint",
+    "check": "npm run verify:vendor && npm run typecheck && npm run lint && npm test",
+    "verify:vendor": "node scripts/verify-vendor.cjs",
+    "verify:bundles": "node scripts/verify-bundles.cjs"
+  },
+  "private": true,
+  "jest": {
+    "preset": "jest-expo",
+    "setupFilesAfterEnv": [
+      "<rootDir>/tests/setup.ts"
+    ],
+    "watchman": false
+  },
+  "overrides": {
+    "decode-uri-component": "file:./vendor/decode-uri-component",
+    "xcode": {
+      "uuid": "11.1.1"
+    }
+  }
+}
