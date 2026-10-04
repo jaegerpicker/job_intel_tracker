@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+import logging
 import os
 import secrets
 import sqlite3
@@ -207,10 +208,12 @@ def create_app(data_dir=None, demo=False):
         return r
 
     async def verified_apple_subject(form, nonce):
+        stage = "authorization_response"
         try:
             code = str(form.get("code", ""))
             if not code:
                 raise ValueError("Missing authorization code")
+            stage = "client_secret"
             client_secret = jwt.encode(
                 {
                     "iss": os.environ["APPLE_TEAM_ID"],
@@ -224,6 +227,7 @@ def create_app(data_dir=None, demo=False):
                 headers={"kid": os.environ["APPLE_KEY_ID"]},
             )
             async with httpx.AsyncClient(timeout=15) as client:
+                stage = "token_exchange"
                 exchange = await client.post(
                     "https://appleid.apple.com/auth/token",
                     data={
@@ -235,8 +239,11 @@ def create_app(data_dir=None, demo=False):
                     },
                 )
                 exchange.raise_for_status()
+                stage = "token_response"
                 token = exchange.json()["id_token"]
+            stage = "signing_key"
             key = jwt.PyJWKClient("https://appleid.apple.com/auth/keys").get_signing_key_from_jwt(token)
+            stage = "jwt_validation"
             claims = jwt.decode(
                 token,
                 key.key,
@@ -245,6 +252,7 @@ def create_app(data_dir=None, demo=False):
                 issuer="https://appleid.apple.com",
                 options={"require": ["exp", "iat", "sub", "nonce", "aud", "iss"]},
             )
+            stage = "nonce_and_subject"
             if (
                 not secrets.compare_digest(str(claims["nonce"]), nonce)
                 or not isinstance(claims["sub"], str)
@@ -253,7 +261,24 @@ def create_app(data_dir=None, demo=False):
             ):
                 raise ValueError("Identity denied")
             return claims["sub"]
-        except (jwt.PyJWTError, httpx.HTTPError, ValueError, KeyError, OSError):
+        except (jwt.PyJWTError, httpx.HTTPError, ValueError, KeyError, OSError) as exc:
+            # Never log exception text, keys, codes, tokens, claims or header values.
+            status = exc.response.status_code if isinstance(exc, httpx.HTTPStatusError) else None
+            apple_error = "unreported"
+            if isinstance(exc, httpx.HTTPStatusError):
+                try:
+                    error = exc.response.json().get("error")
+                    if error in ("invalid_client", "invalid_grant", "invalid_request", "unauthorized_client"):
+                        apple_error = error
+                except (ValueError, AttributeError):
+                    pass
+            logging.getLogger(__name__).warning(
+                "Apple verification failed: stage=%s kind=%s status=%s apple_error=%s",
+                stage,
+                type(exc).__name__,
+                status,
+                apple_error,
+            )
             raise HTTPException(401, "Identity verification failed") from None
 
     @app.post("/auth/callback")

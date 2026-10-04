@@ -38,6 +38,58 @@ def setup(tmp_path, monkeypatch):
     return app, TestClient(app, base_url="https://tracker.example")
 
 
+@pytest.mark.parametrize(
+    "apple_error,logged_error", [("invalid_client", "invalid_client"), ("private-error", "unreported")]
+)
+def test_apple_failure_diagnostics_do_not_expose_secrets(tmp_path, monkeypatch, caplog, apple_error, logged_error):
+    import httpx
+
+    from job_intel_tracker import app as module
+
+    _, client = setup(tmp_path, monkeypatch)
+    start = client.post(
+        "/auth/enroll/start",
+        headers={"Origin": "https://tracker.example"},
+        data={"code": "inert-capability-" + "x" * 32},
+        follow_redirects=False,
+    )
+    state = parse_qs(urlparse(start.headers["location"]).query)["state"][0]
+
+    class FakeHTTP:
+        def __init__(self, **kwargs):
+            pass
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *args):
+            pass
+
+        async def post(self, url, data):
+            return httpx.Response(
+                400,
+                json={
+                    "error": apple_error,
+                    "error_description": "private-error-description",
+                    "id_token": "private-token",
+                },
+                request=httpx.Request("POST", url),
+            )
+
+    monkeypatch.setattr(module.httpx, "AsyncClient", FakeHTTP)
+    result = client.post("/auth/callback", data={"state": state, "code": "private-authorization-code"})
+    assert result.status_code == 401 and result.json() == {"detail": "Identity verification failed"}
+    messages = [r.getMessage() for r in caplog.records if r.name == "job_intel_tracker.app"]
+    assert messages == [
+        "Apple verification failed: stage=token_exchange kind=HTTPStatusError status=400 apple_error=" + logged_error
+    ]
+    for secret in (state, "private-authorization-code", "private-error", "private-token"):
+        assert secret not in caplog.text
+    with enrollment.connection(tmp_path) as c:
+        assert c.execute("SELECT phase FROM owner_enrollment WHERE id=1").fetchone()[0] == "failed"
+        assert c.execute("SELECT COUNT(*) FROM sessions").fetchone()[0] == 0
+
+
 def test_verified_candidate_requires_local_approval_and_restart(tmp_path, monkeypatch):
     app, client = setup(tmp_path, monkeypatch)
     code = json.loads((tmp_path / "code.json").read_text())["code"]
