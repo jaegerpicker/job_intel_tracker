@@ -133,7 +133,7 @@ physical session. Android signing, association publication and physical-device
 acceptance remain separate work. Automated coverage does not replace those
 manual checks. No additional live writes or credentials were created.
 
-## iOS completion pass (local; not yet on the physical phone)
+## iOS completion pass (PR #5 installed; manual acceptance pending)
 
 After provider acceptance, the mobile check passed again: 64 Jest tests and four
 scene-plugin tests, with TypeScript and ESLint clean. The 22 backend mobile-auth
@@ -152,8 +152,12 @@ the board's virtualized list, and detail headings inside the detail scroll view.
 Keyboard taps remain handled when search is focused. Independent review found
 that interaction requirement; it was corrected. Normal text size was restored.
 Full native scrolling/keyboard interaction and VoiceOver still need manual
-acceptance; screenshots alone do not verify those interactions. This UI change
-has not been installed on the owner's physical phone.
+acceptance; screenshots alone do not verify those interactions. PR #5 merged as `8d431a6504c2a6089a18a125a23efcd3d0c0d690`; exact merge
+CI passed. The approved signed build was installed and launched on the owner's
+physical phone. Signature and exact bundle/domain entitlements were verified;
+the dedicated installed bundle and surviving app process were confirmed.
+Owner-visible UI and the manual checks below remain pending. No logout,
+revocation, live board writes or server deployment occurred during this pass.
 
 Minimal owner sequence, when ready:
 
