@@ -7,6 +7,7 @@ from pathlib import Path
 
 SECRETS_ROOT = Path("/etc/secrets")
 RUNTIME_TEMP_ROOT = Path("/tmp")
+TRUSTED_MOUNT_UID = 0
 
 
 def prepare_apple_key(uid=10001, gid=10001):
@@ -14,7 +15,21 @@ def prepare_apple_key(uid=10001, gid=10001):
     configured = os.getenv("APPLE_PRIVATE_KEY_FILE")
     if not configured or Path(configured).parent != SECRETS_ROOT:
         return
-    source = os.open(configured, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+    # Render projects secret files through symlinks. Follow only links confined
+    # to its root-controlled mount; open the resolved regular file without following.
+    mount = SECRETS_ROOT.resolve(strict=True)
+    resolved = Path(configured).resolve(strict=True)
+    if not resolved.parent.is_relative_to(mount):
+        raise ValueError("Mounted Apple key must stay within its trusted mount")
+    parent = resolved.parent
+    while True:
+        metadata = parent.stat()
+        if not stat.S_ISDIR(metadata.st_mode) or metadata.st_uid != TRUSTED_MOUNT_UID or metadata.st_mode & 0o022:
+            raise ValueError("Untrusted Apple secret mount directory")
+        if parent == mount:
+            break
+        parent = parent.parent
+    source = os.open(resolved, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
     try:
         metadata = os.fstat(source)
         if (
