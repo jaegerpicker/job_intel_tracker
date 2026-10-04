@@ -205,3 +205,58 @@ def test_deleted_board_remnants_prevent_enrollment(tmp_path, monkeypatch):
     with pytest.raises(ValueError):
         enrollment.begin(tmp_path, tmp_path / "new.json")
     assert not (tmp_path / "new.json").exists()
+
+
+def test_explicit_public_origin_behind_http_proxy(tmp_path, monkeypatch):
+    monkeypatch.setenv("PUBLIC_BASE_URL", "https://tracker.example")
+    app, _ = setup(tmp_path, monkeypatch)
+    c = TestClient(app, base_url="http://tracker.example")
+    code = "inert-capability-" + "x" * 32
+    assert c.get("/static", follow_redirects=False).headers["location"] == "https://tracker.example/static/"
+    for origin in (None, "https://evil.example", "http://tracker.example"):
+        headers = {"X-Forwarded-Proto": "https", "X-Forwarded-Host": "tracker.example"}
+        if origin:
+            headers["Origin"] = origin
+        assert c.post("/auth/enroll/start", headers=headers, data={"code": code}).status_code == 401
+    bad = TestClient(app, base_url="http://evil.example")
+    assert (
+        bad.post(
+            "/auth/enroll/start",
+            headers={"Origin": "https://tracker.example", "X-Forwarded-Host": "tracker.example"},
+            data={"code": code},
+        ).status_code
+        == 421
+    )
+    assert bad.get("/healthz").status_code == 200
+    r = c.post(
+        "/auth/enroll/start",
+        headers={"Origin": "https://tracker.example", "X-Forwarded-Proto": "http"},
+        data={"code": code},
+        follow_redirects=False,
+    )
+    assert r.status_code == 303 and "Secure" in r.headers["set-cookie"]
+    assert c.get("/api/records").status_code == 401
+    # Owner writes still require CSRF and exact HTTPS Origin behind the proxy.
+    with app.state.db() as db:
+        from job_intel_tracker.enrollment import digest
+
+        db.execute("INSERT INTO sessions VALUES(?,?,?)", (digest("inert-session"), "inert-csrf", time.time() + 60))
+    headers = {"Cookie": "session=inert-session", "Origin": "https://tracker.example", "X-CSRF-Token": "inert-csrf"}
+    assert c.post("/auth/logout", headers={**headers, "Origin": "https://evil.example"}).status_code == 403
+    assert c.post("/auth/logout", headers={**headers, "X-CSRF-Token": "wrong"}).status_code == 403
+    assert c.post("/auth/logout", headers=headers).status_code == 200
+
+
+@pytest.mark.parametrize(
+    "origin",
+    [
+        "http://tracker.example",
+        "https://user@tracker.example",
+        "https://tracker.example/path",
+        "https://tracker.example?query=1",
+    ],
+)
+def test_invalid_public_origin_refuses_startup(tmp_path, monkeypatch, origin):
+    monkeypatch.setenv("PUBLIC_BASE_URL", origin)
+    with pytest.raises(RuntimeError):
+        create_app(tmp_path)

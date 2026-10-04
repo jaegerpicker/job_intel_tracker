@@ -8,7 +8,7 @@ import sqlite3
 import time
 import uuid
 from pathlib import Path
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlparse
 
 import httpx
 import jwt
@@ -56,6 +56,23 @@ def create_app(data_dir=None, demo=False):
         raise RuntimeError("Invalid owner allowlist; service refuses to start") from None
     app = FastAPI(title="job_intel_tracker", version="0.1.0", docs_url=None, redoc_url=None, openapi_url=None)
     app.state.db = db
+    public_origin = os.getenv("PUBLIC_BASE_URL", "").rstrip("/")
+    if public_origin:
+        public_url = urlparse(public_origin)
+        if (
+            demo
+            or public_url.scheme != "https"
+            or not public_url.hostname
+            or public_url.username
+            or public_url.password
+            or public_url.path
+            or public_url.query
+            or public_url.fragment
+        ):
+            raise RuntimeError("PUBLIC_BASE_URL must be an explicit HTTPS origin in real mode")
+        configured_callback = os.getenv("APPLE_REDIRECT_URI")
+        if configured_callback and configured_callback != public_origin + "/auth/callback":
+            raise RuntimeError("Public origin and Apple callback must match")
 
     def digest(s):
         return hashlib.sha256(s.encode()).hexdigest()
@@ -104,6 +121,12 @@ def create_app(data_dir=None, demo=False):
 
     @app.middleware("http")
     async def headers(req, call):
+        # Explicit TLS-terminating deployment contract; never trust forwarded host/proto.
+        # Health checks carry no authority and may use an internal Host.
+        if public_origin and req.url.path != "/healthz":
+            if req.headers.get("host") != public_url.netloc:
+                return JSONResponse({"detail": "Unrecognized public host"}, 421)
+            req.scope["scheme"] = "https"
         if demo and req.client.host not in ("127.0.0.1", "::1", "testclient"):
             return JSONResponse({"detail": "Demo is loopback only"}, 403)
         if (
@@ -275,8 +298,6 @@ def create_app(data_dir=None, demo=False):
             raise HTTPException(404)
         try:
             client_id, redirect, _ = enrollment.apple_binding()
-            from urllib.parse import urlparse
-
             u = urlparse(redirect)
             origin = f"{u.scheme}://{u.netloc}"
             if (
