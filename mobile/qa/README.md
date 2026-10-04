@@ -3,10 +3,10 @@
 Verified 2026-10-04 locally with Node 22.17, Expo SDK 57 and iPhone 16 Pro / iOS 18.5 via Expo Go.
 
 - TypeScript and Expo ESLint pass without warnings.
-- Jest: 32 tests in 7 suites cover API auth/error mapping and exact-key retry, runtime validation, safe links/file preflight, policy counting, idempotency/conflicts, accessible controls, screen loading/offline recovery, draft preservation, duplicate-write prevention and late-read suppression.
+- Jest: 61 tests in 11 suites cover API auth/error mapping and exact-key retry, runtime validation, safe links/file preflight, policy counting, idempotency/conflicts, accessible controls, screen loading/offline recovery, draft preservation, duplicate-write prevention and late-read suppression.
 - Expo Doctor: 21/21 checks pass; Expo dependency compatibility check passes.
 - iOS native bundle compiled and ran. Device Hub interaction verified detail navigation, keyboard note entry/save/attribution, interview preparation, independent ratings/research/material metadata, stage update/added timeline, return to updated shared board, and synthetic prospect creation.
-- Rebased on backend commit `3dd4a4583129243fb1142dc56001ea253a0ef949` (canonical origin and enrollment referrer fix); all 22 backend tests pass (one upstream Starlette/httpx deprecation warning).
+- Rebased on backend commit `e1d94f773e0c60a74355e79982004499ad346e18` (privacy-preserving Apple diagnostics, plus prior canonical-origin/enrollment fixes); all 46 backend tests pass (one upstream Starlette/httpx deprecation warning).
 - Final iOS, Android and web production bundle export passed (`npx expo export --platform all`). This is local compilation, not a store build or release.
 - Post-remediation native QA also verified the explicit live-mode lock and a synthetic malformed-query detail deep link using the patched decoder. No production API or credentials were used.
 - Independent review found route-state isolation, deep-link loading/error recovery, malformed timeline and overlapping-request risks. Fixed with shared provider/focus-aware back handling, detail loading/retry states, nested validation and generation guards; regression tests added.
