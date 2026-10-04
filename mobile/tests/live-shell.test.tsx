@@ -74,6 +74,12 @@ test("privacy cover preserves unsaved drafts across inactive and active transiti
     listener("inactive");
   });
   expect(screen.getByTestId("privacy-cover")).toBeOnTheScreen();
+  expect(screen.queryByLabelText("Unsaved draft")).toBeNull();
+  await act(async () => {
+    listener("background");
+  });
+  expect(screen.getByTestId("privacy-cover")).toBeOnTheScreen();
+  expect(screen.queryByLabelText("Unsaved draft")).toBeNull();
   await act(async () => {
     listener("active");
   });
