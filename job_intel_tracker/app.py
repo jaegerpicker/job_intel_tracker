@@ -155,7 +155,8 @@ def create_app(data_dir=None, demo=False):
                             "paths": ["/auth/mobile/callback"],
                         }
                     ],
-                }
+                },
+                "webcredentials": {"apps": ["VHWFV2V25Z.com.sandkcampbell.jobinteltracker"]},
             },
         )
 

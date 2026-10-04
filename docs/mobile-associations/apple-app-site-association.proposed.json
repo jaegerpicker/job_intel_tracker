@@ -4,8 +4,15 @@
     "details": [
       {
         "appID": "VHWFV2V25Z.com.sandkcampbell.jobinteltracker",
-        "paths": ["/auth/mobile/callback"]
+        "paths": [
+          "/auth/mobile/callback"
+        ]
       }
+    ]
+  },
+  "webcredentials": {
+    "apps": [
+      "VHWFV2V25Z.com.sandkcampbell.jobinteltracker"
     ]
   }
 }

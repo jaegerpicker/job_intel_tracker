@@ -82,3 +82,24 @@ idempotence, unknown-template rejection, and the single-window manifest.
 App installation and a successful launch command alone do not establish stable
 startup. Acceptance requires a surviving process plus owner-visible UI. Native
 auth activation remains held until stable startup is verified.
+
+## HTTPS authentication association correction (pending approval)
+
+A controlled native probe found a valid scene presentation anchor, followed by
+ASWebAuthenticationSession cancellation code 1 without a callback or Apple UI.
+Apple's installed iOS 27 SDK `ASWebAuthenticationSessionCallback.h` explicitly
+requires HTTPS callback hosts to be associated using web-credential domains.
+The deployed setup declares only applinks, so it is missing this requirement.
+
+Prepared correction: add `webcredentials:jobs.sandkcampbell.com` to the signed
+app and add only `VHWFV2V25Z.com.sandkcampbell.jobinteltracker` to the AASA
+webcredentials apps array. Universal links remain restricted to the exact native
+callback path. Webcredentials association applies to the domain, not a path, and
+permits OS credential association for this signed app. No credential-reading API
+is added, and no provider secret, session scope, allowlist, refresh lifetime or
+server authentication setting changes. Approval is needed before publishing the
+updated AASA/deploying or installing the newly entitled build. Native acceptance
+still requires a refreshed Apple association cache and a successful phone flow.
+
+The temporary native stdout probe is local-only and has been removed from the
+SDK source. No raw errors, URLs, tickets, codes or tokens were logged.
