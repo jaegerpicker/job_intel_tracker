@@ -25,6 +25,7 @@ was created. This verification is independent of the wildcard profile metadata.
 Build configuration:
 
 ```sh
+EXPO_PUBLIC_TRACKER_MODE=live
 EXPO_PUBLIC_TRACKER_API_ORIGIN=https://jobs.sandkcampbell.com
 EXPO_PUBLIC_TRACKER_MOBILE_REDIRECT=https://jobs.sandkcampbell.com/auth/mobile/callback
 ```

@@ -26,7 +26,10 @@ export async function createNativeAuth(origin: string, redirect: string) {
     redirect,
     storage: store,
     browser: {
-      open: (url, callback) => WebBrowser.openAuthSessionAsync(url, callback),
+      open: (url, callback) =>
+        WebBrowser.openAuthSessionAsync(url, callback, {
+          preferUniversalLinks: Platform.OS === "ios",
+        }),
     },
     crypto: {
       random: async () => {

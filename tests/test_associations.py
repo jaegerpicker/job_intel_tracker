@@ -8,6 +8,7 @@ def test_public_association_claims_only_native_callback(tmp_path):
     response = client.get("/.well-known/apple-app-site-association", follow_redirects=False)
     assert response.status_code == 200
     assert response.headers["content-type"] == "application/json"
+    assert response.headers["cache-control"] == "public, max-age=300"
     assert "set-cookie" not in response.headers
     assert response.json() == {
         "applinks": {

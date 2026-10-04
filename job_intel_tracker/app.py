@@ -157,7 +157,6 @@ def create_app(data_dir=None, demo=False):
                     ],
                 }
             },
-            headers={"Cache-Control": "public, max-age=300"},
         )
 
     @app.exception_handler(RequestValidationError)
@@ -191,7 +190,9 @@ def create_app(data_dir=None, demo=False):
                 "Referrer-Policy": "same-origin"
                 if req.url.path in ("/auth/enroll", "/auth/mobile/authorize")
                 else "no-referrer",
-                "Cache-Control": "no-store",
+                "Cache-Control": "public, max-age=300"
+                if req.url.path == "/.well-known/apple-app-site-association"
+                else "no-store",
                 "Content-Security-Policy": "default-src 'self'; script-src 'self'; style-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self' https://appleid.apple.com",
             }
         )
