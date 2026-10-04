@@ -8,7 +8,8 @@ let csrf = '',
     stages = [],
     demo = false,
     detailGeneration = 0,
-    credentialIssuing = false;
+    credentialIssuing = false,
+    credentialHandoffGeneration = 0;
 const defaults = {
     active_cap: 10,
     base_floor: 220000,
@@ -375,6 +376,8 @@ $('#search').oninput = render;
 $('#stage').onchange = render;
 $('#lane').onchange = render;
 $$('nav button').forEach(btn => btn.onclick = () => guarded(async () => {
+    credentialHandoffGeneration++;
+    TrackerSecureHandoff.clear();
     const view = btn.dataset.view;
     ['board', 'filters', 'audit', 'agents'].forEach(v => $('#' + v).hidden = v !== view);
     $$('nav button').forEach(b => b.classList.toggle('selected', b === btn));
@@ -411,6 +414,7 @@ function renderAgentList(entries) {
         const button = el('button', 'Revoke', 'quiet');
         button.disabled = !!x.revoked;
         button.onclick = () => guarded(async () => {
+            TrackerSecureHandoff.clearFor(x.name);
             await api('/api/agents/' + x.name, {method: 'DELETE'});
             renderAgentList(await api('/api/agents'));
         });
@@ -418,10 +422,32 @@ function renderAgentList(entries) {
         return row;
     }));
 }
+function updateHandoffMode() {
+    const f = $('#agent-create'), direct = f.elements.handoff.value === 'secure-entry';
+    TrackerSecureHandoff.clear();
+    $('#agent-encrypted-options').hidden = direct;
+    $('#agent-secure-options').hidden = !direct;
+    for (const name of ['passphrase', 'confirmation']) {
+        f.elements[name].disabled = direct;
+        f.elements[name].required = !direct;
+        f.elements[name].value = '';
+    }
+    f.elements.secure_approved.disabled = !direct;
+    f.elements.secure_approved.required = direct;
+    f.elements.secure_approved.checked = false;
+    $('#agent-create-button').textContent = direct ? 'Create one-time token for manual entry' : 'Create encrypted credential download';
+}
+$('#agent-create').elements.handoff.onchange = updateHandoffMode;
+addEventListener('pagehide', () => { credentialHandoffGeneration++; });
 $('#agent-create').onsubmit = async e => {
     e.preventDefault();
     const f = e.currentTarget, fields = $('#agent-create-fields'), status = $('#agent-create-status');
     if (fields.disabled || demo || credentialIssuing) return;
+    const direct = f.elements.handoff.value === 'secure-entry';
+    if (direct && !f.elements.secure_approved.checked) {
+        status.textContent = 'Confirm the one-time token display for your own manual transfer before creating a credential.';
+        return;
+    }
     const p = {
         name: f.elements.name.value,
         days: Number(f.elements.days.value),
@@ -437,32 +463,52 @@ $('#agent-create').onsubmit = async e => {
         status.textContent = 'Select assigned jobs or explicitly allow all jobs.';
         return;
     }
-    if (f.elements.passphrase.value !== f.elements.confirmation.value) {
+    if (!direct && f.elements.passphrase.value !== f.elements.confirmation.value) {
         status.textContent = 'The handoff passphrases do not match.';
         return;
     }
     fields.disabled = true;
+    TrackerSecureHandoff.clear();
+    const generation = credentialHandoffGeneration;
     credentialIssuing = true;
     let attempted = false;
     let created = false;
     try {
-        status.textContent = 'Preparing encrypted handoff…';
-        const prepared = await TrackerCredentialCapsule.prepare(f.elements.passphrase.value);
+        status.textContent = direct ? 'Preparing one-time token…' : 'Preparing encrypted handoff…';
+        const prepared = direct ? null : await TrackerCredentialCapsule.prepare(f.elements.passphrase.value);
         attempted = true;
         const issued = await api('/api/agents', {method: 'POST', body: JSON.stringify(p)});
         created = true;
-        const capsule = await TrackerCredentialCapsule.seal(prepared, {...p, token: issued.token, base_url: location.origin});
-        issued.token = '';
-        const url = URL.createObjectURL(new Blob([JSON.stringify(capsule)], {type: 'application/json'}));
-        const link = el('a');
-        link.href = url;
-        link.download = 'job-intel-agent-' + p.name + '.encrypted.json';
-        link.click();
-        setTimeout(() => URL.revokeObjectURL(url), 30000);
+        try {
+            if (generation !== credentialHandoffGeneration) throw Error('Handoff view dismissed');
+            if (direct) TrackerSecureHandoff.show(issued.token, p.name);
+            else {
+                const capsule = await TrackerCredentialCapsule.seal(prepared, {...p, token: issued.token, base_url: location.origin});
+                const url = URL.createObjectURL(new Blob([JSON.stringify(capsule)], {type: 'application/json'}));
+                const link = el('a');
+                link.href = url;
+                link.download = 'job-intel-agent-' + p.name + '.encrypted.json';
+                link.click();
+                setTimeout(() => URL.revokeObjectURL(url), 30000);
+            }
+        } finally { issued.token = ''; }
         f.reset();
-        status.textContent = 'Encrypted download created. Import it privately before testing the client. If the download was blocked, revoke this credential and create a new name.';
+        // Reset controls without clearing the just-created direct handoff.
+        $('#agent-encrypted-options').hidden = false;
+        $('#agent-secure-options').hidden = true;
+        for (const name of ['passphrase', 'confirmation']) {
+            f.elements[name].disabled = false;
+            f.elements[name].required = true;
+        }
+        f.elements.secure_approved.disabled = true;
+        f.elements.secure_approved.required = false;
+        $('#agent-create-button').textContent = 'Create encrypted credential download';
+        status.textContent = direct ?
+            'New token is available below for five minutes. Transfer it yourself into your trusted connector, then dismiss. If transfer is cancelled, revoke the credential.' :
+            'Encrypted download created. Import it privately before testing the client. If the download was blocked, revoke this credential and create a new name.';
         renderAgentList(await api('/api/agents'));
     } catch (error) {
+        TrackerSecureHandoff.clear();
         if (attempted && !created && error.status === 409) {
             status.textContent = 'That credential name already exists, including if revoked. Choose a new name. No new credential was created.';
         } else if (attempted && !created && error.status === 422) {
@@ -476,6 +522,7 @@ $('#agent-create').onsubmit = async e => {
         f.elements.passphrase.value = '';
         f.elements.confirmation.value = '';
         f.elements.approved.checked = false;
+        f.elements.secure_approved.checked = false;
         credentialIssuing = false;
         fields.disabled = demo;
     }
@@ -580,6 +627,8 @@ $('#demo').onclick = () => guarded(async () => {
     await enter();
 });
 $('#logout').onclick = () => guarded(async () => {
+    credentialHandoffGeneration++;
+    TrackerSecureHandoff.clear();
     await api('/auth/logout', {
         method: 'POST'
     });

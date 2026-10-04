@@ -113,6 +113,37 @@ def test_agent_isolation_scope_revoke_state(env):
     assert eva.get("/api/records").status_code == 401
 
 
+def test_attachment_write_only_does_not_grant_listing_or_binary_read(env):
+    _, owner, agent = env
+    put(owner)
+    writer = agent("SyntheticUploader", ["read", "contribute", "jobs:write", "attachments:write"])
+    uploaded = writer.post(
+        "/api/jobs/job1/attachments",
+        headers={"Idempotency-Key": "synthetic-upload-only"},
+        files={"file": ("synthetic-cover-letter.pdf", b"%PDF-inert-fixture", "application/pdf")},
+    )
+    assert uploaded.status_code == 200
+    aid = uploaded.json()["id"]
+    assert writer.get("/api/jobs/job1/attachments").status_code == 403
+    assert writer.get("/api/attachments/" + aid).status_code == 403
+    assert owner.get("/api/attachments/" + aid).status_code == 200
+    replay = writer.post(
+        "/api/jobs/job1/attachments",
+        headers={"Idempotency-Key": "synthetic-upload-only"},
+        files={"file": ("synthetic-cover-letter.pdf", b"%PDF-inert-fixture", "application/pdf")},
+    )
+    assert replay.json() == uploaded.json()
+    assert owner.delete("/api/agents/SyntheticUploader").status_code == 200
+    assert (
+        writer.post(
+            "/api/jobs/job1/attachments",
+            headers={"Idempotency-Key": "synthetic-revoked-upload"},
+            files={"file": ("synthetic.pdf", b"%PDF-inert-fixture", "application/pdf")},
+        ).status_code
+        == 401
+    )
+
+
 def test_upload_download_authorization_versions(env):
     app, c, agent = env
     put(c)

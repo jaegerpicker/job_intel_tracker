@@ -197,7 +197,7 @@
           <div id="agent-list">
           </div>
           <p class="muted">
-            Give each agent its own credential. Tokens are never displayed here or placed in URLs. Demo mode cannot issue credentials.
+            Give each agent its own credential. Existing tokens cannot be recovered. Demo mode cannot issue credentials.
           </p>
           <form id="agent-create" method="post" action="/auth/blocked-credential-form" autocomplete="off">
             <fieldset id="agent-create-fields" disabled>
@@ -212,14 +212,29 @@
               <label><input type="checkbox" name="scope" value="attachments:write"> Upload job attachments</label>
               <label><input type="checkbox" name="all_jobs"> Allow all jobs, including future jobs</label>
               <label>Otherwise, select assigned jobs <select id="agent-jobs" name="jobs" multiple size="4"></select></label>
-              <label>Handoff passphrase <input name="passphrase" type="password" minlength="16" maxlength="256" required autocomplete="new-password"></label>
-              <label>Confirm passphrase <input name="confirmation" type="password" minlength="16" maxlength="256" required autocomplete="new-password"></label>
-              <p class="muted">The download is encrypted. Import it privately into the local client's secret store; keep the passphrase out of chat. This does not connect a client automatically.</p>
+              <label>Handoff method <select name="handoff"><option value="encrypted">Encrypted download for local Keychain / MCP</option><option value="secure-entry">Show once for manual entry into a trusted connector</option></select></label>
+              <div id="agent-encrypted-options">
+                <label>Handoff passphrase <input name="passphrase" type="password" minlength="16" maxlength="256" required autocomplete="new-password"></label>
+                <label>Confirm passphrase <input name="confirmation" type="password" minlength="16" maxlength="256" required autocomplete="new-password"></label>
+                <p class="muted">The download is encrypted. Import it privately into the local client's secret store; keep the passphrase out of chat. This does not connect a client automatically.</p>
+              </div>
+              <div id="agent-secure-options" hidden>
+                <p>Use only a verified connector's secure API-key entry. The new token will be available here for five minutes, until dismissed or until you leave this view. It cannot be recovered after dismissal or reload. No plaintext file is created and nothing is copied automatically.</p>
+                <label><input name="secure_approved" type="checkbox" disabled> I authorize showing this new bearer token once for my own manual transfer. I will keep it out of chat, URLs and screenshots.</label>
+              </div>
               <label><input name="approved" type="checkbox" required> I authorize the selected permissions, job access and expiry.</label>
-              <button type="submit">Create encrypted credential download</button>
+              <button id="agent-create-button" type="submit">Create encrypted credential download</button>
             </fieldset>
             <p id="agent-create-status" role="status"></p>
           </form>
+          <section id="agent-secure-handoff" hidden aria-labelledby="agent-secure-title">
+            <h3 id="agent-secure-title">One-time token for <span id="agent-secure-name"></span></h3>
+            <p>Enter this token yourself into your verified connector's secure API-key field. This is the actual bearer token, not an encrypted capsule. Do not share it with an assistant. Dismiss after storing it. If transfer fails, revoke the credential and create a new name.</p>
+            <label>New token <input id="agent-secure-token" type="password" readonly autocomplete="off" spellcheck="false" autocapitalize="off" aria-label="One-time bearer token"></label>
+            <label><input id="agent-secure-reveal" type="checkbox"> Reveal token on this screen</label>
+            <button id="agent-secure-select" type="button">Select token for manual copy</button>
+            <button id="agent-secure-dismiss" type="button" class="quiet">Dismiss token</button>
+          </section>
         </section>
       </section>
     </main>
@@ -353,6 +368,7 @@
       </form>
     </dialog>
     <script src="/static/credential-capsule.js" defer></script>
+    <script src="/static/secure-handoff.js" defer></script>
     <script src="/static/app.js" defer>
     </script>
   </body>
