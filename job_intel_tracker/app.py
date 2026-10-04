@@ -141,6 +141,25 @@ def create_app(data_dir=None, demo=False):
 
     mobile_auth.configure(app, db, public_origin, owner, configured_owner)
 
+    @app.get("/.well-known/apple-app-site-association")
+    def apple_app_association():
+        # Public app identity, verified against the dedicated Apple Developer App ID.
+        # Association alone cannot issue a session; native authentication remains gated.
+        return JSONResponse(
+            {
+                "applinks": {
+                    "apps": [],
+                    "details": [
+                        {
+                            "appID": "VHWFV2V25Z.com.sandkcampbell.jobinteltracker",
+                            "paths": ["/auth/mobile/callback"],
+                        }
+                    ],
+                }
+            },
+            headers={"Cache-Control": "public, max-age=300"},
+        )
+
     @app.exception_handler(RequestValidationError)
     async def validation_error(req, error):
         if req.url.path.startswith("/auth/mobile/"):

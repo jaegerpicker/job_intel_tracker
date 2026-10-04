@@ -1,6 +1,6 @@
 # First owner-device acceptance
 
-Prepared October 4, 2026. This is a proposed activation plan, not an activation record.
+Prepared October 4, 2026. Owner approved the signing, device installation, association publication, and mobile-auth activation bundle. Deployment and device acceptance remain pending.
 
 ## Verified local prerequisites
 
@@ -17,9 +17,10 @@ Prepared October 4, 2026. This is a proposed activation plan, not an activation 
 ## Proposed identifiers and public configuration
 
 Reuse the dedicated identifier `com.sandkcampbell.jobinteltracker` for iOS and
-propose the same Android package. Verify the exact explicit App ID and its prefix
-in Apple Developer before signing or publishing associations. The wildcard
-profile's prefix is evidence for the team, not verification of the explicit App ID.
+propose the same Android package. The dedicated App ID detail page was independently inspected in Apple Developer:
+its App ID prefix is `VHWFV2V25Z`. Associated Domains was enabled with owner
+approval; Sign in with Apple remains enabled as primary. No certificate or key
+was created. This verification is independent of the wildcard profile metadata.
 
 Build configuration:
 
@@ -31,17 +32,16 @@ EXPO_PUBLIC_TRACKER_MOBILE_REDIRECT=https://jobs.sandkcampbell.com/auth/mobile/c
 The existing config derives `applinks:jobs.sandkcampbell.com` from these values.
 The installed Expo WebBrowser implementation supports an HTTPS authentication
 callback on iOS 17.4 or newer. Use the detected modern iPhone for this milestone;
-older OS support needs a separate fail-closed compatibility decision.
+the Expo build-properties plugin enforces iOS 17.4 as the minimum deployment target.
 
-The adjacent proposed AASA file uses the locally observed prefix. It must remain
-unpublished until the explicit App ID prefix is verified. Serve the verified file
+The adjacent AASA artifact uses the now-verified dedicated App ID prefix. Serve the verified file
 at `/.well-known/apple-app-site-association` with JSON content type, HTTPS, and no
 redirect. Permit only `/auth/mobile/callback`. Do not create an Android assetlinks
 file until the actual approved Android signing certificate fingerprint is known.
 
 ## Approval bundle
 
-Owner approval is required for these concrete next actions:
+The owner approved these concrete actions; execute after validation and coordination:
 
 1. Set the iOS bundle identifier and Android package above in Expo configuration.
    Verify the dedicated Apple App ID under the existing paid account, enable
