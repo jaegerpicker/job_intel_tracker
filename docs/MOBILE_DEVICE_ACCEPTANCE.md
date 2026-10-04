@@ -177,3 +177,26 @@ Minimal owner sequence, when ready:
    and mark physical live writes unverified. No private test records are created.
 
 Android is deferred until the owner is ready. No Android schedule is inferred.
+
+## Top session-control safe-area correction (local)
+
+The owner's October 4 screenshot was retrieved from Library and inspected as
+pixels. The sign-out button overlapped the time/status icons. A synthetic inert
+session-control harness reproduced the same overlap on iPhone 16 Pro / iOS 18.5.
+No real sign-in, credentials or board records were used in the reproduction.
+
+The root layout now owns all safe-area edges, including live session controls,
+sign-in, recovery and routed content. Board screens no longer consume a second
+inset. Synthetic before/after images show the button moving below the status bar
+while the board's heading position remains unchanged. The temporary harness was
+removed and real configuration restored before verification.
+
+Validation: 67 Jest tests, four scene-plugin tests, TypeScript and ESLint passed.
+Independent review passed 13 focused tests across three suites with no remaining
+concrete issue. Physical updated-build acceptance and native keyboard positioning
+remain pending. The correction has not been pushed, merged or installed.
+
+Synthetic evidence saved in Library: `jobintel-safe-area-before.png` and
+`jobintel-safe-area-after.png`. The owner's screenshot and its Library identifiers
+are intentionally not included in source control. No server/auth-policy change
+or live record write was made.
