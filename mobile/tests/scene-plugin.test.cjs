@@ -6,6 +6,7 @@ const {
 } = require("../plugins/withSceneLifecycle.cjs");
 
 const source = `class AppDelegate: ExpoAppDelegate {
+  var window: UIWindow?
   var reactNativeFactory: RCTReactNativeFactory?
   func start() {
     reactNativeFactory = factory
@@ -32,6 +33,20 @@ test("unknown templates fail closed instead of generating a broken signed app", 
     () => adoptSceneLifecycle("class DifferentAppDelegate {}"),
     /template changed/,
   );
+});
+test("already adopted templates still require the factory and launch bridge", () => {
+  const adopted = adoptSceneLifecycle(source);
+  for (const invariant of [
+    "var window: UIWindow?",
+    "var reactNativeFactory: RCTReactNativeFactory?",
+    "reactNativeFactory = factory",
+    "return super.application(application, didFinishLaunchingWithOptions: launchOptions)",
+  ]) {
+    assert.throws(
+      () => adoptSceneLifecycle(adopted.replace(invariant, "")),
+      /factory bridge/,
+    );
+  }
 });
 test("manifest selects the SDK's Objective-C scene delegate and one window", () => {
   const manifest = sceneManifest();

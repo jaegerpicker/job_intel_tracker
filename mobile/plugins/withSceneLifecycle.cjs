@@ -3,6 +3,17 @@ const { withAppDelegate, withInfoPlist } = require("expo/config-plugins");
 // Expo 57's native template still starts RN in UIApplicationDelegate. UIKit 27
 // traps that lifecycle. Use the SDK's scene delegate and factory-provider bridge.
 function adoptSceneLifecycle(source) {
+  const bridge = [
+    /var window:\s*UIWindow\?/,
+    /var reactNativeFactory:\s*RCTReactNativeFactory\?/,
+    /reactNativeFactory\s*=\s*factory/,
+    /return super\.application\(application, didFinishLaunchingWithOptions: launchOptions\)/,
+  ];
+  if (!bridge.every((required) => required.test(source))) {
+    throw new Error(
+      "Expo AppDelegate template changed; required scene factory bridge is missing.",
+    );
+  }
   const declaration = "class AppDelegate: ExpoAppDelegate {";
   const adopted =
     "class AppDelegate: ExpoAppDelegate, ExpoReactNativeFactoryProvider {";
