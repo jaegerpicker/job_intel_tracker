@@ -51,7 +51,7 @@ The local backend implements the disabled-by-default PKCE native owner session e
 
 ## Verification and evidence
 
-See [QA](qa/README.md). The path-filtered mobile CI workflow runs the same checks and exports a web bundle; it has not run on GitHub because this branch has not been pushed. Dependency remediation and actual remaining tooling exposure are tracked in [QA/dependencies](qa/DEPENDENCIES.md); the runtime decoder is patched without downgrading Expo. The backend and web board remain in the repository root.
+See [QA](qa/README.md). The path-filtered mobile CI workflow runs the same checks and exports all three platform bundles; the PR checks report verification for the current published commit. Dependency remediation and actual remaining tooling exposure are tracked in [QA/dependencies](qa/DEPENDENCIES.md); the runtime decoder is patched without downgrading Expo. The backend and web board remain in the repository root.
 
 ## Native owner session milestone
 
