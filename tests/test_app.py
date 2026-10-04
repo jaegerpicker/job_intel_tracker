@@ -416,6 +416,15 @@ def test_owner_credential_lifecycle_with_inert_fixture(tmp_path, monkeypatch):
         assert token["hash"] == hashlib.sha256(b"inert-lifecycle-token-fixture").hexdigest()
         assert token["hash"] != "inert-lifecycle-token-fixture"
     assert "inert-lifecycle-token-fixture" not in c.get("/api/agents").text
+    duplicate = c.post("/api/agents", json={"name": "Eva", "scopes": ["read", "jobs:write"]})
+    assert duplicate.status_code == 409
+    assert "token" not in duplicate.json()
+    for invalid_name in ("Name with spaces", "1invalid", "", "a" * 41):
+        rejected = c.post("/api/agents", json={"name": invalid_name, "scopes": ["read"]})
+        assert rejected.status_code == 422
+        assert "token" not in rejected.json()
+    listed = c.get("/api/agents").json()
+    assert len(listed) == 1 and json.loads(listed[0]["scopes"]) == ["read"]
     assert c.post("/api/agents", json={"name": "owner", "scopes": ["read"]}).status_code == 422
     assert c.post("/api/agents", json={"name": "Hana", "scopes": ["admin"]}).status_code == 422
     assert c.post("/api/agents", json={"name": "Hana", "scopes": ["read"], "days": 91}).status_code == 422
@@ -423,4 +432,6 @@ def test_owner_credential_lifecycle_with_inert_fixture(tmp_path, monkeypatch):
     agent.headers["Authorization"] = "Bearer inert-lifecycle-token-fixture"
     assert agent.get("/api/policy").status_code == 200
     assert c.delete("/api/agents/Eva").status_code == 200
+    assert c.post("/api/agents", json={"name": "Eva", "scopes": ["read"]}).status_code == 409
+    assert len(c.get("/api/agents").json()) == 1
     assert agent.get("/api/policy").status_code == 401

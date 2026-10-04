@@ -197,8 +197,29 @@
           <div id="agent-list">
           </div>
           <p class="muted">
-            Use the authenticated API to issue credentials after approval. Tokens are never placed in this UI or URLs. Demo mode cannot issue credentials.
+            Give each agent its own credential. Tokens are never displayed here or placed in URLs. Demo mode cannot issue credentials.
           </p>
+          <form id="agent-create" method="post" action="/auth/blocked-credential-form" autocomplete="off">
+            <fieldset id="agent-create-fields" disabled>
+              <legend>Create a private agent handoff</legend>
+              <label>Credential name <input name="name" required pattern="[A-Za-z][A-Za-z0-9_\-]{0,39}" maxlength="40" title="Start with a letter; use only letters, numbers, underscores or hyphens (1–40 characters)." placeholder="Researcher-pilot"></label>
+              <p class="muted">Use a new name starting with a letter, with only letters, numbers, underscores or hyphens. Previously used names cannot be reused.</p>
+              <label>Expires after days <input name="days" type="number" min="1" max="90" value="7" required></label>
+              <p>Read access is included. Choose additional permissions explicitly.</p>
+              <label><input type="checkbox" name="scope" value="jobs:write"> Create jobs and update their stages</label>
+              <label><input type="checkbox" name="scope" value="contribute"> Add and edit this agent's research, notes, ratings and interview preparation</label>
+              <label><input type="checkbox" name="scope" value="attachments:read"> Read private job attachments</label>
+              <label><input type="checkbox" name="scope" value="attachments:write"> Upload job attachments</label>
+              <label><input type="checkbox" name="all_jobs"> Allow all jobs, including future jobs</label>
+              <label>Otherwise, select assigned jobs <select id="agent-jobs" name="jobs" multiple size="4"></select></label>
+              <label>Handoff passphrase <input name="passphrase" type="password" minlength="16" maxlength="256" required autocomplete="new-password"></label>
+              <label>Confirm passphrase <input name="confirmation" type="password" minlength="16" maxlength="256" required autocomplete="new-password"></label>
+              <p class="muted">The download is encrypted. Import it privately into the local client's secret store; keep the passphrase out of chat. This does not connect a client automatically.</p>
+              <label><input name="approved" type="checkbox" required> I authorize the selected permissions, job access and expiry.</label>
+              <button type="submit">Create encrypted credential download</button>
+            </fieldset>
+            <p id="agent-create-status" role="status"></p>
+          </form>
         </section>
       </section>
     </main>
@@ -331,6 +352,7 @@
         </button>
       </form>
     </dialog>
+    <script src="/static/credential-capsule.js" defer></script>
     <script src="/static/app.js" defer>
     </script>
   </body>
