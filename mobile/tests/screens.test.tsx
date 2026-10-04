@@ -10,6 +10,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { BoardApp } from "../App";
 import { BoardProvider } from "../src/store";
 import { DemoRepository, fixtures } from "../src/demo";
+import { createRuntime } from "../src/runtime";
 import { BoardRecord, Repository } from "../src/domain";
 const params = jest.mocked(useLocalSearchParams);
 const pathname = jest.mocked(usePathname);
@@ -142,4 +143,69 @@ test("note and prep drafts survive switching sections", async () => {
     "value",
     "Keep my draft",
   );
+});
+
+test("live mode without a session shows a locked screen and sends no requests", async () => {
+  const transport = jest.fn();
+  const runtime = createRuntime({
+    mode: "live",
+    origin: "https://example.com",
+    transport,
+  });
+  await render(
+    <SafeAreaProvider
+      initialMetrics={{
+        frame: { x: 0, y: 0, width: 390, height: 844 },
+        insets: { top: 0, bottom: 0, left: 0, right: 0 },
+      }}
+    >
+      <BoardProvider runtime={runtime}>
+        <BoardApp />
+      </BoardProvider>
+    </SafeAreaProvider>,
+  );
+  expect(screen.getByText("Live connection locked")).toBeOnTheScreen();
+  expect(screen.queryByRole("button", { name: "+ New" })).toBeNull();
+  expect(transport).not.toHaveBeenCalled();
+});
+test("injected owner read mode loads typed records but disables native mutations", async () => {
+  params.mockReturnValue({ id: "demo-cedar" });
+  const response = (body: unknown) =>
+    ({ ok: true, status: 200, json: async () => body }) as Response;
+  const transport = jest
+    .fn()
+    .mockResolvedValueOnce(response({ actor: "owner" }))
+    .mockResolvedValueOnce(response(fixtures));
+  const runtime = createRuntime({
+    mode: "live",
+    origin: "https://example.com",
+    session: {
+      origin: "https://example.com",
+      expiresAt: Date.now() + 60000,
+      headers: async () => ({ Authorization: "Bearer synthetic-test-only" }),
+      invalidate: jest.fn(),
+    },
+    transport,
+  });
+  await render(
+    <SafeAreaProvider
+      initialMetrics={{
+        frame: { x: 0, y: 0, width: 390, height: 844 },
+        insets: { top: 0, bottom: 0, left: 0, right: 0 },
+      }}
+    >
+      <BoardProvider runtime={runtime}>
+        <BoardApp selectedId="demo-cedar" />
+      </BoardProvider>
+    </SafeAreaProvider>,
+  );
+  await screen.findByText("Status timeline");
+  expect(
+    screen.getByText("LIVE · OWNER READ ONLY · WRITES DISABLED"),
+  ).toBeOnTheScreen();
+  expect(screen.getByRole("button", { name: "Offer" })).toBeDisabled();
+  await fireEvent.press(screen.getByRole("button", { name: "Notes" }));
+  expect(screen.getByRole("button", { name: "Save entry" })).toBeDisabled();
+  expect(screen.getByLabelText("New note")).toHaveProp("editable", false);
+  expect(transport).toHaveBeenCalledTimes(2);
 });

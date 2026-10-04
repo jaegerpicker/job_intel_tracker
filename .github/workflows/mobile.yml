@@ -22,4 +22,5 @@ jobs:
       - run: npm ci
       - run: npm run check
       - run: npx expo install --check
-      - run: npx expo export --platform web
+      - run: npx expo export --platform all --source-maps
+      - run: npm run verify:bundles

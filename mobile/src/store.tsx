@@ -6,15 +6,17 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { BoardRecord, Repository } from "./domain";
+import { BoardError, BoardRecord, Repository } from "./domain";
 import { DemoRepository } from "./demo";
+import { AppRuntime } from "./runtime";
 const demo = new DemoRepository();
-function useStore(repository: Repository) {
+function useStore(repository: Repository, enabled = true) {
   const generation = useRef(0);
   const [records, setRecords] = useState<BoardRecord[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(enabled);
   const [error, setError] = useState("");
   const load = useCallback(async () => {
+    if (!enabled) return;
     const request = ++generation.current;
     setLoading(true);
     setError("");
@@ -22,12 +24,18 @@ function useStore(repository: Repository) {
       const result = await repository.list();
       if (request === generation.current) setRecords(result);
     } catch (e) {
-      if (request === generation.current)
+      if (request === generation.current) {
+        if (
+          e instanceof BoardError &&
+          ["unauthorized", "forbidden"].includes(e.code)
+        )
+          setRecords([]);
         setError(e instanceof Error ? e.message : "Unable to load board");
+      }
     } finally {
       if (request === generation.current) setLoading(false);
     }
-  }, [repository]);
+  }, [repository, enabled]);
   useEffect(() => {
     // Initial loading is already true; schedule the external read after mounting.
     let cancelled = false;
@@ -48,16 +56,31 @@ function useStore(repository: Repository) {
   };
   return { records, loading, error, load, updateRecord, repository };
 }
-const Context = createContext<ReturnType<typeof useStore> | null>(null);
+const Context = createContext<
+  | (ReturnType<typeof useStore> &
+      Pick<AppRuntime, "mode" | "canWrite" | "lockedReason">)
+  | null
+>(null);
 export function BoardProvider({
   children,
   repository = demo,
+  runtime,
 }: {
   children: React.ReactNode;
   repository?: Repository;
+  runtime?: AppRuntime;
 }) {
-  const store = useStore(repository);
-  return <Context.Provider value={store}>{children}</Context.Provider>;
+  const store = useStore(
+    runtime?.repository ?? repository,
+    !runtime?.lockedReason,
+  );
+  const value = {
+    ...store,
+    mode: runtime?.mode ?? ("demo" as const),
+    canWrite: runtime?.canWrite ?? true,
+    lockedReason: runtime?.lockedReason,
+  };
+  return <Context.Provider value={value}>{children}</Context.Provider>;
 }
 export function useBoard() {
   const store = useContext(Context);

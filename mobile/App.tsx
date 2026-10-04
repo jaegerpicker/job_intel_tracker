@@ -37,8 +37,17 @@ export default function App(props: ScreenProps) {
   return <BoardApp {...props} />;
 }
 export function BoardApp({ selectedId, creating = false }: ScreenProps) {
-  const { records, updateRecord, loading, error, load, repository } =
-    useBoard();
+  const {
+    records,
+    updateRecord,
+    loading,
+    error,
+    load,
+    repository,
+    mode,
+    canWrite,
+    lockedReason,
+  } = useBoard();
   const router = useRouter();
   const selected = selectedId ?? null;
   const [query, setQuery] = useState("");
@@ -99,7 +108,7 @@ export function BoardApp({ selectedId, creating = false }: ScreenProps) {
     };
   }, [tab, loadFiles]);
   async function save(write: PendingWrite) {
-    if (saveLock.current) return;
+    if (!canWrite || saveLock.current) return;
     saveLock.current = true;
     setSaving(true);
     setPending(write);
@@ -139,6 +148,7 @@ export function BoardApp({ selectedId, creating = false }: ScreenProps) {
     items: readonly string[],
     current: string,
     choose: (v: string) => void,
+    disabled = false,
   ) => (
     <ScrollView
       horizontal
@@ -149,8 +159,11 @@ export function BoardApp({ selectedId, creating = false }: ScreenProps) {
         <Pressable
           key={item}
           accessibilityRole="button"
-          accessibilityState={{ selected: item === current, disabled: busy }}
-          disabled={busy}
+          accessibilityState={{
+            selected: item === current,
+            disabled: busy || disabled,
+          }}
+          disabled={busy || disabled}
           onPress={() => choose(item)}
           style={[s.chip, current === item && s.chipSelected]}
         >
@@ -161,6 +174,20 @@ export function BoardApp({ selectedId, creating = false }: ScreenProps) {
       ))}
     </ScrollView>
   );
+  if (lockedReason)
+    return (
+      <SafeAreaView style={s.root}>
+        <View style={s.header}>
+          <Text style={s.eyebrow}>FIELDNOTES / JOB INTEL</Text>
+          <Text style={s.title}>Live connection locked</Text>
+          <Notice text={lockedReason} />
+          <Text style={s.subtitle}>
+            No API requests or credential creation occur in this state. Use demo
+            mode for synthetic portfolio QA.
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
   return (
     <SafeAreaView style={s.root}>
       <StatusBar style="dark" />
@@ -182,7 +209,11 @@ export function BoardApp({ selectedId, creating = false }: ScreenProps) {
               ? String(job.body.title)
               : "Keep your next move grounded in evidence."}
           </Text>
-          <Text style={s.badge}>DEMO · SYNTHETIC DATA · RESETS ON RESTART</Text>
+          <Text style={s.badge}>
+            {mode === "demo"
+              ? "DEMO · SYNTHETIC DATA · RESETS ON RESTART"
+              : "LIVE · OWNER READ ONLY · WRITES DISABLED"}
+          </Text>
         </View>
         {selected || creating ? (
           <ScrollView
@@ -241,7 +272,9 @@ export function BoardApp({ selectedId, creating = false }: ScreenProps) {
                 <Notice text="Starts in Prospect. This synthetic demo makes no external applications." />
                 <Button
                   label={saving ? "Saving…" : "Create opportunity"}
-                  disabled={busy || !company.trim() || !title.trim()}
+                  disabled={
+                    busy || !canWrite || !company.trim() || !title.trim()
+                  }
                   onPress={() =>
                     void save({
                       id: randomUUID(),
@@ -292,6 +325,7 @@ export function BoardApp({ selectedId, creating = false }: ScreenProps) {
                             randomUUID(),
                           ),
                         ),
+                      !canWrite,
                     )}
                     <View style={s.card}>
                       <Text style={s.label}>THE OPPORTUNITY</Text>
@@ -376,11 +410,11 @@ export function BoardApp({ selectedId, creating = false }: ScreenProps) {
                       value={draft}
                       onChange={setDraft}
                       multiline
-                      disabled={busy}
+                      disabled={busy || !canWrite}
                     />
                     <Button
                       label={saving ? "Saving…" : "Save entry"}
-                      disabled={busy || !draft.trim()}
+                      disabled={busy || !canWrite || !draft.trim()}
                       onPress={() =>
                         void save({
                           id: randomUUID(),
@@ -467,9 +501,9 @@ export function BoardApp({ selectedId, creating = false }: ScreenProps) {
                             Version {f.version} · {f.author}
                           </Text>
                           <Text style={s.subtitle}>
-                            Synthetic metadata only. Native downloads and
-                            uploads require approved authentication and a
-                            private file workflow.
+                            {mode === "demo"
+                              ? "Synthetic metadata only. Native downloads and uploads require approved authentication and a private file workflow."
+                              : "Downloads and uploads await approved native private-file handling."}
                           </Text>
                         </View>
                       ))
@@ -518,6 +552,7 @@ export function BoardApp({ selectedId, creating = false }: ScreenProps) {
                 <Text style={s.section}>Your opportunities</Text>
                 <Button
                   label="+ New"
+                  disabled={!canWrite}
                   onPress={() => {
                     router.push("/new");
                     setCompany("");
@@ -586,8 +621,9 @@ export function BoardApp({ selectedId, creating = false }: ScreenProps) {
               }}
             >
               <Text style={[s.label, { textAlign: "center" }]}>
-                Private by design · Live sign-in awaits secure mobile
-                integration
+                {mode === "demo"
+                  ? "Private by design · Live sign-in awaits secure mobile integration"
+                  : "Owner read only · No live writes or private-file transfers"}
               </Text>
             </View>
           </>

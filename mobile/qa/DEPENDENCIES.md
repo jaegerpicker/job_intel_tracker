@@ -1,0 +1,22 @@
+# Dependency exposure and remediation — 2026-10-04
+
+The post-remediation `npm audit` snapshot reports **50 high dependency-chain entries, zero moderate/critical**, arising from **two underlying unpatched advisories**. This is not a clean audit and not fifty separate flaws. The prior snapshot reported 60 entries from four advisories.
+
+## Fixed paths
+
+- Runtime Router query decoding: replace transitive `decode-uri-component@0.2.2` with the exact upstream patched 0.5.0 scanner adapted to CommonJS under `vendor/decode-uri-component`. The old exponential decoder is no longer installed or bundled. Upstream 0.5.0 is ESM-only while Router57's query-string7 caller needs a function from `require`; a raw version override would break it. Source provenance, Unicode/malformed query behavior and a bounded malicious-input subprocess are tested. [Advisory](https://github.com/advisories/GHSA-vcc3-ghjq-m6fr).
+- Xcode generation: override `xcode`'s UUID dependency from 7.0.3 to patched 11.1.1, whose package still provides CommonJS exports. Xcode's actual `generateUuid()` v4 path is exercised with an initialized synthetic project object. The advisory affects v3/v5/v6 buffer writes, not that v4 path; nevertheless the vulnerable package is removed. App operation IDs continue to use expo-crypto. [Advisory](https://github.com/advisories/GHSA-w5hq-g745-h8pq).
+- Native peer compatibility: explicitly install Expo SDK57's declared `react-native-worklets@0.10.1` and `react-native-reanimated@4.5.1`; this replaces the implicitly installed worklets0.13 peer mismatch. Expo Doctor and SDK package checks pass.
+
+## Remaining actual exposure
+
+| Package | Advisory and reachable path | Current mitigation and limit |
+| --- | --- | --- |
+| braces3.0.3 — high | [GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm): deeply nested brace patterns can exhaust recursive AST walkers. Installed through micromatch in Jest and Metro file/glob tooling. | Tests/builds use checked-in, trusted glob patterns and repo files; no job/research/link input is forwarded to these tools. Do not execute untrusted repository configuration or expose Metro publicly. No patched upstream release is listed; keep tracking the fix. |
+| node-forge1.4.0 — high | [GHSA-86w9-cpqp-85rv](https://github.com/advisories/GHSA-86w9-cpqp-85rv): low-exponent RSA PKCS#1 v1.5 signature verification can accept malformed nested DigestAlgorithm data. Installed in Expo CLI and @expo/code-signing-certificates. Local Keychain PEM parsing and configured code-signing certificate/CSR validation/signing paths use forge; Expo development signing can consume fetched/cached certificates. | This project configures no EAS project ID, update signing certificate or private signing key; current Expo Go/production bundle export flow does not rely on forge to authorize an owner. CLI's expo-root development-signing path returns without fetching a project certificate when no EAS project ID exists. Only trusted local config/certificates; no signing enrollment/publication performed. Do not certify future signing/update flows safe until patched or independently reviewed. No patched release is listed. |
+
+All iOS/Android/web **production JavaScript source inventories** include the patched decoder and exclude the npm `braces`, `node-forge`, and `uuid` packages. `npm run verify:bundles` checks this from fresh external source maps. Expo's separate native UUID wrapper is present; it has no caller-supplied output-buffer interface implicated by the npm UUID advisory. This inventory check establishes absence from these JS bundles, not blanket safety of Expo Go, native libraries, CI tooling, or future SDK updates.
+
+Dev commands now bind localhost by default. No runtime credential is passed to Expo CLI, and live mode stays locked without a separately supplied approved owner session. Hostile app links can still reach Router's decoder, so replacing the runtime decoder was necessary even with live auth disabled.
+
+The audit's forced proposals included incompatible Expo44/React Native0.72 downgrades and Jest/Expo-preset major changes; no forced downgrade was used. Compatible upstream updates and the two targeted overrides were tested with a clean `npm ci`, rather than hiding findings with an audit allowlist. Public release still needs the usual dependency review; current work is a gated native milestone, not a production auth/file-transfer release.

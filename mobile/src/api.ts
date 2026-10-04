@@ -5,7 +5,7 @@ import {
   Repository,
   parseRecord,
 } from "./domain";
-// Not wired to UI until an approved mobile owner-session exchange exists.
+// Live mode uses this through an owner-only, read-only runtime boundary.
 // Credentials are supplied by an ephemeral session provider, never build variables.
 export class ApiRepository implements Repository {
   constructor(
@@ -68,6 +68,16 @@ export class ApiRepository implements Repository {
     } finally {
       clearTimeout(timeout);
     }
+  }
+  async identity(): Promise<{ actor: string }> {
+    const data = await this.request("/api/me");
+    if (
+      !data ||
+      typeof data !== "object" ||
+      typeof (data as { actor?: unknown }).actor !== "string"
+    )
+      throw new BoardError("invalid", "Invalid identity response");
+    return { actor: (data as { actor: string }).actor };
   }
   async list() {
     const data = await this.request("/api/records");

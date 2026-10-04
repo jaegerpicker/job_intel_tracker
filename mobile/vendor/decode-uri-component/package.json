@@ -1,0 +1,9 @@
+{
+  "name": "decode-uri-component",
+  "version": "0.5.0",
+  "description": "CommonJS-only adaptation of upstream patched 0.5.0 for Expo Router 57 query-string 7",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "license": "MIT",
+  "private": true
+}

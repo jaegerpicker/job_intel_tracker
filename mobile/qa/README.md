@@ -3,7 +3,7 @@
 Verified 2026-10-04 locally with Node 22.17, Expo SDK 57 and iPhone 16 Pro / iOS 18.5 via Expo Go.
 
 - TypeScript and Expo ESLint pass without warnings.
-- Jest: 19 tests in 5 suites cover API auth/error mapping and exact-key retry, runtime validation, safe links/file preflight, policy counting, idempotency/conflicts, accessible controls, screen loading/offline recovery, draft preservation, duplicate-write prevention and late-read suppression.
+- Jest: 32 tests in 7 suites cover API auth/error mapping and exact-key retry, runtime validation, safe links/file preflight, policy counting, idempotency/conflicts, accessible controls, screen loading/offline recovery, draft preservation, duplicate-write prevention and late-read suppression.
 - Expo Doctor: 21/21 checks pass; Expo dependency compatibility check passes.
 - iOS native bundle compiled and ran. Device Hub interaction verified detail navigation, keyboard note entry/save/attribution, interview preparation, independent ratings/research/material metadata, stage update/added timeline, return to updated shared board, and synthetic prospect creation.
 - Rebased on canonical-origin backend commit `7f2946ac8261e8b2235477d8007f55afdfe2373e`; all 22 backend tests pass (one upstream Starlette/httpx deprecation warning).
@@ -14,4 +14,4 @@ Verified 2026-10-04 locally with Node 22.17, Expo SDK 57 and iPhone 16 Pro / iOS
 
 Limitations: Android device execution, VoiceOver/TalkBack manual navigation, large Dynamic Type, hardware keyboard and real authentication/file-transfer acceptance remain unverified. Initial Simulator URL opening timed out before boot finished; bootstatus + opening the installed Expo Go app resolved it. Native CUA selection by “Simulator” failed because Xcode exposes this device window through Device Hub; its supported controls worked. No hanging generic screenshot/state polling loop was used.
 
-Dependency audit after compatible updates reports 60 advisories (50 high, 10 moderate) across transitive Expo/Metro/Jest tooling packages; these counts include dependency chains, not 60 independent flaws. Do not claim a clean dependency audit. `npm audit fix --force` proposed incompatible Expo downgrades and was not used. Review current advisories and SDK-compatible updates before shipping a production app; this branch is a local demo milestone, with no publication or deployment.
+Post-remediation audit reports 50 high dependency-chain entries from two unpatched tooling advisories, zero moderate/critical. The runtime decoder and UUID paths are fixed, with package, provenance and production-bundle source checks; see [exact exposure and mitigations](DEPENDENCIES.md). Do not claim a clean audit or production authentication readiness. No publication or deployment.
