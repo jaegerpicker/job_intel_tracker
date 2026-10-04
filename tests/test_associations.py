@@ -19,7 +19,8 @@ def test_public_association_claims_only_native_callback(tmp_path):
                     "paths": ["/auth/mobile/callback"],
                 }
             ],
-        }
+        },
+        "webcredentials": {"apps": ["VHWFV2V25Z.com.sandkcampbell.jobinteltracker"]},
     }
     assert client.get("/api/records").status_code == 401
     assert client.post("/auth/mobile/start", json={}).status_code in (404, 422)

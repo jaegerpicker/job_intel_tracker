@@ -17,7 +17,13 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     throw new Error("Use the canonical HTTPS API-origin mobile callback.");
   return {
     ...config,
-    ios: { ...config.ios, associatedDomains: [`applinks:${url.hostname}`] },
+    ios: {
+      ...config.ios,
+      associatedDomains: [
+        `applinks:${url.hostname}`,
+        `webcredentials:${url.hostname}`,
+      ],
+    },
     android: {
       ...config.android,
       intentFilters: [
