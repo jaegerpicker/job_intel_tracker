@@ -132,3 +132,44 @@ background privacy and accessibility checks have not been verified in this
 physical session. Android signing, association publication and physical-device
 acceptance remain separate work. Automated coverage does not replace those
 manual checks. No additional live writes or credentials were created.
+
+## iOS completion pass (local; not yet on the physical phone)
+
+After provider acceptance, the mobile check passed again: 64 Jest tests and four
+scene-plugin tests, with TypeScript and ESLint clean. The 22 backend mobile-auth
+cases also passed using isolated temporary databases and synthetic identities.
+These exercise expiry, logout/revocation, one-use exchange, scoped writes,
+idempotency, conflict handling and interrupted login; they do not revoke the
+owner's production session. Existing recovery tests cover lost responses after
+commit and exact-key retry. The privacy regression now verifies inaccessible
+underlying drafts during both inactive and background states, with their text
+preserved on return.
+
+Synthetic Expo Go QA on iPhone 16 Pro / iOS 18.5 confirmed normal and enlarged
+text rendering. Maximum Dynamic Type exposed a fixed header that consumed the
+viewport. The local correction puts the header, search/actions and footer inside
+the board's virtualized list, and detail headings inside the detail scroll view.
+Keyboard taps remain handled when search is focused. Independent review found
+that interaction requirement; it was corrected. Normal text size was restored.
+Full native scrolling/keyboard interaction and VoiceOver still need manual
+acceptance; screenshots alone do not verify those interactions. This UI change
+has not been installed on the owner's physical phone.
+
+Minimal owner sequence, when ready:
+
+1. Without saving an edit, enter a short disposable draft, open the app switcher,
+   and lock/unlock. Confirm the app preview is covered and the draft returns.
+   Report only pass/fail; do not capture private board data.
+2. Temporarily enable VoiceOver and larger text. Navigate a job, Notes/Prep,
+   stage controls and back. Confirm labels, focus and usable scrolling, then
+   restore preferred accessibility settings.
+3. Allow the normal 15-minute session lifetime to elapse, then foreground or
+   refresh. Confirm owner sign-in replaces board access. Do not alter the device
+   clock or production lifetime.
+4. Only after explicit owner approval for a logout test, use the existing sign-out
+   control, reopen and verify no restored access; the owner signs in again.
+5. Live-write recovery needs separate explicit test approval for a designated
+   disposable record and cleanup. Until then, rely on synthetic recovery coverage
+   and mark physical live writes unverified. No private test records are created.
+
+Android is deferred until the owner is ready. No Android schedule is inferred.

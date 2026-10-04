@@ -178,6 +178,30 @@ export function BoardApp({ selectedId, creating = false }: ScreenProps) {
       ))}
     </ScrollView>
   );
+  const pageHeader = (
+    <View style={s.header}>
+      <Text style={s.eyebrow}>FIELDNOTES / JOB INTEL</Text>
+      <Text style={s.title}>
+        {job
+          ? String(job.body.company)
+          : creating
+            ? "New opportunity"
+            : "A more intentional search."}
+      </Text>
+      <Text style={s.subtitle}>
+        {job
+          ? String(job.body.title)
+          : "Keep your next move grounded in evidence."}
+      </Text>
+      <Text style={s.badge}>
+        {mode === "demo"
+          ? "DEMO · SYNTHETIC DATA · RESETS ON RESTART"
+          : canWrite
+            ? "LIVE · OWNER SESSION · SECURE PENDING WORK"
+            : "LIVE · OWNER READ ONLY · WRITES DISABLED"}
+      </Text>
+    </View>
+  );
   if (lockedReason)
     return (
       <SafeAreaView style={s.root}>
@@ -199,33 +223,12 @@ export function BoardApp({ selectedId, creating = false }: ScreenProps) {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={s.container}
       >
-        <View style={s.header}>
-          <Text style={s.eyebrow}>FIELDNOTES / JOB INTEL</Text>
-          <Text style={s.title}>
-            {job
-              ? String(job.body.company)
-              : creating
-                ? "New opportunity"
-                : "A more intentional search."}
-          </Text>
-          <Text style={s.subtitle}>
-            {job
-              ? String(job.body.title)
-              : "Keep your next move grounded in evidence."}
-          </Text>
-          <Text style={s.badge}>
-            {mode === "demo"
-              ? "DEMO · SYNTHETIC DATA · RESETS ON RESTART"
-              : canWrite
-                ? "LIVE · OWNER SESSION · SECURE PENDING WORK"
-                : "LIVE · OWNER READ ONLY · WRITES DISABLED"}
-          </Text>
-        </View>
         {selected || creating ? (
           <ScrollView
             contentContainerStyle={s.list}
             keyboardShouldPersistTaps="handled"
           >
+            {pageHeader}
             <Button
               label="← Back to board"
               onPress={back}
@@ -524,115 +527,116 @@ export function BoardApp({ selectedId, creating = false }: ScreenProps) {
             )}
           </ScrollView>
         ) : (
-          <>
-            <View style={{ paddingHorizontal: 24 }}>
-              <View
-                style={[s.card, s.row, { justifyContent: "space-between" }]}
-              >
+          <FlatList
+            keyboardShouldPersistTaps="handled"
+            data={error ? [] : filterJobs(records, query, filter)}
+            ListHeaderComponent={
+              <>
+                {pageHeader}
                 <View>
-                  <Text style={s.cardTitle}>
-                    {records.filter(active).length} /{" "}
-                    {String(policy?.body.active_cap ?? "—")}
-                  </Text>
-                  <Text style={s.label}>active opportunities</Text>
-                </View>
-                <View>
-                  <Text style={s.cardTitle}>
-                    ${Number(policy?.body.base_floor ?? 0).toLocaleString()}
-                  </Text>
-                  <Text style={s.label}>base salary floor</Text>
-                </View>
-              </View>
-              <Field
-                label="Search company, role, or lane"
-                value={query}
-                onChange={setQuery}
-              />
-              {chips(["All", ...stages], filter, setFilter)}
-              <View
-                style={[
-                  s.row,
-                  { justifyContent: "space-between", marginBottom: 16 },
-                ]}
-              >
-                <Text style={s.section}>Your opportunities</Text>
-                <Button
-                  label="+ New"
-                  disabled={!canWrite}
-                  onPress={() => {
-                    router.push("/new");
-                    setCompany("");
-                    setTitle("");
-                  }}
-                />
-              </View>
-            </View>
-            {error ? (
-              <View style={s.list}>
-                <Notice text={error} />
-                <Button label="Retry board" onPress={() => void load()} />
-              </View>
-            ) : loading && !records.length ? (
-              <ActivityIndicator
-                accessibilityLabel="Loading opportunities"
-                size="large"
-                color={colors.green}
-              />
-            ) : (
-              <FlatList
-                data={filterJobs(records, query, filter)}
-                keyExtractor={(r) => r.id}
-                contentContainerStyle={s.list}
-                refreshControl={
-                  <RefreshControl
-                    refreshing={loading}
-                    onRefresh={() => void load()}
-                    tintColor={colors.green}
+                  <View
+                    style={[s.card, s.row, { justifyContent: "space-between" }]}
+                  >
+                    <View>
+                      <Text style={s.cardTitle}>
+                        {records.filter(active).length} /{" "}
+                        {String(policy?.body.active_cap ?? "—")}
+                      </Text>
+                      <Text style={s.label}>active opportunities</Text>
+                    </View>
+                    <View>
+                      <Text style={s.cardTitle}>
+                        ${Number(policy?.body.base_floor ?? 0).toLocaleString()}
+                      </Text>
+                      <Text style={s.label}>base salary floor</Text>
+                    </View>
+                  </View>
+                  <Field
+                    label="Search company, role, or lane"
+                    value={query}
+                    onChange={setQuery}
                   />
-                }
-                ListEmptyComponent={
-                  <Notice text="No opportunities match. Try another search or create a prospect." />
-                }
-                renderItem={({ item }) => (
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel={`Open ${item.body.company}, ${item.body.title}, ${item.body.stage}`}
-                    onPress={() => open(item.id)}
-                    style={({ pressed }) => [
-                      s.card,
-                      pressed && { opacity: 0.7 },
+                  {chips(["All", ...stages], filter, setFilter)}
+                  <View
+                    style={[
+                      s.row,
+                      { justifyContent: "space-between", marginBottom: 16 },
                     ]}
                   >
-                    <View style={[s.row, { justifyContent: "space-between" }]}>
-                      <Text style={s.badge}>
-                        {item.body.stage?.toUpperCase()}
-                      </Text>
-                      <Text style={s.label}>↗</Text>
-                    </View>
-                    <Text style={s.cardTitle}>{item.body.company}</Text>
-                    <Text style={s.text}>{item.body.title}</Text>
-                    <Text style={s.label}>
-                      {String(item.body.location ?? "Location unconfirmed")} ·{" "}
-                      {String(item.body.lane ?? "Lane unassigned")}
-                    </Text>
-                  </Pressable>
-                )}
+                    <Text style={s.section}>Your opportunities</Text>
+                    <Button
+                      label="+ New"
+                      disabled={!canWrite}
+                      onPress={() => {
+                        router.push("/new");
+                        setCompany("");
+                        setTitle("");
+                      }}
+                    />
+                  </View>
+                </View>
+              </>
+            }
+            keyExtractor={(r) => r.id}
+            contentContainerStyle={s.list}
+            refreshControl={
+              <RefreshControl
+                refreshing={loading}
+                onRefresh={() => void load()}
+                tintColor={colors.green}
               />
+            }
+            ListEmptyComponent={
+              error ? (
+                <View>
+                  <Notice text={error} />
+                  <Button label="Retry board" onPress={() => void load()} />
+                </View>
+              ) : loading ? (
+                <ActivityIndicator
+                  accessibilityLabel="Loading opportunities"
+                  size="large"
+                  color={colors.green}
+                />
+              ) : (
+                <Notice text="No opportunities match. Try another search or create a prospect." />
+              )
+            }
+            ListFooterComponent={
+              <View
+                style={{
+                  padding: 16,
+                  borderTopWidth: 1,
+                  borderColor: colors.line,
+                }}
+              >
+                <Text style={[s.label, { textAlign: "center" }]}>
+                  {mode === "demo"
+                    ? "Synthetic demo · Your live board requires owner sign-in"
+                    : "Owner board · Private file transfers remain unavailable"}
+                </Text>
+              </View>
+            }
+            renderItem={({ item }) => (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`Open ${item.body.company}, ${item.body.title}, ${item.body.stage}`}
+                onPress={() => open(item.id)}
+                style={({ pressed }) => [s.card, pressed && { opacity: 0.7 }]}
+              >
+                <View style={[s.row, { justifyContent: "space-between" }]}>
+                  <Text style={s.badge}>{item.body.stage?.toUpperCase()}</Text>
+                  <Text style={s.label}>↗</Text>
+                </View>
+                <Text style={s.cardTitle}>{item.body.company}</Text>
+                <Text style={s.text}>{item.body.title}</Text>
+                <Text style={s.label}>
+                  {String(item.body.location ?? "Location unconfirmed")} ·{" "}
+                  {String(item.body.lane ?? "Lane unassigned")}
+                </Text>
+              </Pressable>
             )}
-            <View
-              style={{
-                padding: 16,
-                borderTopWidth: 1,
-                borderColor: colors.line,
-              }}
-            >
-              <Text style={[s.label, { textAlign: "center" }]}>
-                {mode === "demo"
-                  ? "Private by design · Live sign-in awaits secure mobile integration"
-                  : "Owner board · Private file transfers remain unavailable"}
-              </Text>
-            </View>
-          </>
+          />
         )}
       </KeyboardAvoidingView>
     </SafeAreaView>
