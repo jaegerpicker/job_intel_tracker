@@ -1,0 +1,11 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "VHWFV2V25Z.com.sandkcampbell.jobinteltracker",
+        "paths": ["/auth/mobile/callback"]
+      }
+    ]
+  }
+}
