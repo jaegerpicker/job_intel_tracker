@@ -1,0 +1,27 @@
+# Mobile authentication boundary — design, not live integration
+
+The existing Apple web flow is browser-bound: server-generated state/nonce, a five-minute Secure/HttpOnly/SameSite=None flow cookie, backend code exchange and signature verification, exact configured owner Apple subject, then an eight-hour hashed opaque session in a Secure/HttpOnly/SameSite=Lax cookie. Owner mutations require CSRF and matching Origin. The canonical HTTPS origin is configured with `PUBLIC_BASE_URL`; aliases reject nonhealth traffic. See SECURITY.md and APPLE_SETUP.md.
+
+A native app cannot assume that a system browser cookie is its own session. Copying a browser session, storing the server Apple signing key in the app, treating an Apple ID token as an API bearer token, or issuing an agent credential to simulate owner login would violate this model. This milestone does none of those things. `ApiRepository` is intentionally not connected to the UI; its authorization function is an injectable test boundary, not a credential-issuance flow.
+
+## Proposed owner-only native flow
+
+Implementation requires an approved backend change and provider configuration. Proposed endpoint names are illustrative, not existing APIs.
+
+1. Native app creates a cryptographically random PKCE verifier and S256 challenge. Start a server-owned OAuth transaction in the system browser, using the canonical custom HTTPS origin, binding state, nonce, provider, exact allowlisted callback, PKCE challenge, and short expiry. Do not expose session/identity tokens in URLs or logs.
+2. Keep Apple exchange/JWKS validation and preconfigured stable owner-sub authorization on the server. For Google, validate its authorization-code exchange, issuer, exact registered audience, signature/JWKS, nonce, expiry and the separately preconfigured owner subject. Provider identities are explicitly linked by the owner; email matching and first-login bootstrap cannot grant ownership. Apple web auth can also serve Android; Google is an optional planned provider.
+3. After successful owner verification, redirect only a one-use, very short-lived opaque handoff code to an allowlisted callback. Prefer claimed HTTPS Universal/App Links for real builds; approve associated domains and platform association files before use. The code is bound to PKCE and cannot itself read data. Redeem it with the verifier through TLS; invalidate transaction/code atomically. Never send bearer tokens in the redirect URL.
+4. Return a random, short-lived mobile owner session (hashed at rest on the server) with explicit audience, expiry and revocation semantics. Keep access material in memory. If an explicitly approved renewal credential is necessary later, store it in platform Keychain/Keystore through SecureStore, rotate it server-side, and invalidate it on logout. No plaintext AsyncStorage, bundled environment token or analytics capture. Start without persistent renewal to minimize authority and storage.
+5. Authorize mobile owner sessions explicitly on every REST resource, independently of scoped agent tokens and browser cookies. Preserve owner audit attribution, cap/decision controls, server version transactions, and agent-contribution isolation. Never remove web Origin/CSRF checks to support native requests. A separate native bearer-session branch must be tested without accepting arbitrary browser cookie mutations.
+
+## Client work required before live enablement
+
+- An auth-provider interface for Apple/Google and a session controller for startup, expiry, renewal (if approved), explicit sign-out and revocation. API calls may obtain ephemeral headers only from that controller; unauthorized/forbidden errors stop work, rather than trying another identity.
+- An encrypted, device-local pending-operation journal that stores exact body, version, resource ID and idempotency key **before** transmission, survives app termination, and is erased on logout according to owner retention policy. This demo holds only synthetic pending writes in memory. It is not a production offline queue.
+- Fetch current record/policy before an intended write; use the current version while preserving unknown and protected fields. Show record/policy conflicts with latest revision comparison and an explicit reconciled action/fresh key. Never silently rebase an owner's draft or override the cap.
+- Private file selection with the server's PDF/TXT/DOCX 5 MiB contract; client preflight is only a convenience, server signature/authorization/path checks remain mandatory. Use private cache storage, authenticated inert downloads, explicit share/open intent and lifecycle cleanup. No public external-storage copies or inline unknown-document rendering.
+- Background privacy and local-record retention controls; real data must not appear in screenshots, logs, previews or repository fixtures. No production tracing of credentials or OAuth callback bodies.
+
+## Acceptance criteria for a future approved integration
+
+Test real iOS and Android return paths, wrong owner/provider subject, wrong audience/issuer/nonce, expired/replayed handoff, intercepted code without verifier, redirect substitution, cancelled browser flow, logout and server revocation, expired session, web CSRF/Origin regressions, protected attachment denial, and process termination after request delivery before response receipt. Retrying a journaled operation must produce one revision; stale writes must retain the draft and require review. No credentials, OAuth grants, security settings or live migrations were created by this mobile branch.
