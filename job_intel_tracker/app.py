@@ -139,7 +139,9 @@ def create_app(data_dir=None, demo=False):
         r.headers.update(
             {
                 "X-Content-Type-Options": "nosniff",
-                "Referrer-Policy": "no-referrer",
+                # Native form POSTs redact Origin under no-referrer. Preserve it
+                # for enrollment's strict check, while suppressing cross-site referrers.
+                "Referrer-Policy": "same-origin" if req.url.path == "/auth/enroll" else "no-referrer",
                 "Cache-Control": "no-store",
                 "Content-Security-Policy": "default-src 'self'; script-src 'self'; style-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self' https://appleid.apple.com",
             }

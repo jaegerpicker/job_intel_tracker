@@ -41,7 +41,10 @@ def setup(tmp_path, monkeypatch):
 def test_verified_candidate_requires_local_approval_and_restart(tmp_path, monkeypatch):
     app, client = setup(tmp_path, monkeypatch)
     code = json.loads((tmp_path / "code.json").read_text())["code"]
+    assert client.get("/auth/enroll").headers["referrer-policy"] == "same-origin"
+    assert client.get("/").headers["referrer-policy"] == "no-referrer"
     assert client.get("/api/records").status_code == 401
+    assert client.post("/auth/enroll/start", headers={"Origin": "null"}, data={"code": code}).status_code == 401
     assert client.post("/auth/enroll/start", data={"code": code}).status_code == 401
     start = client.post(
         "/auth/enroll/start", headers={"Origin": "https://tracker.example"}, data={"code": code}, follow_redirects=False
