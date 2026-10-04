@@ -24,7 +24,9 @@ jobs:
       - name: Verify root-owned disk, runtime privileges, PORT and restart
         run: |
           docker volume create tracker-ci
-          docker run --cap-drop ALL --cap-add CHOWN --cap-add FOWNER --cap-add SETGID --cap-add SETUID --security-opt no-new-privileges:true -d --name tracker-ci -p 18080:10000 -e PORT=10000 -e DATA_DIR=/var/data/tracker -v tracker-ci:/var/data job-intel-tracker:ci
+          docker volume create tracker-ci-secrets
+          docker run --rm -v tracker-ci-secrets:/etc/secrets --entrypoint python job-intel-tracker:ci -c "from pathlib import Path; p=Path('/etc/secrets/fixture.p8'); p.write_bytes(b'inert-ci-key-fixture'); p.chmod(0o600)"
+          docker run --cap-drop ALL --cap-add CHOWN --cap-add FOWNER --cap-add SETGID --cap-add SETUID --security-opt no-new-privileges:true -d --name tracker-ci -p 18080:10000 -e PORT=10000 -e DATA_DIR=/var/data/tracker -e APPLE_PRIVATE_KEY_FILE=/etc/secrets/fixture.p8 -v tracker-ci:/var/data -v tracker-ci-secrets:/etc/secrets:ro job-intel-tracker:ci
           for attempt in $(seq 1 30); do
             if curl -fsS http://localhost:18080/healthz; then break; fi
             sleep 1
@@ -33,11 +35,15 @@ jobs:
           test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:18080/api/records)" = 401
           test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:18080/auth/apple)" = 503
           docker exec tracker-ci python -c "from pathlib import Path; assert 'Uid:\t10001\t10001\t10001\t10001' in Path('/proc/1/status').read_text(); p=Path('/var/data/tracker'); assert p.stat().st_uid==10001 and p.stat().st_mode&511==448"
+          docker exec -u 10001:10001 tracker-ci python -c "from pathlib import Path; files=list(Path('/tmp').glob('job-intel-apple-*/key.p8')); assert files; assert all(p.read_bytes()==b'inert-ci-key-fixture' and p.stat().st_uid==10001 and p.stat().st_mode&511==384 and p.parent.stat().st_mode&511==448 for p in files); assert not list(Path('/var/data/tracker').glob('*.p8'))"
+          docker exec tracker-ci python -c "from pathlib import Path; p=Path('/etc/secrets/fixture.p8'); assert p.stat().st_uid==0 and p.stat().st_mode&511==384"
           docker restart tracker-ci
           for attempt in $(seq 1 30); do
             if curl -fsS http://localhost:18080/healthz; then break; fi
             sleep 1
           done
           curl -fsS http://localhost:18080/healthz
+          docker exec -u 10001:10001 tracker-ci python -c "from pathlib import Path; files=list(Path('/tmp').glob('job-intel-apple-*/key.p8')); assert len(files)>=2; assert all(p.read_bytes()==b'inert-ci-key-fixture' for p in files)"
           docker rm -f tracker-ci
           docker volume rm tracker-ci
+          docker volume rm tracker-ci-secrets
