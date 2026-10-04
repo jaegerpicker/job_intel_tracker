@@ -2,6 +2,16 @@
 
 Local agents use separate revocable tracker credentials, not the owner's Apple session. This setup requires explicit owner approval at issuance and secure import on the intended client. It does not configure hosted OAuth or register agents publicly. No paid API or model-provider key is required.
 
+## Manual secure-entry connectors
+
+For a connector that accepts a single HTTPS bearer API key, the owner can choose **Show once for manual entry into a trusted connector** in Agent access. Encrypted download remains the default for local Keychain/MCP clients. The owner must explicitly confirm both the exact grant and showing the new token for their own transfer. This creates a new credential; existing tokens cannot be recovered.
+
+Verify the connector's secure-entry site and exact API hostname before issuance. The owner transfers the token themselves into its secure API-key field; assistants must not read the token, operate its reveal/copy controls, or receive it in chat. The panel starts masked. Reveal and Select are manual actions; the application never writes the clipboard, creates a plaintext file, sends the token to a third party or stores it in browser storage. The token necessarily exists in the issuance response and browser memory while the panel is open; use a trusted private browser without screen sharing, recording or untrusted extensions.
+
+The token is cleared after five minutes, dismissal, changing the handoff method, navigating to another board view, logout, pagehide or a restored page. Clearing the panel does **not** revoke the server credential or clear an owner-managed clipboard. If transfer is cancelled or lost, use the agent list to revoke it and create a new name. Revocation clears a displayed matching token even if the request then fails; verify the list confirms revocation before assuming it succeeded. A lost issuance response may still have created a credential; never automatically retry.
+
+The exact approved grant is separate from the handoff method. Upload-only attachment access uses `attachments:write`; it does not grant `attachments:read`, binary downloads or attachment listing. The upload response includes the created attachment metadata. Connectors must stop on 403 for ungranted listing/downloads instead of requesting broader authority implicitly. Each agent needs its own credential, exact host egress restriction and `/api/me` actor verification; do not share another agent's key or the owner's Apple session. The connector capability and secure-entry storage must be verified independently; this UI does not establish a connection or configure a hosted plugin.
+
 ## Approve an exact pilot
 
 Suggested seven-day pilot for Eva and Hanna: separate credential names, each with `read`, `jobs:write` and `contribute`. All-job access is needed if they may discover new jobs, because a restricted credential can write only the assigned IDs. All-job access also includes future jobs. `attachments:read` and `attachments:write` are separate private-material permissions; leave them off until specifically approved. Owner administration, policy edits, deletion, export and owner overrides remain unavailable.
