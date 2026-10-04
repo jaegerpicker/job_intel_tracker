@@ -104,11 +104,13 @@ function setup(){
    Object.defineProperty(context,secretSink,{get(){throw Error('Secret persistence or transport attempted');}});
  }
  vm.createContext(context);vm.runInContext(source,context);
+ context.document.querySelector('#agent-create-status');
  return {api:context.TrackerSecureHandoff,nodes,events,timeout:()=>timeout()};
 }
 const name='#agent-secure-name',token='#agent-secure-token',panel='#agent-secure-handoff';
-for(const action of ['dismiss','pagehide','pageshow','timeout','revoke']) {
+for(const action of ['dismiss','pagehide','pageshow','timeout','revoke','navigation']) {
  const f=setup();f.api.show('inert-fixture-token','Synthetic');
+ f.nodes['#agent-create-status'].textContent='New token is available below for five minutes.';
  assert.equal(f.nodes[token].value,'inert-fixture-token');assert.equal(f.nodes[token].type,'password');
  assert.equal(f.nodes[panel].hidden,false);
  f.nodes['#agent-secure-reveal'].onchange({currentTarget:{checked:true}});assert.equal(f.nodes[token].type,'text');
@@ -116,11 +118,18 @@ for(const action of ['dismiss','pagehide','pageshow','timeout','revoke']) {
  if(action==='dismiss')f.nodes['#agent-secure-dismiss'].onclick();
  else if(action==='timeout')f.timeout();
  else if(action==='revoke')f.api.clearFor('Synthetic');
+ else if(action==='navigation')f.api.clear();
  else f.events[action]();
  assert.equal(f.nodes[token].value,'');assert.equal(f.nodes[token].type,'password');
  assert.equal(f.nodes[name].textContent,'');assert.equal(f.nodes[panel].hidden,true);
  assert.equal(JSON.stringify(f.nodes).includes('inert-fixture-token'),false);
+ assert.doesNotMatch(f.nodes['#agent-create-status'].textContent,/available below/);
+ assert.match(f.nodes['#agent-create-status'].textContent,/cannot be recovered.*revoke/);
 }
+const restored=setup();restored.nodes['#agent-create-status'].textContent='New token is available below for five minutes.';
+restored.events.pageshow();assert.doesNotMatch(restored.nodes['#agent-create-status'].textContent,/available below/);
+restored.nodes['#agent-create-status'].textContent='Encrypted download created.';
+restored.api.clear();assert.equal(restored.nodes['#agent-create-status'].textContent,'Encrypted download created.');
 const f=setup();f.api.show('inert-first','First');f.api.show('inert-second','Second');
 assert.equal(JSON.stringify(f.nodes).includes('inert-first'),false);
 f.api.clearFor('First');assert.equal(f.nodes[token].value,'inert-second');

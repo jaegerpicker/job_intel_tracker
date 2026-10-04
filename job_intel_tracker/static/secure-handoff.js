@@ -4,6 +4,10 @@ globalThis.TrackerSecureHandoff = (() => {
     const find = id => document.querySelector(id);
     let timer;
     function clear() {
+        const status = find('#agent-create-status');
+        if (find('#agent-secure-token').value || status.textContent.startsWith('New token is available below')) {
+            status.textContent = 'Token cleared and cannot be recovered here. If it was not stored successfully, revoke the credential and create a new name.';
+        }
         clearTimeout(timer);
         timer = undefined;
         find('#agent-secure-token').value = '';
