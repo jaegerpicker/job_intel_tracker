@@ -331,6 +331,20 @@ dialog::backdrop {
 #policy {
   max-width:650px
 }
+#agent-create {
+  max-width:650px;
+  margin-top:24px
+}
+#agent-create fieldset {
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:16px 22px
+}
+#agent-create legend {
+  color:var(--accent);
+  font-weight:650;
+  padding:0 8px
+}
 #activity .evidence {
   display:flex;
   justify-content:space-between;

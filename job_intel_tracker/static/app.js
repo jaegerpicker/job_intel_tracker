@@ -7,7 +7,8 @@ let csrf = '',
     editing = null,
     stages = [],
     demo = false,
-    detailGeneration = 0;
+    detailGeneration = 0,
+    credentialIssuing = false;
 const defaults = {
     active_cap: 10,
     base_floor: 220000,
@@ -388,22 +389,83 @@ $$('nav button').forEach(btn => btn.onclick = () => guarded(async () => {
         $('#activity').replaceChildren(...a.map(x => el('div', x.actor + ' · ' + x.action + ' · ' + x.resource + ' · ' + new Date(x.timestamp * 1000).toLocaleString(), 'evidence')));
     }
     if (view === 'agents') {
-        const a = await api('/api/agents');
-        $('#agent-list').replaceChildren(...a.map(x => {
-            const row = el('div', undefined, 'evidence');
-            row.append(el('p', x.name + ' · ' + x.scopes + ' · ' + (x.revoked ? 'Revoked' : 'Active')));
-            const b = el('button', 'Revoke', 'quiet');
-            b.onclick = () => guarded(async () => {
-                await api('/api/agents/' + x.name, {
-                    method: 'DELETE'
-                });
-                btn.click();
-            });
-            row.append(b);
-            return row;
+        $('#agent-create-fields').disabled = demo || credentialIssuing;
+        $('#agent-jobs').replaceChildren(...records.filter(r => r.kind === 'job').map(r => {
+            const option = el('option', r.body.company + ' · ' + r.body.title);
+            option.value = r.id;
+            return option;
         }));
+        renderAgentList(await api('/api/agents'));
     }
 }));
+function renderAgentList(entries) {
+    $('#agent-list').replaceChildren(...entries.map(x => {
+        const row = el('div', undefined, 'evidence');
+        const state = x.revoked ? 'Revoked' : x.expires * 1000 <= Date.now() ? 'Expired' : 'Active';
+        const jobs = JSON.parse(x.jobs);
+        row.append(el('p', x.name + ' · ' + JSON.parse(x.scopes).join(', ') + ' · ' + state));
+        row.append(el('p', (jobs.length ? jobs.length + ' assigned jobs' : 'All jobs, including future jobs') +
+            ' · Expires ' + new Date(x.expires * 1000).toLocaleString(), 'muted'));
+        const button = el('button', 'Revoke', 'quiet');
+        button.disabled = !!x.revoked;
+        button.onclick = () => guarded(async () => {
+            await api('/api/agents/' + x.name, {method: 'DELETE'});
+            renderAgentList(await api('/api/agents'));
+        });
+        row.append(button);
+        return row;
+    }));
+}
+$('#agent-create').onsubmit = async e => {
+    e.preventDefault();
+    const f = e.currentTarget, fields = $('#agent-create-fields'), status = $('#agent-create-status');
+    if (fields.disabled || demo || credentialIssuing) return;
+    const p = {
+        name: f.elements.name.value,
+        days: Number(f.elements.days.value),
+        scopes: ['read', ...[...f.querySelectorAll('[name="scope"]:checked')].map(x => x.value)],
+        jobs: f.elements.all_jobs.checked ? [] : [...f.elements.jobs.selectedOptions].map(x => x.value)
+    };
+    if (!f.elements.approved.checked || !f.checkValidity()) return;
+    if (!f.elements.all_jobs.checked && !p.jobs.length) {
+        status.textContent = 'Select assigned jobs or explicitly allow all jobs.';
+        return;
+    }
+    if (f.elements.passphrase.value !== f.elements.confirmation.value) {
+        status.textContent = 'The handoff passphrases do not match.';
+        return;
+    }
+    fields.disabled = true;
+    credentialIssuing = true;
+    let attempted = false;
+    try {
+        status.textContent = 'Preparing encrypted handoff…';
+        const prepared = await TrackerCredentialCapsule.prepare(f.elements.passphrase.value);
+        attempted = true;
+        const issued = await api('/api/agents', {method: 'POST', body: JSON.stringify(p)});
+        const capsule = await TrackerCredentialCapsule.seal(prepared, {...p, token: issued.token, base_url: location.origin});
+        issued.token = '';
+        const url = URL.createObjectURL(new Blob([JSON.stringify(capsule)], {type: 'application/json'}));
+        const link = el('a');
+        link.href = url;
+        link.download = 'job-intel-agent-' + p.name + '.encrypted.json';
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 30000);
+        f.reset();
+        status.textContent = 'Encrypted download created. Import it privately before testing the client. If the download was blocked, revoke this credential and create a new name.';
+        renderAgentList(await api('/api/agents'));
+    } catch {
+        status.textContent = attempted ?
+            'Handoff interrupted. Check the agent list and revoke any newly created credential before retrying with a new name. No automatic retry was made.' :
+            'Handoff could not be prepared. Check the passphrase and browser support; no credential was requested.';
+    } finally {
+        f.elements.passphrase.value = '';
+        f.elements.confirmation.value = '';
+        f.elements.approved.checked = false;
+        credentialIssuing = false;
+        fields.disabled = demo;
+    }
+};
 $('#policy').onsubmit = e => {
     e.preventDefault();
     guarded(async () => {

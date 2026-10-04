@@ -10,6 +10,7 @@ data/
 *.p8
 *.key
 private-*
+*.encrypted.json
 build/
 dist/
 *.egg-info/
