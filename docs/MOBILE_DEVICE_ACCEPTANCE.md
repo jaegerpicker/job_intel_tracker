@@ -67,3 +67,18 @@ web Apple login still works. Revert native activation if association/login fails
 
 Android follows after iOS acceptance, with its own verified signing fingerprint
 and assetlinks publication approval. Agent/MCP credentials remain a separate task.
+
+## iOS 27 startup correction
+
+The first signed installation exited immediately. Its app-specific crash report
+identified UIKit's no-scene-lifecycle assertion (`EXC_BREAKPOINT`/`SIGTRAP`), before
+JavaScript ran. Expo SDK 57 provides `ExpoAppSceneDelegate`, but its generated
+template did not adopt it. The local config plugin selects the SDK scene delegate,
+conforms the app delegate to its factory-provider protocol, and leaves React Native
+window/start ownership with the scene. It fails closed if the reviewed template
+changes. Regression tests cover preservation of factory/launch subscribers,
+idempotence, unknown-template rejection, and the single-window manifest.
+
+App installation and a successful launch command alone do not establish stable
+startup. Acceptance requires a surviving process plus owner-visible UI. Native
+auth activation remains held until stable startup is verified.
