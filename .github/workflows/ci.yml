@@ -25,7 +25,7 @@ jobs:
         run: |
           docker volume create tracker-ci
           docker volume create tracker-ci-secrets
-          docker run --rm -v tracker-ci-secrets:/etc/secrets --entrypoint python job-intel-tracker:ci -c "from pathlib import Path; d=Path('/etc/secrets/projection'); d.mkdir(); p=d/'fixture.p8'; p.write_bytes(b'inert-ci-key-fixture'); p.chmod(0o600); Path('/etc/secrets/current').symlink_to(d, target_is_directory=True); Path('/etc/secrets/fixture.p8').symlink_to('/etc/secrets/current/fixture.p8')"
+          docker run --rm -v tracker-ci-secrets:/etc/secrets --entrypoint python job-intel-tracker:ci -c "from pathlib import Path; d=Path('/etc/secrets/projection'); d.mkdir(); p=d/'fixture.p8'; p.write_bytes(b'inert-ci-key-fixture'); p.chmod(0o600); Path('/etc/secrets/current').symlink_to(d, target_is_directory=True); Path('/etc/secrets/fixture.p8').symlink_to('/etc/secrets/current/fixture.p8'); Path('/etc/secrets').chmod(0o777)"
           docker run --cap-drop ALL --cap-add CHOWN --cap-add FOWNER --cap-add SETGID --cap-add SETUID --security-opt no-new-privileges:true -d --name tracker-ci -p 18080:10000 -e PORT=10000 -e DATA_DIR=/var/data/tracker -e APPLE_PRIVATE_KEY_FILE=/etc/secrets/fixture.p8 -v tracker-ci:/var/data -v tracker-ci-secrets:/etc/secrets:ro job-intel-tracker:ci
           for attempt in $(seq 1 30); do
             if curl -fsS http://localhost:18080/healthz; then break; fi

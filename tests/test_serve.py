@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -70,6 +71,28 @@ def test_projected_mount_symlinks_are_confined_to_trusted_directories(tmp_path, 
     assert Path(os.environ["APPLE_PRIVATE_KEY_FILE"]).read_bytes() == b"inert-ci-key-fixture"
     monkeypatch.setenv("APPLE_PRIVATE_KEY_FILE", str(source))
     projected.chmod(0o777)
+    with pytest.raises(ValueError):
+        serve.prepare_apple_key(os.getuid(), os.getgid())
+
+
+def test_root_controlled_readonly_mount_accepts_broad_directory_mode(tmp_path, monkeypatch):
+    source = tmp_path / "fixture.p8"
+    source.write_bytes(b"inert-ci-key-fixture")
+    source.chmod(0o600)
+    tmp_path.chmod(0o777)
+    monkeypatch.setattr(serve, "SECRETS_ROOT", tmp_path)
+    monkeypatch.setattr(serve, "RUNTIME_TEMP_ROOT", tmp_path)
+    monkeypatch.setattr(serve, "TRUSTED_MOUNT_UID", os.getuid())
+    monkeypatch.setattr(serve.os, "statvfs", lambda path: SimpleNamespace(f_flag=os.ST_RDONLY))
+    monkeypatch.setenv("APPLE_PRIVATE_KEY_FILE", str(source))
+    serve.prepare_apple_key(os.getuid(), os.getgid())
+    assert Path(os.environ["APPLE_PRIVATE_KEY_FILE"]).read_bytes() == b"inert-ci-key-fixture"
+    monkeypatch.setenv("APPLE_PRIVATE_KEY_FILE", str(source))
+    monkeypatch.setattr(serve.os, "statvfs", lambda path: SimpleNamespace(f_flag=0))
+    with pytest.raises(ValueError):
+        serve.prepare_apple_key(os.getuid(), os.getgid())
+    monkeypatch.setattr(serve, "TRUSTED_MOUNT_UID", os.getuid() + 1)
+    monkeypatch.setattr(serve.os, "statvfs", lambda path: SimpleNamespace(f_flag=os.ST_RDONLY))
     with pytest.raises(ValueError):
         serve.prepare_apple_key(os.getuid(), os.getgid())
 

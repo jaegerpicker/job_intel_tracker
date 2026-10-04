@@ -24,7 +24,8 @@ def prepare_apple_key(uid=10001, gid=10001):
     parent = resolved.parent
     while True:
         metadata = parent.stat()
-        if not stat.S_ISDIR(metadata.st_mode) or metadata.st_uid != TRUSTED_MOUNT_UID or metadata.st_mode & 0o022:
+        writable = metadata.st_mode & 0o022 and not os.statvfs(parent).f_flag & os.ST_RDONLY
+        if not stat.S_ISDIR(metadata.st_mode) or metadata.st_uid != TRUSTED_MOUNT_UID or writable:
             raise ValueError("Untrusted Apple secret mount directory")
         if parent == mount:
             break
