@@ -42,7 +42,9 @@ async function api(path, opts = {}) {
         const e = await r.json().catch(() => ({
             detail: r.statusText
         }));
-        throw Error(typeof e.detail === 'string' ? e.detail : JSON.stringify(e.detail));
+        const error = Error(typeof e.detail === 'string' ? e.detail : JSON.stringify(e.detail));
+        error.status = r.status;
+        throw error;
     }
     return r.json();
 }
@@ -426,6 +428,10 @@ $('#agent-create').onsubmit = async e => {
         scopes: ['read', ...[...f.querySelectorAll('[name="scope"]:checked')].map(x => x.value)],
         jobs: f.elements.all_jobs.checked ? [] : [...f.elements.jobs.selectedOptions].map(x => x.value)
     };
+    if (!/^[A-Za-z][A-Za-z0-9_-]{0,39}$/.test(p.name) || p.name === 'owner') {
+        status.textContent = 'Use a unique credential name: 1–40 letters, numbers, underscores or hyphens, starting with a letter. The name owner is reserved.';
+        return;
+    }
     if (!f.elements.approved.checked || !f.checkValidity()) return;
     if (!f.elements.all_jobs.checked && !p.jobs.length) {
         status.textContent = 'Select assigned jobs or explicitly allow all jobs.';
@@ -438,11 +444,13 @@ $('#agent-create').onsubmit = async e => {
     fields.disabled = true;
     credentialIssuing = true;
     let attempted = false;
+    let created = false;
     try {
         status.textContent = 'Preparing encrypted handoff…';
         const prepared = await TrackerCredentialCapsule.prepare(f.elements.passphrase.value);
         attempted = true;
         const issued = await api('/api/agents', {method: 'POST', body: JSON.stringify(p)});
+        created = true;
         const capsule = await TrackerCredentialCapsule.seal(prepared, {...p, token: issued.token, base_url: location.origin});
         issued.token = '';
         const url = URL.createObjectURL(new Blob([JSON.stringify(capsule)], {type: 'application/json'}));
@@ -454,8 +462,14 @@ $('#agent-create').onsubmit = async e => {
         f.reset();
         status.textContent = 'Encrypted download created. Import it privately before testing the client. If the download was blocked, revoke this credential and create a new name.';
         renderAgentList(await api('/api/agents'));
-    } catch {
-        status.textContent = attempted ?
+    } catch (error) {
+        if (attempted && !created && error.status === 409) {
+            status.textContent = 'That credential name already exists, including if revoked. Choose a new name. No new credential was created.';
+        } else if (attempted && !created && error.status === 422) {
+            status.textContent = 'The credential settings were rejected. Check the name, lifetime and permissions. No credential was created.';
+        } else if (attempted && !created && (error.status === 401 || error.status === 403)) {
+            status.textContent = 'Credential creation was not authorized. Sign in again and confirm owner access. No credential was created.';
+        } else status.textContent = attempted ?
             'Handoff interrupted. Check the agent list and revoke any newly created credential before retrying with a new name. No automatic retry was made.' :
             'Handoff could not be prepared. Check the passphrase and browser support; no credential was requested.';
     } finally {
