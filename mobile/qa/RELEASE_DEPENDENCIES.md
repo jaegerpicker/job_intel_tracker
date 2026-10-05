@@ -18,13 +18,14 @@ Only the test transport maps a fixed HTTPS placeholder origin to loopback. It us
 
 - Shared main baseline: `757597a4af8c18f216bd6129b09fbb156d08e1fd` (PR #6).
 - PR #7 head: `670780f5f918eccc55fc568b7f588e4a103b22fe`, preceded by acceptance documentation `a6c243f`. Verified remotely OPEN / draft / CLEAN. Neither merged nor installed.
-- Backend aging: `ccf4006340cca92e97ccd6db7aa8722ea84b795c`, directly based on the shared baseline; it touches backend/web/docs/dependency files, not mobile files.
+- Backend aging final candidate: `f74c880a7241bbfd5300c7d702a545995d77e7e2`, building on `ccf4006340cca92e97ccd6db7aa8722ea84b795c` from the shared baseline. The final delta changes only `static/app.js`, `static/planning-ui.js` and `tests/test_planning_ui.py`: web capacity copy now says "Planning warning" only when the server supplies the open-applications warning. API schemas, projection/calendar rules, authentication and all mobile files are unchanged. The actual-server integration evidence above remains against `ccf4006`; inspection confirms it applies to the unchanged final API contract, without claiming a redundant integration rerun. Browser retesting remains owned by the backend task.
 - Mobile plan documentation: `38999b371f543bb9aa7886c952a57eeb321433f3`, then feature `45ab7dfb47786467a0a3031d1efa373110e5474c`, then this verification commit. The mobile branch already contains PR #7; publishing it would publish that dependency too.
 - Local `git merge-tree --write-tree ccf4006 45ab7df` succeeded without conflicts, producing tree `5a9dd9b4527b7d755f63f98999dd742af698e1d6`. This computed compatibility without changing either branch or working tree.
 
 A future explicit approval bundle should identify PR #7, the backend commit and the final mobile head individually. Resolve PR #7 and merge the backend (their order is technically independent), deploy/verify the backend workload endpoint, then publish/merge the mobile commits on the combined baseline and build/install the reviewed iOS feature release. Phone acceptance requires live login, workload rendering and saves, keyboard/large-text/VoiceOver review, logout and expiry. Android remains deferred. The previously prepared safe-area-only artifact must not be described as containing the new feature.
 
 No new push, PR, merge, deployment, feature signing or phone installation was performed.
+Publication and installation remain on hold pending a new explicit approval naming the final candidate commits.
 
 ## Library evidence
 
