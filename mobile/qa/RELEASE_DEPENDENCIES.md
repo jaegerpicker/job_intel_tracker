@@ -1,5 +1,15 @@
 # Local cross-contract verification and release dependencies
 
+## Current local preparation after backend PR #8
+
+Backend PR #8 is merged at `ac50887b82c6cb0472529ba25c32b767f8918c14`; its tree exactly matches reviewed backend candidate `f74c880a7241bbfd5300c7d702a545995d77e7e2`. The original reviewed mobile branch remains `feat/mobile-waiting-planning` at `611a899a50a4bf3032c23d502683d4ec95132a57`.
+
+A separate unpublished branch, `prep/mobile-waiting-backend-pr8`, replays the six original local commits onto that backend merge. Pre-documentation head: `ff74ae8c104c131a1199e56a8fe15beb20a616c5`. Rebase completed without conflicts; `git range-diff` marks every replayed patch equal. Mobile file contents match the original branch, and backend file contents match the merged baseline. Replayed safe-area patch `a59bdba` is identical to PR #7's `670780f`; this is local preparation, not approval or publication of that still-gated dependency.
+
+PR #7 remains draft/unmerged. Automatic approval review rejected marking it ready because the approval was relayed rather than given directly in this thread. No retry or indirect publication of its patch is permitted without direct owner approval here. Backend merging is complete, but backend deployment, mobile publication, physical-phone installation and iOS acceptance remain separate pending actions. Render remains on its previous manual deployment per the backend task; this mobile task did not access Render.
+
+The dependency notes below record the earlier candidate verification. Current future order is: resolve the separate PR #7 approval, verify/deploy the approved merged backend, then publish the reviewed integrated mobile changes and build/install them for physical iPhone acceptance. No main branch was mutated during local integration preparation.
+
 ## Synthetic backend verification
 
 Backend: `/tmp/job-intel-aging-workload`, commit `ccf4006340cca92e97ccd6db7aa8722ea84b795c`. Existing fixture: `http://127.0.0.1:8004`, generated from isolated synthetic records. No backend files, auth configuration or production data were changed.
