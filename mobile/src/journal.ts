@@ -147,6 +147,14 @@ export class JournalRepository implements Repository {
   list() {
     return this.api.list();
   }
+  workload() {
+    if (!this.api.workload)
+      throw new BoardError(
+        "invalid",
+        "Planning is unavailable on this server.",
+      );
+    return this.api.workload();
+  }
   attachments(id: string) {
     return this.api.attachments(id);
   }

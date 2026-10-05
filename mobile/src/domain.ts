@@ -1,3 +1,4 @@
+import type { Workload } from "./planning";
 export const stages = [
   "Prospect",
   "Applied",
@@ -42,6 +43,7 @@ export interface PendingWrite {
 }
 export interface Repository {
   list(): Promise<BoardRecord[]>;
+  workload?(): Promise<Workload>;
   save(write: PendingWrite): Promise<BoardRecord>;
   attachments(job: string): Promise<Attachment[]>;
 }

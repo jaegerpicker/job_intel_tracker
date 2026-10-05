@@ -54,6 +54,9 @@ class OwnerRepository implements Repository {
   async list() {
     return this.read(() => this.api.list());
   }
+  async workload() {
+    return this.read(() => this.api.workload());
+  }
   async attachments(job: string) {
     return this.read(() => this.api.attachments(job));
   }
@@ -151,6 +154,7 @@ export function createRuntime(options: {
             )
           : {
               list: () => new OwnerRepository(api, source).list(),
+              workload: () => new OwnerRepository(api, source).workload(),
               attachments: (id) =>
                 new OwnerRepository(api, source).attachments(id),
               save: async () => {

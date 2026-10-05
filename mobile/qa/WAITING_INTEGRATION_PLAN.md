@@ -1,6 +1,6 @@
 # Mobile waiting and workload integration plan
 
-Planning only. API-dependent implementation waits for the backend contract.
+Implemented locally against backend contract commit `ccf4006340cca92e97ccd6db7aa8722ea84b795c`. See WORKLOAD_ACCEPTANCE.md for verification and release boundaries.
 No feature publication, merge, phone installation or production changes are
 approved. Android remains deferred.
 
@@ -34,7 +34,7 @@ replace the pending artifact with a feature build.
   jobs/company counting, conflict and exact-key retry, accessible labels and
   draft preservation. Derived fields must never become persisted write data.
 
-## Contract questions that block dependent implementation
+## Contract questions resolved by the backend contract
 
 Confirm the reference event for waiting age and whether dates are local calendar
 values or UTC instants. Confirm override priority, overdue behavior and missing

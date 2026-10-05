@@ -1,3 +1,4 @@
+import { parseWorkload } from "./planning";
 import {
   Attachment,
   BoardError,
@@ -84,6 +85,9 @@ export class ApiRepository implements Repository {
     if (!Array.isArray(data))
       throw new BoardError("invalid", "Invalid record list");
     return data.map(parseRecord);
+  }
+  async workload() {
+    return parseWorkload(await this.request("/api/workload"));
   }
   async save(write: PendingWrite) {
     return parseRecord(
