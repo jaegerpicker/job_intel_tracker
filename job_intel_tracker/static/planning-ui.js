@@ -1,5 +1,10 @@
 'use strict';
 globalThis.TrackerPlanningUI = (() => {
+    function capacityNote(workload) {
+        return workload?.warnings?.some(warning => warning.code === 'open_applications') ?
+            'Planning warning; recording stays available' :
+            'Recording stays available';
+    }
     const node = (tag, text) => {
         const e = document.createElement(tag);
         if (text !== undefined) e.textContent = text;
@@ -139,5 +144,5 @@ globalThis.TrackerPlanningUI = (() => {
         if (derived?.reasons?.length) root.append(node('p', derived.reasons.join(' ')));
         return root;
     }
-    return {editor, pendingWrite};
+    return {editor, pendingWrite, capacityNote};
 })();

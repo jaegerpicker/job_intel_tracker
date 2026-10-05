@@ -17,6 +17,12 @@ let sequence=0;const context={document:{createElement:tag=>new Element(tag)},str
  crypto:{randomUUID:()=>`synthetic-operation-${++sequence}`}};
 vm.createContext(context);vm.runInContext(fs.readFileSync(process.argv[1],'utf8'),context);
 const api=context.TrackerPlanningUI;
+assert.equal(api.capacityNote({counts:{open_applications:15},policy:{open_application_limit:16},warnings:[]}), 'Recording stays available');
+assert.equal(api.capacityNote({warnings:[{code:'weekly_new'},{code:'pilot_review'}]}), 'Recording stays available');
+assert.equal(api.capacityNote(null), 'Recording stays available');
+for (const count of [15,16]) {
+ assert.equal(api.capacityNote({counts:{open_applications:count},policy:{open_application_limit:15},warnings:[{code:'open_applications'}]}), 'Planning warning; recording stays available');
+}
 const record={id:'synthetic-job',kind:'job',version:3,body:{stage:'Applied',title:'Synthetic',company:'Example',custom:'Preserve',tracking:{contacts:[]}}};
 const flat=node=>[node,...node.children.flatMap(flat)];
 (async()=>{
