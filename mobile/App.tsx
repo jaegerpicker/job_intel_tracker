@@ -12,7 +12,6 @@ import {
   Text,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { randomUUID } from "expo-crypto";
 import {
@@ -204,7 +203,7 @@ export function BoardApp({ selectedId, creating = false }: ScreenProps) {
   );
   if (lockedReason)
     return (
-      <SafeAreaView style={s.root}>
+      <View style={s.root}>
         <View style={s.header}>
           <Text style={s.eyebrow}>FIELDNOTES / JOB INTEL</Text>
           <Text style={s.title}>Live connection locked</Text>
@@ -214,10 +213,10 @@ export function BoardApp({ selectedId, creating = false }: ScreenProps) {
             mode for synthetic portfolio QA.
           </Text>
         </View>
-      </SafeAreaView>
+      </View>
     );
   return (
-    <SafeAreaView style={s.root}>
+    <View style={s.root}>
       <StatusBar style="dark" />
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -639,6 +638,6 @@ export function BoardApp({ selectedId, creating = false }: ScreenProps) {
           />
         )}
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }
