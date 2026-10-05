@@ -20,7 +20,7 @@ from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from . import enrollment, mobile_auth
+from . import enrollment, mobile_auth, workload
 
 STAGES = ["Prospect", "Applied", "Screening", "Interview", "Offer", "Closed", "Rejected", "Withdrawn"]
 
@@ -523,11 +523,24 @@ def create_app(data_dir=None, demo=False):
             and q.lower() in r["body"].lower()
         ]
 
+    @app.get("/api/workload", response_model=workload.WorkloadResponse)
+    def planning(req: Request):
+        """Read derived aging and planning warnings for authorized jobs only. Never writes."""
+        _, jobs = principal(req)
+        with db() as c:
+            c.execute("BEGIN")
+            rows = c.execute("SELECT * FROM records ORDER BY id").fetchall()
+            policy_row = next((r for r in rows if r["kind"] == "filters"), None)
+        visible = [unpack(r) for r in rows if r["kind"] == "job" and (not jobs or r["id"] in jobs)]
+        return workload.project(visible, json.loads(policy_row["body"]) if policy_row else {})
+
     class Record(BaseModel):
         kind: str
         job: str | None = None
         version: int = Field(ge=0)
-        body: dict
+        body: dict = Field(
+            description="Complete record body; optional job tracking is defined by the Tracking schema in /api/workload. Preserve existing fields on updates."
+        )
 
     def validate(p):
         if p.kind not in ("job", "research", "note", "rating", "interview", "filters"):
@@ -569,6 +582,11 @@ def create_app(data_dir=None, demo=False):
             or not all(isinstance(x, str) and x for x in p.body["lanes"])
         ):
             raise HTTPException(422, "Invalid structured search policy")
+        if p.kind == "job" and "tracking" in p.body:
+            try:
+                p.body["tracking"] = workload.Tracking.model_validate(p.body["tracking"]).model_dump(mode="json")
+            except (ValueError, TypeError):
+                raise HTTPException(422, "Invalid tracking dates, action or source provenance") from None
         if p.kind == "rating" and (
             not isinstance(p.body.get("score"), (int, float))
             or not 0 <= p.body["score"] <= 100
@@ -638,22 +656,33 @@ def create_app(data_dir=None, demo=False):
                         and p.body["stage"] not in ("Closed", "Rejected", "Withdrawn")
                     ):
                         raise HTTPException(409, "Employer has a primary role; link alternative using primary_id")
-                policy_record = c.execute("SELECT body FROM records WHERE kind='filters'").fetchone()
-                cap = json.loads(policy_record["body"])["active_cap"] if policy_record else 10
-                is_active = lambda body: (
-                    body["stage"] not in ("Prospect", "Closed", "Rejected", "Withdrawn") and not body.get("primary_id")
-                )
-                count = sum(is_active(json.loads(j["body"])) for j in all_jobs)
-                becoming_active = is_active(p.body) and (not old or not is_active(json.loads(old["body"])))
-                if (
-                    becoming_active
-                    and count >= cap
-                    and not (actor == "owner" and req.headers.get("x-owner-cap-override") == "true")
-                ):
-                    raise HTTPException(
-                        409, "Active cap reached; owner may explicitly override with X-Owner-Cap-Override: true"
-                    )
             body = dict(p.body)
+            if p.kind == "filters":
+                # Old owner clients may omit newer policy keys; omission is not deletion.
+                body = workload.normalized_policy({**(json.loads(old["body"]) if old else {}), **body})
+                try:
+                    workload.validate_policy(body)
+                except (ValueError, TypeError, KeyError):
+                    raise HTTPException(422, "Invalid combined planning policy") from None
+            if p.kind == "job":
+                policy_row = c.execute("SELECT body FROM records WHERE kind='filters'").fetchone()
+                effective, _ = workload.effective_policy(json.loads(policy_row["body"]) if policy_row else {})
+                from datetime import datetime
+                from zoneinfo import ZoneInfo
+
+                try:
+                    workload.parse_tracking(body, datetime.now(ZoneInfo(effective["timezone"])).date())
+                except (ValueError, TypeError):
+                    raise HTTPException(422, "Actual observations and review dates must not be in the future") from None
+                previous_tracking = json.loads(old["body"]).get("tracking") if old else None
+                previous_review = previous_tracking.get("review") if isinstance(previous_tracking, dict) else None
+                if previous_review:
+                    try:
+                        previous_review = workload.Review.model_validate(previous_review).model_dump(mode="json")
+                    except ValueError:
+                        pass
+                if actor != "owner" and body.get("tracking", {}).get("review") != previous_review:
+                    raise HTTPException(403, "Review decisions are owner-only")
             if old and p.kind == "job" and actor != "owner":
                 previous = json.loads(old["body"])
                 for protected in ("owner_assessment", "grandfathered", "exception_reason"):
@@ -858,23 +887,25 @@ def create_app(data_dir=None, demo=False):
         with db() as c:
             r = c.execute("SELECT * FROM records WHERE kind='filters' LIMIT 1").fetchone()
         return (
-            unpack(r)
+            {**unpack(r), "body": workload.normalized_policy(json.loads(r["body"]))}
             if r
             else {
                 "id": "search-policy",
                 "version": 0,
                 "kind": "filters",
-                "body": {
-                    "active_cap": 10,
-                    "base_floor": 220000,
-                    "lanes": [
-                        "Principal / Staff AI technical IC",
-                        "Engineering Manager",
-                        "Senior+ mobile",
-                        "Flexible strongest fit",
-                    ],
-                    "priorities": "Maximize base salary boost; give Engineering Manager roles serious weight. Unknown or spanning base ranges require qualification. Existing explicit exceptions may be grandfathered.",
-                },
+                "body": workload.normalized_policy(
+                    {
+                        "active_cap": 10,
+                        "base_floor": 220000,
+                        "lanes": [
+                            "Principal / Staff AI technical IC",
+                            "Engineering Manager",
+                            "Senior+ mobile",
+                            "Flexible strongest fit",
+                        ],
+                        "priorities": "Maximize base salary boost; give Engineering Manager roles serious weight. Unknown or spanning base ranges require qualification. Existing explicit exceptions may be grandfathered.",
+                    }
+                ),
             }
         )
 

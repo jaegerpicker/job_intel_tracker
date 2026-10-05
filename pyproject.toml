@@ -3,7 +3,7 @@ name = "job_intel_tracker"
 version = "0.1.0"
 description = "Private single-owner, multi-agent job intelligence board"
 requires-python = ">=3.12"
-dependencies = ["fastapi==0.142.2", "uvicorn==0.54.0", "python-multipart==0.0.32", "PyJWT[crypto]==2.15.1", "httpx==0.28.1"]
+dependencies = ["fastapi==0.142.2", "uvicorn==0.54.0", "python-multipart==0.0.32", "PyJWT[crypto]==2.15.1", "httpx==0.28.1", "tzdata==2026.5"]
 [project.optional-dependencies]
 dev = ["pytest==9.1.1", "ruff==0.16.10", "mypy==2.4.0", "build==1.6.1"]
 [tool.ruff]

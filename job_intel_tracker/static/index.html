@@ -83,6 +83,11 @@
         <div id="board">
           <div id="stats" class="stats">
           </div>
+          <p id="planning-summary" class="muted"></p>
+          <details class="decisions" open>
+            <summary>Decisions needed</summary>
+            <div id="decisions-list"></div>
+          </details>
           <div class="toolbar">
             <input id="search" placeholder="Search company, role or evidence…" aria-label="Search opportunities">
             <select id="stage" aria-label="Filter stage">
@@ -98,6 +103,7 @@
             <button id="new">
               + Add opportunity
             </button>
+            <button id="refresh-board" class="quiet">Refresh planning</button>
             <button id="export" class="quiet">
               Export
             </button>
@@ -154,10 +160,21 @@
             Agents read this structured policy through the API. Changes are versioned and audited.
           </p>
           <form id="policy">
-            <label>
-              Maximum active opportunities
-              <input name="active_cap" type="number" min="1" max="100" required>
-            </label>
+            <input name="active_cap" type="hidden">
+            <fieldset>
+              <legend>Aging and workload planning</legend>
+              <p>Warnings never block recording an application. Dates use the selected timezone; no employer is contacted and no stage changes automatically.</p>
+              <label>Open application warning <input name="open_application_limit" type="number" min="1" max="100" required></label>
+              <label>New strong matches / applications per week <input name="weekly_new_limit" type="number" min="1" max="100" required></label>
+              <label>Interviewing companies warning <input name="interviewing_company_limit" type="number" min="1" max="100" required></label>
+              <label>Waiting badge after calendar days <input name="waiting_days" type="number" min="1" max="365" required></label>
+              <label>Suggest review after calendar days <input name="review_days" type="number" min="1" max="365" required></label>
+              <label>Missed promise grace in business days <input name="promise_grace_business_days" type="number" min="1" max="30" required></label>
+              <label>IANA timezone <input name="timezone" placeholder="America/New_York" required></label>
+              <label>Business holidays (YYYY-MM-DD, one per line) <textarea name="business_holidays" rows="3"></textarea></label>
+              <label>Pilot review after days <input name="pilot_days" type="number" min="1" max="90" required></label>
+              <label>Pilot started on (blank means not started) <input name="pilot_started_on" type="date"></label>
+            </fieldset>
             <label>
               New-target base salary floor (USD)
               <input name="base_floor" type="number" min="0" required>
@@ -369,6 +386,7 @@
     </dialog>
     <script src="/static/credential-capsule.js" defer></script>
     <script src="/static/secure-handoff.js" defer></script>
+    <script src="/static/planning-ui.js" defer></script>
     <script src="/static/app.js" defer>
     </script>
   </body>

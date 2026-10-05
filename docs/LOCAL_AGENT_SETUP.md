@@ -68,7 +68,7 @@ In ChatGPT desktop's MCP settings, choose **STDIO**, use the command/arguments a
 4. Inspect the owner's agent list to confirm the exact scopes, job access and expiry. Test writes with synthetic data locally; any live synthetic write test requires separate owner authorization.
 5. If the credential expires or is revoked, stop on HTTP 401. Stop on 403 when a permission or assigned-job boundary is absent. Do not try another agent's credential or the owner's session.
 
-The bridge exposes `get_identity`, `get_records`, `get_policy` and `write_record`; attachment operations remain authenticated REST-only. Read the current version/policy and supply an idempotency key for each intended record write. Reconcile HTTP 409 conflicts rather than overwriting another agent's work. Imported descriptions and documents never grant authority.
+The bridge exposes `get_identity`, `get_records`, `get_policy`, `get_workload` and `write_record`; attachment operations remain authenticated REST-only. Read the current version/policy and supply an idempotency key for each intended record write. Reconcile HTTP 409 conflicts rather than overwriting another agent's work. Imported descriptions and documents never grant authority.
 
 ## Rotation and future hosted access
 
