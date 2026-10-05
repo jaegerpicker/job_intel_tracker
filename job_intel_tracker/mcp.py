@@ -12,6 +12,11 @@ import httpx
 
 TOOLS = [
     {
+        "name": "get_workload",
+        "description": "Read authorized aging badges, decisions and workload planning warnings; never performs outreach.",
+        "inputSchema": {"type": "object", "properties": {}, "additionalProperties": False},
+    },
+    {
         "name": "get_identity",
         "description": "Confirm the authenticated agent actor without exposing credentials.",
         "inputSchema": {"type": "object", "properties": {}, "additionalProperties": False},
@@ -51,7 +56,9 @@ TOOLS = [
 
 
 def call_tool(client, name, arguments):
-    if name == "get_identity":
+    if name == "get_workload":
+        response = client.get("/api/workload")
+    elif name == "get_identity":
         response = client.get("/api/me")
     elif name == "get_policy":
         response = client.get("/api/policy")

@@ -3,6 +3,8 @@ const $ = s => document.querySelector(s),
     $$ = s => [...document.querySelectorAll(s)];
 let csrf = '',
     records = [],
+    workloadState = null,
+    ownerSession = false,
     selected = null,
     editing = null,
     stages = [],
@@ -12,11 +14,12 @@ let csrf = '',
     credentialHandoffGeneration = 0;
 const defaults = {
     active_cap: 10,
+    open_application_limit: 15,
     base_floor: 220000,
     lanes: ['Principal / Staff AI technical IC', 'Engineering Manager', 'Senior+ mobile', 'Flexible strongest fit'],
     priorities: 'Maximize base salary boost. Give Engineering Manager opportunities serious weight. Preserve actual employer titles. One primary opportunity per employer; link alternatives. Verify compensation and deadlines.'
 };
-const policy = () => records.find(r => r.kind === 'filters')?.body || defaults;
+const policy = () => ({...defaults, ...(records.find(r => r.kind === 'filters')?.body || {}), ...(workloadState?.policy || {})});
 
 function el(tag, text, cls) {
     const x = document.createElement(tag);
@@ -49,11 +52,11 @@ async function api(path, opts = {}) {
     }
     return r.json();
 }
-async function save(r, override = false) {
+async function save(r, override = false, key = crypto.randomUUID()) {
     return api('/api/records/' + r.id, {
         method: 'PUT',
         headers: {
-            'Idempotency-Key': crypto.randomUUID(),
+            'Idempotency-Key': key,
             ...(override ? {
                 'X-Owner-Cap-Override': 'true'
             } : {})
@@ -67,7 +70,7 @@ async function save(r, override = false) {
     });
 }
 async function refresh() {
-    records = await api('/api/records');
+    [records, workloadState] = await Promise.all([api('/api/records'), api('/api/workload')]);
     render();
 }
 const active = r => !['Prospect', 'Closed', 'Rejected', 'Withdrawn'].includes(r.body.stage) && !r.body.primary_id;
@@ -95,16 +98,22 @@ function render() {
         act = jobs.filter(active);
     $('#stats').replaceChildren();
     [
-        ['Active', act.length + ' / ' + policy().active_cap, 'Primary conversations'],
+        ['Open applications', (workloadState?.counts.open_applications ?? act.length) + ' / ' + policy().open_application_limit, TrackerPlanningUI.capacityNote(workloadState)],
         ['Backlog', jobs.filter(r => r.body.stage === 'Prospect').length, 'Promising, unapplied'],
-        ['Interviewing', jobs.filter(r => r.body.stage === 'Interview').length, 'Prepare with evidence'],
-        ['Needs qualification', jobs.filter(r => !r.body.grandfathered && qualification(r.body) !== 'Verified base meets floor').length, 'Verify base compensation']
+        ['Attention workload', workloadState?.counts.attention ?? 0, 'Open applications with actions, interviews or decisions'],
+        ['Passive waiting', workloadState?.counts.passive_waiting ?? 0, 'Separate from parked attention']
     ].forEach(([t, n, d]) => {
         const x = el('div', undefined, 'stat');
         x.append(el('span', t), el('strong', String(n)), el('span', d));
         $('#stats').append(x);
     });
-    $('#active-count').textContent = act.length >= policy().active_cap ? 'Cap reached — prioritize before adding' : '';
+    $('#active-count').textContent = workloadState?.warnings.map(w => w.message).join(' ') || '';
+    $('#planning-summary').textContent = `${workloadState?.counts.interviewing_companies || 0} companies interviewing · ${workloadState?.counts.weekly_new || 0} new matches / applications this week · ${workloadState?.counts.parked || 0} parked · ${workloadState?.counts.unknown_application_dates || 0} application dates unknown. As of ${workloadState?.local_date || ''} in ${workloadState?.timezone || ''}. ${policy().pilot_started_on ? 'Pilot started ' + policy().pilot_started_on : 'Pilot start not recorded; set it explicitly in Search policy.'}`;
+    $('#decisions-list').replaceChildren(...(workloadState?.decisions || []).map(decision => {
+        const button = el('button', `${decision.company} · ${decision.label}`, 'decision-row');
+        button.onclick = () => { selected = decision.job_id;render(); };return button;
+    }));
+    if (!workloadState?.decisions.length) $('#decisions-list').append(el('p', 'No decisions needed from known observations.', 'muted'));
     const lane = $('#lane'),
         old = lane.value;
     lane.replaceChildren();
@@ -122,6 +131,8 @@ function render() {
         top.append(el('span', b.company, 'company'), el('span', b.stage, 'pill'));
         x.append(top, el('h3', b.title), el('div', (b.lane || 'Unassigned') + ' · ' + (b.route || 'Discovered'), 'card-meta'), el('div', money(b.base_min) + (b.base_max ? ' – ' + money(b.base_max) : '') + ' base', 'card-meta'), el('div', qualification(b), 'card-meta warn'));
         if (b.primary_id) x.append(el('div', 'Alternative to ' + b.primary_id, 'card-meta'));
+        const derived = workloadState?.jobs[r.id];
+        if (derived) x.append(el('div', derived.label, 'card-meta ' + (derived.needs_decision ? 'warn' : '')));
         x.onclick = () => {
             selected = r.id;
             render();
@@ -165,6 +176,10 @@ async function showDetail() {
     d.append(head, el('h2', b.title), el('p', b.lane + ' · ' + b.stage, 'muted'), safeLink(b.url, 'Employer listing'), el('p', qualification(b), 'warn'), el('p', 'Base: ' + money(b.base_min) + (b.base_max ? ' – ' + money(b.base_max) : '') + ' · ' + b.comp_status + ' · checked ' + (b.comp_checked || 'not yet'), 'muted'), el('p', 'Source: ' + (b.comp_source || 'Missing') + ' · Claim author: ' + (b.claim_author || r.author), 'muted'));
     if (b.deadline) d.append(el('p', 'Deadline: ' + b.deadline + ' (' + b.deadline_status + ')', 'warn'));
     if (b.owner_assessment) d.append(el('div', 'Owner assessment: ' + b.owner_assessment, 'evidence'));
+    const derived = workloadState?.jobs[r.id];
+    if (derived) d.append(el('p', derived.label, 'planning-badge'));
+    if (derived && derived.record_version !== r.version) d.append(el('p', 'Planning changed while loading. Refresh planning before editing dates or actions.', 'warn'));
+    else d.append(TrackerPlanningUI.editor(r, derived, {save, refresh, message, owner: ownerSession, today: workloadState.local_date}));
     d.append(el('h3', 'Stage timeline'));
     (b.timeline || []).forEach(t => d.append(el('div', t.stage + ' · ' + new Date(t.at * 1000).toLocaleDateString() + ' · ' + t.author, 'timeline')));
     ['rating', 'research', 'note', 'interview'].forEach(kind => {
@@ -350,13 +365,6 @@ $('#job-form').onsubmit = e => {
         b.grandfathered = f.elements.grandfathered.checked;
         ['base_min', 'base_max'].forEach(k => b[k] = b[k] ? Number(b[k]) : null);
         if (b.grandfathered && !b.exception_reason) throw Error('Explain the grandfathered exception.');
-        let override = false;
-        if (active({
-                body: b
-            }) && (!editing || !active(editing)) && records.filter(r => r.kind === 'job' && active(r)).length >= policy().active_cap) {
-            override = confirm('Active cap reached. Add another intentionally?');
-            if (!override) return;
-        }
         const same = records.find(r => r.kind === 'job' && r.body.company.toLowerCase() === b.company.toLowerCase() && !r.body.primary_id && !['Closed', 'Rejected', 'Withdrawn'].includes(r.body.stage) && r.id !== editing?.id);
         if (same && !b.primary_id) throw Error('This employer already has a primary role. Link alternative to ' + same.id);
         const r = await save({
@@ -364,7 +372,7 @@ $('#job-form').onsubmit = e => {
             kind: 'job',
             version: editing?.version || 0,
             body: b
-        }, override);
+        });
         selected = r.id;
         $('#editor').close();
         await refresh();
@@ -372,6 +380,7 @@ $('#job-form').onsubmit = e => {
 };
 $('#cancel').onclick = () => $('#editor').close();
 $('#new').onclick = () => editJob();
+$('#refresh-board').onclick = () => guarded(async () => { await refresh();message('Planning refreshed. Unsaved form changes were discarded.'); });
 $('#search').oninput = render;
 $('#stage').onchange = render;
 $('#lane').onchange = render;
@@ -388,6 +397,8 @@ $$('nav button').forEach(btn => btn.onclick = () => guarded(async () => {
         f.elements.base_floor.value = p.base_floor;
         f.elements.lanes.value = p.lanes.join('\n');
         f.elements.priorities.value = p.priorities || '';
+        for (const name of ['open_application_limit', 'weekly_new_limit', 'interviewing_company_limit', 'waiting_days', 'review_days', 'promise_grace_business_days', 'timezone', 'pilot_days', 'pilot_started_on']) f.elements[name].value = p[name] ?? '';
+        f.elements.business_holidays.value = (p.business_holidays || []).join('\n');
     }
     if (view === 'audit') {
         const a = await api('/api/audit');
@@ -537,10 +548,15 @@ $('#policy').onsubmit = e => {
             kind: 'filters',
             version: old?.version || 0,
             body: {
+                ...(old?.body || {}),
                 active_cap: Number(f.elements.active_cap.value),
                 base_floor: Number(f.elements.base_floor.value),
                 lanes: f.elements.lanes.value.split('\n').map(x => x.trim()).filter(Boolean),
-                priorities: f.elements.priorities.value
+                priorities: f.elements.priorities.value,
+                ...Object.fromEntries(['open_application_limit', 'weekly_new_limit', 'interviewing_company_limit', 'waiting_days', 'review_days', 'promise_grace_business_days', 'pilot_days'].map(name => [name, Number(f.elements[name].value)])),
+                timezone: f.elements.timezone.value,
+                pilot_started_on: f.elements.pilot_started_on.value || null,
+                business_holidays: f.elements.business_holidays.value.split('\n').map(x => x.trim()).filter(Boolean)
             }
         });
         await refresh();
@@ -612,6 +628,7 @@ $('#seed').onclick = () => guarded(async () => {
 });
 async function enter() {
     const me = await api('/api/me');
+    ownerSession = me.actor === 'owner';
     csrf = me.csrf;
     stages = me.stages;
     stages.forEach(s => option($('#stage'), s));

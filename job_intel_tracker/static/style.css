@@ -430,4 +430,11 @@ h1 {
 
 }
 body.enrollment { display:block; }
+.decisions { margin:16px 0; padding:16px; border:1px solid var(--border, #ccd5d7); border-radius:12px; }
+.decision-row { display:block; text-align:left; width:100%; margin-top:8px; overflow-wrap:anywhere; }
+.planning-badge { border-left:3px solid var(--accent, #137d72); padding:10px; background:var(--surface, #eef6f3); color:#163e36; }
+.detail details form { margin:16px 0; }
+.detail details fieldset { min-width:0; padding:12px; border:1px solid #ccd5d7; }
+.detail details input, .detail details textarea, .detail details select { max-width:100%; }
+.planning-review button { margin:4px; }
 body.enrollment main { margin:0 auto; width:auto; max-width:700px; padding:40px 24px; }

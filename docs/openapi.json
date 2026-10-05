@@ -5,6 +5,179 @@
     "version": "0.1.0"
   },
   "paths": {
+    "/auth/mobile/callback": {
+      "get": {
+        "summary": "Callback Fallback",
+        "operationId": "callback_fallback_auth_mobile_callback_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/mobile/start": {
+      "post": {
+        "summary": "Start",
+        "operationId": "start_auth_mobile_start_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Start"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/mobile/authorize": {
+      "get": {
+        "summary": "Authorize",
+        "operationId": "authorize_auth_mobile_authorize_get",
+        "parameters": [
+          {
+            "name": "ticket",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Ticket"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/mobile/approve": {
+      "post": {
+        "summary": "Approve",
+        "operationId": "approve_auth_mobile_approve_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/mobile/exchange": {
+      "post": {
+        "summary": "Exchange",
+        "operationId": "exchange_auth_mobile_exchange_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Exchange"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/mobile/logout": {
+      "post": {
+        "summary": "Logout",
+        "operationId": "logout_auth_mobile_logout_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/.well-known/apple-app-site-association": {
+      "get": {
+        "summary": "Apple App Association",
+        "operationId": "apple_app_association__well_known_apple_app_site_association_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
     "/": {
       "get": {
         "summary": "Index",
@@ -57,6 +230,50 @@
       "get": {
         "summary": "Apple",
         "operationId": "apple_auth_apple_get",
+        "parameters": [
+          {
+            "name": "mobile_ticket",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Mobile Ticket"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/callback": {
+      "post": {
+        "summary": "Callback",
+        "operationId": "callback_auth_callback_post",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -69,10 +286,42 @@
         }
       }
     },
-    "/auth/callback": {
+    "/auth/enroll": {
+      "get": {
+        "summary": "Enrollment Page",
+        "operationId": "enrollment_page_auth_enroll_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/enroll/start": {
       "post": {
-        "summary": "Callback",
-        "operationId": "callback_auth_callback_post",
+        "summary": "Enrollment Start",
+        "operationId": "enrollment_start_auth_enroll_start_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/healthz": {
+      "get": {
+        "summary": "Health",
+        "operationId": "health_healthz_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -98,15 +347,7 @@
               }
             }
           }
-        },
-        "security": [
-          {
-            "AgentBearer": []
-          },
-          {
-            "OwnerSession": []
-          }
-        ]
+        }
       }
     },
     "/auth/logout": {
@@ -192,15 +433,26 @@
               }
             }
           }
-        },
-        "security": [
-          {
-            "AgentBearer": []
-          },
-          {
-            "OwnerSession": []
+        }
+      }
+    },
+    "/api/workload": {
+      "get": {
+        "summary": "Planning",
+        "description": "Read derived aging and planning warnings for authorized jobs only. Never writes.",
+        "operationId": "planning_api_workload_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkloadResponse"
+                }
+              }
+            }
           }
-        ]
+        }
       }
     },
     "/api/records/{rid}": {
@@ -247,15 +499,7 @@
               }
             }
           }
-        },
-        "security": [
-          {
-            "AgentBearer": []
-          },
-          {
-            "OwnerSession": []
-          }
-        ]
+        }
       },
       "delete": {
         "summary": "Delete",
@@ -299,15 +543,7 @@
               }
             }
           }
-        },
-        "security": [
-          {
-            "AgentBearer": []
-          },
-          {
-            "OwnerSession": []
-          }
-        ]
+        }
       }
     },
     "/api/records/{rid}/revisions": {
@@ -344,15 +580,7 @@
               }
             }
           }
-        },
-        "security": [
-          {
-            "AgentBearer": []
-          },
-          {
-            "OwnerSession": []
-          }
-        ]
+        }
       }
     },
     "/api/audit": {
@@ -368,15 +596,7 @@
               }
             }
           }
-        },
-        "security": [
-          {
-            "AgentBearer": []
-          },
-          {
-            "OwnerSession": []
-          }
-        ]
+        }
       }
     },
     "/api/jobs/{job}/attachments": {
@@ -423,15 +643,7 @@
               }
             }
           }
-        },
-        "security": [
-          {
-            "AgentBearer": []
-          },
-          {
-            "OwnerSession": []
-          }
-        ]
+        }
       },
       "get": {
         "summary": "Files",
@@ -466,15 +678,7 @@
               }
             }
           }
-        },
-        "security": [
-          {
-            "AgentBearer": []
-          },
-          {
-            "OwnerSession": []
-          }
-        ]
+        }
       }
     },
     "/api/attachments/{aid}": {
@@ -511,15 +715,7 @@
               }
             }
           }
-        },
-        "security": [
-          {
-            "AgentBearer": []
-          },
-          {
-            "OwnerSession": []
-          }
-        ]
+        }
       },
       "delete": {
         "summary": "Remove Attachment",
@@ -554,15 +750,7 @@
               }
             }
           }
-        },
-        "security": [
-          {
-            "AgentBearer": []
-          },
-          {
-            "OwnerSession": []
-          }
-        ]
+        }
       }
     },
     "/api/agents": {
@@ -578,15 +766,7 @@
               }
             }
           }
-        },
-        "security": [
-          {
-            "AgentBearer": []
-          },
-          {
-            "OwnerSession": []
-          }
-        ]
+        }
       },
       "post": {
         "summary": "Issue",
@@ -620,15 +800,7 @@
               }
             }
           }
-        },
-        "security": [
-          {
-            "AgentBearer": []
-          },
-          {
-            "OwnerSession": []
-          }
-        ]
+        }
       }
     },
     "/api/agents/{name}": {
@@ -665,15 +837,7 @@
               }
             }
           }
-        },
-        "security": [
-          {
-            "AgentBearer": []
-          },
-          {
-            "OwnerSession": []
-          }
-        ]
+        }
       }
     },
     "/api/export": {
@@ -689,15 +853,7 @@
               }
             }
           }
-        },
-        "security": [
-          {
-            "AgentBearer": []
-          },
-          {
-            "OwnerSession": []
-          }
-        ]
+        }
       }
     },
     "/api/policy": {
@@ -713,15 +869,7 @@
               }
             }
           }
-        },
-        "security": [
-          {
-            "AgentBearer": []
-          },
-          {
-            "OwnerSession": []
-          }
-        ]
+        }
       }
     },
     "/api/schema": {
@@ -737,15 +885,7 @@
               }
             }
           }
-        },
-        "security": [
-          {
-            "AgentBearer": []
-          },
-          {
-            "OwnerSession": []
-          }
-        ]
+        }
       }
     }
   },
@@ -764,6 +904,93 @@
           "file"
         ],
         "title": "Body_upload_api_jobs__job__attachments_post"
+      },
+      "Contact": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{1,100}$",
+            "title": "Id"
+          },
+          "on": {
+            "type": "string",
+            "format": "date",
+            "title": "On"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "human",
+              "receipt",
+              "outbound"
+            ],
+            "title": "Kind"
+          },
+          "source": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Source"
+          },
+          "summary": {
+            "type": "string",
+            "maxLength": 4000,
+            "title": "Summary",
+            "default": ""
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "on",
+          "kind",
+          "source"
+        ],
+        "title": "Contact"
+      },
+      "Counts": {
+        "properties": {
+          "open_applications": {
+            "type": "integer",
+            "title": "Open Applications"
+          },
+          "passive_waiting": {
+            "type": "integer",
+            "title": "Passive Waiting"
+          },
+          "attention": {
+            "type": "integer",
+            "title": "Attention"
+          },
+          "parked": {
+            "type": "integer",
+            "title": "Parked"
+          },
+          "interviewing_companies": {
+            "type": "integer",
+            "title": "Interviewing Companies"
+          },
+          "weekly_new": {
+            "type": "integer",
+            "title": "Weekly New"
+          },
+          "unknown_application_dates": {
+            "type": "integer",
+            "title": "Unknown Application Dates"
+          }
+        },
+        "type": "object",
+        "required": [
+          "open_applications",
+          "passive_waiting",
+          "attention",
+          "parked",
+          "interviewing_companies",
+          "weekly_new",
+          "unknown_application_dates"
+        ],
+        "title": "Counts"
       },
       "Credential": {
         "properties": {
@@ -802,6 +1029,168 @@
         ],
         "title": "Credential"
       },
+      "Decision": {
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "title": "Job Id"
+          },
+          "company": {
+            "type": "string",
+            "title": "Company"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Reasons"
+          },
+          "next_action": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NextAction"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "job_id",
+          "company",
+          "title",
+          "status",
+          "label",
+          "reasons"
+        ],
+        "title": "Decision"
+      },
+      "DerivedJob": {
+        "properties": {
+          "record_version": {
+            "type": "integer",
+            "title": "Record Version",
+            "default": 0
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "terminal",
+              "backlog",
+              "action_due",
+              "action_needed",
+              "parked",
+              "interview_scheduled",
+              "interview_review",
+              "promise_waiting",
+              "promise_review",
+              "dates_unknown",
+              "waiting",
+              "waiting_badge",
+              "review_due",
+              "offer_review"
+            ],
+            "title": "Status"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "waiting_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Waiting Days"
+          },
+          "needs_decision": {
+            "type": "boolean",
+            "title": "Needs Decision",
+            "default": false
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Reasons"
+          },
+          "next_action": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NextAction"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "review_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Review On"
+          },
+          "tracking": {
+            "$ref": "#/components/schemas/Tracking"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "label"
+        ],
+        "title": "DerivedJob"
+      },
+      "Exchange": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "code_verifier": {
+            "type": "string",
+            "title": "Code Verifier"
+          },
+          "redirect_uri": {
+            "type": "string",
+            "title": "Redirect Uri"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "code_verifier",
+          "redirect_uri"
+        ],
+        "title": "Exchange"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -814,6 +1203,57 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "NextAction": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Text"
+          },
+          "owner": {
+            "type": "string",
+            "enum": [
+              "owner",
+              "company",
+              "agent"
+            ],
+            "title": "Owner"
+          },
+          "assignee": {
+            "type": "string",
+            "maxLength": 100,
+            "title": "Assignee",
+            "default": ""
+          },
+          "due_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Due On"
+          },
+          "source": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Source"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "text",
+          "owner",
+          "source"
+        ],
+        "title": "NextAction"
       },
       "Record": {
         "properties": {
@@ -840,7 +1280,8 @@
           "body": {
             "additionalProperties": true,
             "type": "object",
-            "title": "Body"
+            "title": "Body",
+            "description": "Complete record body; optional job tracking is defined by the Tracking schema in /api/workload. Preserve existing fields on updates."
           }
         },
         "type": "object",
@@ -850,6 +1291,185 @@
           "body"
         ],
         "title": "Record"
+      },
+      "Review": {
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "keep_waiting",
+              "prepare_follow_up",
+              "park"
+            ],
+            "title": "Decision"
+          },
+          "on": {
+            "type": "string",
+            "format": "date",
+            "title": "On"
+          },
+          "source": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Source"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 4000,
+            "title": "Note",
+            "default": ""
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "decision",
+          "on",
+          "source"
+        ],
+        "title": "Review"
+      },
+      "Start": {
+        "properties": {
+          "redirect_uri": {
+            "type": "string",
+            "title": "Redirect Uri"
+          },
+          "code_challenge": {
+            "type": "string",
+            "title": "Code Challenge"
+          },
+          "code_challenge_method": {
+            "type": "string",
+            "title": "Code Challenge Method"
+          },
+          "client_state": {
+            "type": "string",
+            "title": "Client State"
+          },
+          "provider": {
+            "type": "string",
+            "title": "Provider"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "redirect_uri",
+          "code_challenge",
+          "code_challenge_method",
+          "client_state",
+          "provider"
+        ],
+        "title": "Start"
+      },
+      "Tracking": {
+        "properties": {
+          "applied_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Applied On"
+          },
+          "applied_source": {
+            "type": "string",
+            "maxLength": 2000,
+            "title": "Applied Source",
+            "default": ""
+          },
+          "shortlisted_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shortlisted On"
+          },
+          "shortlisted_source": {
+            "type": "string",
+            "maxLength": 2000,
+            "title": "Shortlisted Source",
+            "default": ""
+          },
+          "contacts": {
+            "items": {
+              "$ref": "#/components/schemas/Contact"
+            },
+            "type": "array",
+            "maxItems": 200,
+            "title": "Contacts"
+          },
+          "interview_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Interview On"
+          },
+          "interview_source": {
+            "type": "string",
+            "maxLength": 2000,
+            "title": "Interview Source",
+            "default": ""
+          },
+          "promised_response_on": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Promised Response On"
+          },
+          "promise_source": {
+            "type": "string",
+            "maxLength": 2000,
+            "title": "Promise Source",
+            "default": ""
+          },
+          "next_action": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NextAction"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "review": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Review"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "Tracking"
       },
       "ValidationError": {
         "properties": {
@@ -890,17 +1510,83 @@
           "type"
         ],
         "title": "ValidationError"
-      }
-    },
-    "securitySchemes": {
-      "AgentBearer": {
-        "type": "http",
-        "scheme": "bearer"
       },
-      "OwnerSession": {
-        "type": "apiKey",
-        "in": "cookie",
-        "name": "session"
+      "Warning": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "Warning"
+      },
+      "WorkloadResponse": {
+        "properties": {
+          "as_of": {
+            "type": "string",
+            "format": "date-time",
+            "title": "As Of"
+          },
+          "local_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Local Date"
+          },
+          "timezone": {
+            "type": "string",
+            "title": "Timezone"
+          },
+          "policy": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Policy"
+          },
+          "counts": {
+            "$ref": "#/components/schemas/Counts"
+          },
+          "warnings": {
+            "items": {
+              "$ref": "#/components/schemas/Warning"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "jobs": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/DerivedJob"
+            },
+            "type": "object",
+            "title": "Jobs"
+          },
+          "decisions": {
+            "items": {
+              "$ref": "#/components/schemas/Decision"
+            },
+            "type": "array",
+            "title": "Decisions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "as_of",
+          "local_date",
+          "timezone",
+          "policy",
+          "counts",
+          "warnings",
+          "jobs",
+          "decisions"
+        ],
+        "title": "WorkloadResponse"
       }
     }
   }

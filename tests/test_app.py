@@ -221,10 +221,11 @@ def test_provenance_and_policy(env):
     assert c.post("/auth/demo", headers={"Origin": "https://evil.example"}).status_code == 403
 
 
-def test_capacity_atomic_and_primary_employer(env):
+def test_capacity_warns_without_blocking_and_preserves_primary_employer_rule(env):
     _, c, _ = env
     p = c.get("/api/policy").json()["body"]
     p["active_cap"] = 1
+    p["open_application_limit"] = 1
     assert put(c, "search-policy", "filters", body=p).status_code == 200
 
     def create(i):
@@ -233,8 +234,11 @@ def test_capacity_atomic_and_primary_employer(env):
         ).status_code
 
     with ThreadPoolExecutor(max_workers=2) as pool:
-        assert sorted(pool.map(create, range(2))) == [200, 409]
-    assert len([x for x in c.get("/api/records?kind=job").json()]) == 1
+        assert sorted(pool.map(create, range(2))) == [200, 200]
+    assert len([x for x in c.get("/api/records?kind=job").json()]) == 2
+    planning = c.get("/api/workload").json()
+    assert planning["counts"]["open_applications"] == 2
+    assert "open_applications" in {w["code"] for w in planning["warnings"]}
     job = c.get("/api/records?kind=job").json()[0]
     assert put(c, "duplicate", body=job["body"]).status_code == 409
     alt = {**job["body"], "primary_id": job["id"], "title": "Alternative title"}

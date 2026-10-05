@@ -21,6 +21,7 @@ jobs:
       - run: node --check job_intel_tracker/static/app.js
       - run: node --check job_intel_tracker/static/credential-capsule.js
       - run: node --check job_intel_tracker/static/secure-handoff.js
+      - run: node --check job_intel_tracker/static/planning-ui.js
       - run: python -m build
       - run: docker build -t job-intel-tracker:ci .
       - name: Verify root-owned disk, runtime privileges, PORT and restart
