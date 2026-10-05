@@ -1,5 +1,9 @@
 # Local cross-contract verification and release dependencies
 
+## Aging publication preparation on current main
+
+`feat/mobile-aging-publication` is locally rebased onto main at `395ae8933e8cff9f1ab5647a37926c23d15c6328`, containing merged backend PR #8 and safe-area PR #7. Git skipped the already-merged acceptance and safe-area commits; the PR diff contains only mobile feature, tests and QA documentation. Before this documentation update, its mobile tree matched the preserved `prep/mobile-waiting-backend-pr8` tree exactly. Backend, web and non-mobile documentation match main. Original planning and preparation branches remain preserved. No aging build installation or backend deployment is implied by PR #7's direct installation approval.
+
 ## PR #7 approval and merge, October 5
 
 The owner directly approved "PR #7 merge and deploy to iphone" in this thread. Exact head `670780f5f918eccc55fc568b7f588e4a103b22fe` had four successful checks. PR #7 was marked ready and merged at `395ae8933e8cff9f1ab5647a37926c23d15c6328` (2:49 p.m. America/New_York). This supersedes the earlier approval blocker below for PR #7 only. New workload publication and backend deployment remain separate.
