@@ -1,5 +1,11 @@
 # Local cross-contract verification and release dependencies
 
+## PR #7 approval and merge, October 5
+
+The owner directly approved "PR #7 merge and deploy to iphone" in this thread. Exact head `670780f5f918eccc55fc568b7f588e4a103b22fe` had four successful checks. PR #7 was marked ready and merged at `395ae8933e8cff9f1ab5647a37926c23d15c6328` (2:49 p.m. America/New_York). This supersedes the earlier approval blocker below for PR #7 only. New workload publication and backend deployment remain separate.
+
+Merged mobile source exactly matches the reviewed safe-area head. The prepared safe-area-only Release artifact passed strict codesign verification, has bundle identifier `com.sandkcampbell.jobinteltracker`, both expected domain entitlements and minimum iOS 17.4. Its main bundle SHA-256 is `8d5e916613dbdf18b117878269f7e440d45aa515fe7ddb2ccc0baa0116839eff`; unpublished workload editor strings are absent. Installation has not occurred: the physical owner iPhone reports unavailable. Connection/unlock is required before the approved install can proceed. No live records or auth settings were changed.
+
 ## Current local preparation after backend PR #8
 
 Backend PR #8 is merged at `ac50887b82c6cb0472529ba25c32b767f8918c14`; its tree exactly matches reviewed backend candidate `f74c880a7241bbfd5300c7d702a545995d77e7e2`. The original reviewed mobile branch remains `feat/mobile-waiting-planning` at `611a899a50a4bf3032c23d502683d4ec95132a57`.
