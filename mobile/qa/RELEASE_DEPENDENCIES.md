@@ -2,6 +2,8 @@
 
 ## Current combined rollout status — October 6
 
+After backend PR #9 merged, the isolated mobile branch was rebased without conflicts onto `c3a2988076ca5288f39aec84e4e84114983f9ee9`. Mobile contents match the previously reviewed tree exactly; only the commit ancestry changed. This new backend baseline supersedes the earlier main base below. Publication remains paused at the same direct-approval gate; no retry of the rejected push was made.
+
 PR #7 is merged, installed and narrowly accepted for physical safe-area layout. The sections below are historical preparation snapshots; their pending PR #7 merge/install statements are superseded.
 
 The combined mobile branch is `feat/mobile-research-requests`, based on main `395ae8933e8cff9f1ab5647a37926c23d15c6328`. It contains waiting/planning, the separate active-application count fix, and research requests. Full local checks and independent release review pass: 125 Jest tests, four scene-plugin tests, TypeScript, ESLint and vendor verification. Backend merge/deployment sequencing belongs to the backend task; this task does not deploy Render. Automatic agent wake-up stays disabled. No live records or sessions were changed.
