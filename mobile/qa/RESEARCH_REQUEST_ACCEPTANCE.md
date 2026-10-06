@@ -24,4 +24,6 @@ Screenshot saved to Library as `libfile_d080e40a27188191a1f65bfe74d25949` (`file
 
 ## Remaining release dependencies
 
+October 6 rollout update: combined publication/installation approval was relayed by the parent task, but automatic approval review rejected publishing this branch because it requires trusted direct authorization in this execution session. Publication and newer phone installation remain paused; see [current release dependencies](RELEASE_DEPENDENCIES.md). PR #7's completed safe-area installation is unaffected.
+
 Backend research routes must be merged and deployed before live client use. Durable backend work-available events do not yet have a configured delivery transport or agent wake-up integration; the app does not promise that requesting work will immediately run an agent. No live queue writes occurred. The newer aging/research client has not been pushed, merged, deployed or installed on a phone. Existing PR #7 approval applies to its already installed safe-area release only. Android execution remains deferred in favor of iOS.

@@ -1,5 +1,13 @@
 # Local cross-contract verification and release dependencies
 
+## Current combined rollout status — October 6
+
+PR #7 is merged, installed and narrowly accepted for physical safe-area layout. The sections below are historical preparation snapshots; their pending PR #7 merge/install statements are superseded.
+
+The combined mobile branch is `feat/mobile-research-requests`, based on main `395ae8933e8cff9f1ab5647a37926c23d15c6328`. It contains waiting/planning, the separate active-application count fix, and research requests. Full local checks and independent release review pass: 125 Jest tests, four scene-plugin tests, TypeScript, ESLint and vendor verification. Backend merge/deployment sequencing belongs to the backend task; this task does not deploy Render. Automatic agent wake-up stays disabled. No live records or sessions were changed.
+
+The owner approval for the combined rollout was relayed from the parent conversation. Automatic approval review rejected `git push -u origin feat/mobile-research-requests` because that quoted approval is not trusted direct authorization in this execution session. No workaround or remote publication was attempted. A direct approval here is required before this branch can be pushed, its PR created/merged, or its newer signed app installed. The branch remains local, and no combined release PR exists yet.
+
 ## Aging publication preparation on current main
 
 `feat/mobile-aging-publication` is locally rebased onto main at `395ae8933e8cff9f1ab5647a37926c23d15c6328`, containing merged backend PR #8 and safe-area PR #7. Git skipped the already-merged acceptance and safe-area commits; the PR diff contains only mobile feature, tests and QA documentation. Before this documentation update, its mobile tree matched the preserved `prep/mobile-waiting-backend-pr8` tree exactly. Backend, web and non-mobile documentation match main. Original planning and preparation branches remain preserved. No aging build installation or backend deployment is implied by PR #7's direct installation approval.

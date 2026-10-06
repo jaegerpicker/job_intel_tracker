@@ -1,5 +1,7 @@
 # Waiting and workload: local acceptance
 
+Current October 6 status: waiting/planning is part of local `feat/mobile-research-requests`, alongside the corrected application count and research requests. PR #7 was already merged, installed and accepted for its safe-area layout. The older pending-release statements below are historical snapshots, superseded by [current release dependencies](RELEASE_DEPENDENCIES.md). Combined feature checks pass 125 Jest tests and four scene-plugin checks, with lint/typecheck and all-platform export successful; physical feature acceptance remains pending.
+
 The Expo TypeScript companion now reads the server workload projection and offers a Plan tab with sourced observations, human/receipt/outbound contacts, scheduled interviews, promised responses, explicit task ownership, and owner review decisions. Workload guidance separates open roles (15), interviewing companies (3), and weekly new applications (2); warnings never block otherwise permitted writes.
 
 Live labels and dates are server authoritative through GET /api/workload. Record-version agreement is required before combining projections or saving. Complete-body versioned writes retain unrelated fields and use the existing journal and idempotency keys. Response-loss retries preserve the exact payload/key. Assignment grants no access. Existing owner identity, HTTPS, expiry and read/write scopes remain enforced; no backend/auth/configuration changes were made.
