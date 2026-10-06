@@ -73,7 +73,7 @@ async function refresh() {
     [records, workloadState] = await Promise.all([api('/api/records'), api('/api/workload')]);
     render();
 }
-const active = r => !['Prospect', 'Closed', 'Rejected', 'Withdrawn'].includes(r.body.stage) && !r.body.primary_id;
+const active = r => TrackerPlanningUI.activeApplication(r);
 const money = n => n ? new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
@@ -98,9 +98,9 @@ function render() {
         act = jobs.filter(active);
     $('#stats').replaceChildren();
     [
-        ['Open applications', (workloadState?.counts.open_applications ?? act.length) + ' / ' + policy().open_application_limit, TrackerPlanningUI.capacityNote(workloadState)],
+        ['Active applications', (workloadState?.counts.open_applications ?? act.length) + ' / ' + policy().open_application_limit, TrackerPlanningUI.capacityNote(workloadState)],
         ['Backlog', jobs.filter(r => r.body.stage === 'Prospect').length, 'Promising, unapplied'],
-        ['Attention workload', workloadState?.counts.attention ?? 0, 'Open applications with actions, interviews or decisions'],
+        ['Attention workload', workloadState?.counts.attention ?? 0, 'Active applications with actions, interviews or decisions'],
         ['Passive waiting', workloadState?.counts.passive_waiting ?? 0, 'Separate from parked attention']
     ].forEach(([t, n, d]) => {
         const x = el('div', undefined, 'stat');

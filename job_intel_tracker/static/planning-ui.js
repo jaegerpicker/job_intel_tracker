@@ -1,5 +1,8 @@
 'use strict';
 globalThis.TrackerPlanningUI = (() => {
+    function activeApplication(record) {
+        return record.kind === 'job' && ['Applied', 'Screening', 'Interview', 'Offer'].includes(record.body.stage);
+    }
     function capacityNote(workload) {
         return workload?.warnings?.some(warning => warning.code === 'open_applications') ?
             'Planning warning; recording stays available' :
@@ -144,5 +147,5 @@ globalThis.TrackerPlanningUI = (() => {
         if (derived?.reasons?.length) root.append(node('p', derived.reasons.join(' ')));
         return root;
     }
-    return {editor, pendingWrite, capacityNote};
+    return {editor, pendingWrite, capacityNote, activeApplication};
 })();

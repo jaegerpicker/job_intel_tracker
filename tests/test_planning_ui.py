@@ -17,6 +17,15 @@ let sequence=0;const context={document:{createElement:tag=>new Element(tag)},str
  crypto:{randomUUID:()=>`synthetic-operation-${++sequence}`}};
 vm.createContext(context);vm.runInContext(fs.readFileSync(process.argv[1],'utf8'),context);
 const api=context.TrackerPlanningUI;
+for (const stage of ['Applied','Screening','Interview','Offer']) {
+ for (const primary_id of [undefined,'synthetic-primary']) {
+  assert.equal(api.activeApplication({kind:'job',body:{stage,primary_id}}),true);
+ }
+}
+for (const stage of ['Prospect','Rejected','Withdrawn','Closed','']) {
+ assert.equal(api.activeApplication({kind:'job',body:{stage,primary_id:'synthetic-primary'}}),false);
+}
+assert.equal(api.activeApplication({kind:'note',body:{stage:'Applied'}}),false);
 assert.equal(api.capacityNote({counts:{open_applications:15},policy:{open_application_limit:16},warnings:[]}), 'Recording stays available');
 assert.equal(api.capacityNote({warnings:[{code:'weekly_new'},{code:'pilot_review'}]}), 'Recording stays available');
 assert.equal(api.capacityNote(null), 'Recording stays available');
