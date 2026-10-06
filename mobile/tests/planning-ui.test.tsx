@@ -7,7 +7,7 @@ import {
   waitFor,
   act,
 } from "@testing-library/react-native";
-import { PlanningEditor, AttentionBadge } from "../src/planning-ui";
+import { PlanningEditor, AttentionBadge, PlanningSummary } from "../src/planning-ui";
 import { fixtures, DemoRepository } from "../src/demo";
 import { demoWorkload } from "../src/demo-workload";
 import { useWorkload } from "../src/use-workload";
@@ -16,6 +16,15 @@ import { BoardProvider } from "../src/store";
 import { BoardApp } from "../App";
 const job = fixtures[0],
   projected = demoWorkload(fixtures);
+test("displayed active applications include separately applied linked roles", () => {
+  const linked = { ...fixtures[1], id: "synthetic-linked-role", body: { ...fixtures[1].body, stage: "Applied" as const, primary_id: fixtures[1].id } };
+  const records = [...fixtures, linked];
+  const data = demoWorkload(records);
+  expect(data.counts.open_applications).toBe(projected.counts.open_applications + 1);
+  render(<PlanningSummary data={data} error="" loading={false} retry={jest.fn()} />);
+  expect(screen.getByText("4 / 15 active applications")).toBeOnTheScreen();
+  expect(linked.body.primary_id).toBe(fixtures[1].id);
+});
 const editor = (onSave = jest.fn(), record = job) => (
   <PlanningEditor
     job={record}

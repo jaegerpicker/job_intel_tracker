@@ -38,7 +38,7 @@ export function PlanningSummary({
       <Text style={s.section}>Search workload</Text>
       <Text style={s.cardTitle}>
         {data.counts.open_applications} /{" "}
-        {String(data.policy.open_application_limit)} open applications
+        {String(data.policy.open_application_limit)} active applications
       </Text>
       <Text style={s.text}>
         {data.counts.interviewing_companies} /{" "}

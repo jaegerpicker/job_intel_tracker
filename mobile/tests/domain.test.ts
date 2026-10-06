@@ -7,15 +7,19 @@ import {
   safeSource,
   validateFile,
 } from "../src/domain";
-test("filters by actual title and stage and counts active primary roles", () => {
+test("filters by actual title and stage and counts each active application", () => {
   expect(filterJobs(fixtures, "native", "Prospect")).toHaveLength(1);
   expect(fixtures.filter(active)).toHaveLength(3);
   expect(
     active({
       ...fixtures[0],
-      body: { ...fixtures[0].body, primary_id: "other" },
+      body: { ...fixtures[0].body, stage: "Applied", primary_id: "other" },
     }),
-  ).toBe(false);
+  ).toBe(true);
+  for (const stage of ["Applied", "Screening", "Interview", "Offer"] as const)
+    expect(active({ ...fixtures[0], body: { ...fixtures[0].body, stage, primary_id: "other", waiting: true } })).toBe(true);
+  for (const stage of ["Prospect", "Closed", "Rejected", "Withdrawn", undefined] as const)
+    expect(active({ ...fixtures[0], body: { ...fixtures[0].body, stage } })).toBe(false);
 });
 test("writes preserve unknown and owner fields and use current version", () => {
   const record = {

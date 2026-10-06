@@ -102,8 +102,7 @@ export function parseRecord(value: unknown): BoardRecord {
 export function active(record: BoardRecord): boolean {
   return (
     record.kind === "job" &&
-    !record.body.primary_id &&
-    !["Prospect", "Closed", "Rejected", "Withdrawn"].includes(
+    ["Applied", "Screening", "Interview", "Offer"].includes(
       record.body.stage ?? "",
     )
   );
