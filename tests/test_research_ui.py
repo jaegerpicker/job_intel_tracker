@@ -53,6 +53,25 @@ const request={id:'synthetic-request',job:'synthetic-job',version:1,package:'ful
  assert.equal(messages.at(-1),'Request changed. Refresh and compare before acting again.');
  const readOnly=ctx.TrackerResearchUI.panel({id:'synthetic-job'},{owner:false,message:()=>{},api:async()=>[request]});await tick();
  assert.equal(flat(readOnly).some(n=>n.tag==='form'||n.tag==='button'),false);
+ for (const prior of ['success','conflict','uncertain']) {
+  let current=structuredClone(request);
+  const feedback=ctx.TrackerResearchUI.panel({id:'synthetic-job'},{owner:true,message:()=>{},api:async(path,opts)=>{
+   if(!opts)return [current];
+   if(path.endsWith('/cancel')){current={...current,status:'cancelled',version:2};return current;}
+   if(prior==='conflict')throw Object.assign(Error('Synthetic conflict'),{status:409});
+   if(prior==='uncertain')throw Error('Synthetic lost response');
+   return current;
+  }});
+  await tick();let nodes=flat(feedback);
+  const feedbackForm=nodes.find(n=>n.tag==='form'),feedbackStatus=nodes.find(n=>n.attributes.role==='status');
+  const draft=nodes.find(n=>n.tag==='textarea');draft.value='Preserve unsent instructions';
+  await feedbackForm.onsubmit({preventDefault(){}});assert.ok(feedbackStatus.textContent);
+  const cancel=flat(feedback).find(n=>n.tag==='button'&&n.textContent==='Cancel request');await cancel.onclick();
+  assert.equal(draft.value,'Preserve unsent instructions');
+  if(prior==='uncertain'){
+   assert.ok(feedbackStatus.textContent.startsWith('Response uncertain.'));assert.equal(nodes.find(n=>n.tag==='fieldset').disabled,true);
+  }else assert.equal(feedbackStatus.textContent,'');
+ }
  console.log('PASS uncertain retry identity, repeated-submit guard, conflict recovery, owner controls, missing artifacts and safe text');
 })().catch(error=>{console.error(error);process.exit(1);});
 """
