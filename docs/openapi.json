@@ -162,6 +162,195 @@
         }
       }
     },
+    "/api/research-requests": {
+      "get": {
+        "summary": "Requests",
+        "operationId": "requests_api_research_requests_get",
+        "parameters": [
+          {
+            "name": "job",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Job"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "queued",
+                    "claimed",
+                    "completed",
+                    "blocked",
+                    "cancelled"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WorkRequest"
+                  },
+                  "title": "Response Requests Api Research Requests Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/jobs/{job}/research-requests": {
+      "post": {
+        "summary": "Create",
+        "operationId": "create_api_jobs__job__research_requests_post",
+        "parameters": [
+          {
+            "name": "job",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkRequest"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/research-requests/{rid}/{action}": {
+      "post": {
+        "summary": "Transition",
+        "operationId": "transition_api_research_requests__rid___action__post",
+        "parameters": [
+          {
+            "name": "rid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Rid"
+            }
+          },
+          {
+            "name": "action",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "enum": [
+                "claim",
+                "renew",
+                "release",
+                "block",
+                "complete",
+                "requeue",
+                "cancel"
+              ],
+              "type": "string",
+              "title": "Action"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Action"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkRequest"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/.well-known/apple-app-site-association": {
       "get": {
         "summary": "Apple App Association",
@@ -891,6 +1080,169 @@
   },
   "components": {
     "schemas": {
+      "Action": {
+        "properties": {
+          "version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Version"
+          },
+          "lease_minutes": {
+            "type": "integer",
+            "maximum": 120.0,
+            "minimum": 5.0,
+            "title": "Lease Minutes",
+            "default": 30
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 4000,
+            "title": "Reason",
+            "default": ""
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 4000,
+            "title": "Note",
+            "default": ""
+          },
+          "artifacts": {
+            "items": {
+              "$ref": "#/components/schemas/Artifact"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "title": "Artifacts"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "version"
+        ],
+        "title": "Action"
+      },
+      "Artifact": {
+        "properties": {
+          "deliverable": {
+            "type": "string",
+            "enum": [
+              "research",
+              "resume",
+              "cover_letter",
+              "interview_prep"
+            ],
+            "title": "Deliverable"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "record",
+              "attachment"
+            ],
+            "title": "Type"
+          },
+          "id": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Id"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Version"
+          },
+          "source": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Source"
+          },
+          "observed_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Observed On"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "deliverable",
+          "type",
+          "id",
+          "version",
+          "source",
+          "observed_on"
+        ],
+        "title": "Artifact"
+      },
+      "ArtifactView": {
+        "properties": {
+          "deliverable": {
+            "type": "string",
+            "enum": [
+              "research",
+              "resume",
+              "cover_letter",
+              "interview_prep"
+            ],
+            "title": "Deliverable"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "record",
+              "attachment"
+            ],
+            "title": "Type"
+          },
+          "id": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Id"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Version"
+          },
+          "source": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Source"
+          },
+          "observed_on": {
+            "type": "string",
+            "format": "date",
+            "title": "Observed On"
+          },
+          "availability": {
+            "type": "string",
+            "enum": [
+              "available",
+              "missing",
+              "changed",
+              "invalid"
+            ],
+            "title": "Availability"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "deliverable",
+          "type",
+          "id",
+          "version",
+          "source",
+          "observed_on",
+          "availability"
+        ],
+        "title": "ArtifactView"
+      },
       "Body_upload_api_jobs__job__attachments_post": {
         "properties": {
           "file": {
@@ -1167,6 +1519,74 @@
         ],
         "title": "DerivedJob"
       },
+      "Event": {
+        "properties": {
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "actor": {
+            "type": "string",
+            "title": "Actor"
+          },
+          "action": {
+            "type": "string",
+            "title": "Action"
+          },
+          "timestamp": {
+            "type": "number",
+            "title": "Timestamp"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          },
+          "artifacts": {
+            "items": {
+              "$ref": "#/components/schemas/Artifact"
+            },
+            "type": "array",
+            "title": "Artifacts"
+          },
+          "completion_note": {
+            "type": "string",
+            "title": "Completion Note",
+            "default": ""
+          },
+          "claimed_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Claimed By"
+          },
+          "lease_until": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lease Until"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "version",
+          "actor",
+          "action",
+          "timestamp",
+          "reason"
+        ],
+        "title": "Event"
+      },
       "Exchange": {
         "properties": {
           "code": {
@@ -1203,6 +1623,32 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "NewRequest": {
+        "properties": {
+          "package": {
+            "type": "string",
+            "enum": [
+              "research",
+              "application_documents",
+              "interview_prep",
+              "full_package"
+            ],
+            "title": "Package"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 4000,
+            "title": "Note",
+            "default": ""
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "package"
+        ],
+        "title": "NewRequest"
       },
       "NextAction": {
         "properties": {
@@ -1528,6 +1974,169 @@
           "message"
         ],
         "title": "Warning"
+      },
+      "WorkRequest": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "job": {
+            "type": "string",
+            "title": "Job"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "package": {
+            "type": "string",
+            "enum": [
+              "research",
+              "application_documents",
+              "interview_prep",
+              "full_package"
+            ],
+            "title": "Package"
+          },
+          "note": {
+            "type": "string",
+            "title": "Note"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "claimed",
+              "completed",
+              "blocked",
+              "cancelled"
+            ],
+            "title": "Status"
+          },
+          "created_by": {
+            "type": "string",
+            "title": "Created By"
+          },
+          "created_at": {
+            "type": "number",
+            "title": "Created At"
+          },
+          "updated_by": {
+            "type": "string",
+            "title": "Updated By"
+          },
+          "updated_at": {
+            "type": "number",
+            "title": "Updated At"
+          },
+          "claimed_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Claimed By"
+          },
+          "lease_until": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lease Until"
+          },
+          "claim_expired": {
+            "type": "boolean",
+            "title": "Claim Expired",
+            "default": false
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason",
+            "default": ""
+          },
+          "completion_note": {
+            "type": "string",
+            "title": "Completion Note",
+            "default": ""
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "artifacts": {
+            "items": {
+              "$ref": "#/components/schemas/ArtifactView"
+            },
+            "type": "array",
+            "title": "Artifacts"
+          },
+          "required_deliverables": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "research",
+                "resume",
+                "cover_letter",
+                "interview_prep"
+              ]
+            },
+            "type": "array",
+            "title": "Required Deliverables"
+          },
+          "missing_deliverables": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "research",
+                "resume",
+                "cover_letter",
+                "interview_prep"
+              ]
+            },
+            "type": "array",
+            "title": "Missing Deliverables"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/Event"
+            },
+            "type": "array",
+            "title": "Events"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "job",
+          "version",
+          "package",
+          "note",
+          "status",
+          "created_by",
+          "created_at",
+          "updated_by",
+          "updated_at",
+          "required_deliverables",
+          "missing_deliverables",
+          "events"
+        ],
+        "title": "WorkRequest"
       },
       "WorkloadResponse": {
         "properties": {

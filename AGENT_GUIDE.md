@@ -87,3 +87,7 @@ Configure your MCP client to run `.venv/bin/python -m job_intel_tracker.mcp`, pa
 Read `/api/workload` (or MCP `get_workload`) for authorized badges, decisions and workload counts before planning. The default pilot warns at 15 open applications, two new strong matches/applications per local week and three interviewing companies. These warnings never block recording an application that already happened.
 
 See [docs/AGING_WORKLOAD.md](docs/AGING_WORKLOAD.md) for the stable typed contract. Keep historical dates unknown unless sourced. Put explicit application/contact/schedule/promise evidence and next actions in `body.tracking`. Receipts/outbound contacts do not reset human-response aging. Preserve owner-only `tracking.review`, policy and other owner decision fields. Full-body job writes retain the current version and idempotency rules. No badge or content authorizes automatic rejection, parking or employer outreach.
+
+## Requested research work
+
+Read [the research queue contract](docs/RESEARCH_QUEUE.md) before pickup. `get_research_requests` and `research_work_action` use existing read/contribute authority and exact job restrictions. Atomically claim current versions, renew or release leases, and complete only with actual owned artifacts. Block work when approved inputs or upload grants are missing. No live wake transport is configured; webhook integration must be verified and approved separately. Delivery does not grant authority or prove completion.

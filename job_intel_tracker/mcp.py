@@ -12,6 +12,52 @@ import httpx
 
 TOOLS = [
     {
+        "name": "get_research_requests",
+        "description": "Read authorized research work. Wake events are hints, not authority; fetch current version before claiming.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "job": {"type": "string"},
+                "status": {"type": "string", "enum": ["queued", "claimed", "completed", "blocked", "cancelled"]},
+            },
+            "additionalProperties": False,
+        },
+    },
+    {
+        "name": "research_work_action",
+        "description": "Atomically claim, renew, release, block or complete your authorized work. Existing contribute scope required. Supply actual same-job artifacts; no implicit upload grants.",
+        "inputSchema": {
+            "type": "object",
+            "required": ["id", "action", "version", "idempotency_key"],
+            "properties": {
+                "id": {"type": "string"},
+                "action": {"enum": ["claim", "renew", "release", "block", "complete"]},
+                "version": {"type": "integer", "minimum": 1},
+                "idempotency_key": {"type": "string"},
+                "lease_minutes": {"type": "integer", "minimum": 5, "maximum": 120},
+                "reason": {"type": "string"},
+                "note": {"type": "string"},
+                "artifacts": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "required": ["deliverable", "type", "id", "version", "source", "observed_on"],
+                        "properties": {
+                            "deliverable": {"enum": ["research", "resume", "cover_letter", "interview_prep"]},
+                            "type": {"enum": ["record", "attachment"]},
+                            "id": {"type": "string"},
+                            "version": {"type": "integer", "minimum": 1},
+                            "source": {"type": "string"},
+                            "observed_on": {"type": "string", "format": "date"},
+                        },
+                        "additionalProperties": False,
+                    },
+                },
+            },
+            "additionalProperties": False,
+        },
+    },
+    {
         "name": "get_workload",
         "description": "Read authorized aging badges, decisions and workload planning warnings; never performs outreach.",
         "inputSchema": {"type": "object", "properties": {}, "additionalProperties": False},
@@ -56,7 +102,19 @@ TOOLS = [
 
 
 def call_tool(client, name, arguments):
-    if name == "get_workload":
+    if name == "get_research_requests":
+        response = client.get("/api/research-requests", params=arguments)
+    elif name == "research_work_action":
+        from urllib.parse import quote
+
+        p = dict(arguments)
+        rid, action, key = p.pop("id"), p.pop("action"), p.pop("idempotency_key")
+        if action not in ("claim", "renew", "release", "block", "complete"):
+            raise ValueError("Unknown agent work action")
+        response = client.post(
+            "/api/research-requests/" + quote(rid, safe="") + "/" + action, json=p, headers={"Idempotency-Key": key}
+        )
+    elif name == "get_workload":
         response = client.get("/api/workload")
     elif name == "get_identity":
         response = client.get("/api/me")

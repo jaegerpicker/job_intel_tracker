@@ -180,6 +180,7 @@ async function showDetail() {
     if (derived) d.append(el('p', derived.label, 'planning-badge'));
     if (derived && derived.record_version !== r.version) d.append(el('p', 'Planning changed while loading. Refresh planning before editing dates or actions.', 'warn'));
     else d.append(TrackerPlanningUI.editor(r, derived, {save, refresh, message, owner: ownerSession, today: workloadState.local_date}));
+    d.append(TrackerResearchUI.panel(r, {api, message, owner: ownerSession}));
     d.append(el('h3', 'Stage timeline'));
     (b.timeline || []).forEach(t => d.append(el('div', t.stage + ' · ' + new Date(t.at * 1000).toLocaleDateString() + ' · ' + t.author, 'timeline')));
     ['rating', 'research', 'note', 'interview'].forEach(kind => {
