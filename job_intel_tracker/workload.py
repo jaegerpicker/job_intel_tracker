@@ -9,6 +9,14 @@ from pydantic import BaseModel, ConfigDict, Field, StringConstraints, field_vali
 
 Text = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=2000)]
 TERMINAL = {"Closed", "Rejected", "Withdrawn"}
+ACTIVE_APPLICATION_STAGES = {"Applied", "Screening", "Interview", "Offer"}
+
+
+def active_application(record):
+    """Count applied role identities; company links and attention state do not reduce capacity."""
+    return record["kind"] == "job" and record["body"].get("stage") in ACTIVE_APPLICATION_STAGES
+
+
 DEFAULTS = {
     "open_application_limit": 15,
     "weekly_new_limit": 2,
@@ -326,7 +334,7 @@ def project(records, raw_policy, now=None):
     states = {r["id"]: derive(r["body"], policy, today) for r in jobs}
     for r in jobs:
         states[r["id"]].record_version = r["version"]
-    opened = [r for r in jobs if r["body"]["stage"] not in TERMINAL | {"Prospect"}]
+    opened = [r for r in jobs if active_application(r)]
     parked = sum(states[r["id"]].status == "parked" for r in opened)
     attention = sum(
         states[r["id"]].status != "parked"
@@ -370,7 +378,7 @@ def project(records, raw_policy, now=None):
             )
         )
     for value, limit, code, label in (
-        (len(opened), policy["open_application_limit"], "open_applications", "open applications"),
+        (len(opened), policy["open_application_limit"], "open_applications", "active applications"),
         (weekly, policy["weekly_new_limit"], "weekly_new", "new strong matches / applications this week"),
         (
             interviewing,

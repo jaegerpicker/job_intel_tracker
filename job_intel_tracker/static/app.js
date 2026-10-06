@@ -73,7 +73,7 @@ async function refresh() {
     [records, workloadState] = await Promise.all([api('/api/records'), api('/api/workload')]);
     render();
 }
-const active = r => !['Prospect', 'Closed', 'Rejected', 'Withdrawn'].includes(r.body.stage) && !r.body.primary_id;
+const active = r => TrackerPlanningUI.activeApplication(r);
 const money = n => n ? new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
@@ -98,9 +98,9 @@ function render() {
         act = jobs.filter(active);
     $('#stats').replaceChildren();
     [
-        ['Open applications', (workloadState?.counts.open_applications ?? act.length) + ' / ' + policy().open_application_limit, TrackerPlanningUI.capacityNote(workloadState)],
+        ['Active applications', (workloadState?.counts.open_applications ?? act.length) + ' / ' + policy().open_application_limit, TrackerPlanningUI.capacityNote(workloadState)],
         ['Backlog', jobs.filter(r => r.body.stage === 'Prospect').length, 'Promising, unapplied'],
-        ['Attention workload', workloadState?.counts.attention ?? 0, 'Open applications with actions, interviews or decisions'],
+        ['Attention workload', workloadState?.counts.attention ?? 0, 'Active applications with actions, interviews or decisions'],
         ['Passive waiting', workloadState?.counts.passive_waiting ?? 0, 'Separate from parked attention']
     ].forEach(([t, n, d]) => {
         const x = el('div', undefined, 'stat');
@@ -180,6 +180,7 @@ async function showDetail() {
     if (derived) d.append(el('p', derived.label, 'planning-badge'));
     if (derived && derived.record_version !== r.version) d.append(el('p', 'Planning changed while loading. Refresh planning before editing dates or actions.', 'warn'));
     else d.append(TrackerPlanningUI.editor(r, derived, {save, refresh, message, owner: ownerSession, today: workloadState.local_date}));
+    d.append(TrackerResearchUI.panel(r, {api, message, owner: ownerSession}));
     d.append(el('h3', 'Stage timeline'));
     (b.timeline || []).forEach(t => d.append(el('div', t.stage + ' · ' + new Date(t.at * 1000).toLocaleDateString() + ' · ' + t.author, 'timeline')));
     ['rating', 'research', 'note', 'interview'].forEach(kind => {

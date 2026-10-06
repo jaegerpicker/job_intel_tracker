@@ -20,7 +20,7 @@ from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from . import enrollment, mobile_auth, workload
+from . import enrollment, mobile_auth, research_queue, workload
 
 STAGES = ["Prospect", "Applied", "Screening", "Interview", "Offer", "Closed", "Rejected", "Withdrawn"]
 
@@ -140,6 +140,7 @@ def create_app(data_dir=None, demo=False):
         return response
 
     mobile_auth.configure(app, db, public_origin, owner, configured_owner)
+    research_queue.configure(app, db, principal, audit, lambda aid: (uploads / aid).is_file())
 
     @app.get("/.well-known/apple-app-site-association")
     def apple_app_association():
@@ -701,7 +702,7 @@ def create_app(data_dir=None, demo=False):
                     history.append({"stage": body["stage"], "at": time.time(), "author": actor})
                 body["timeline"] = history
             c.execute(
-                "INSERT OR REPLACE INTO records VALUES(?,?,?,?,?,?,?)",
+                "INSERT INTO records VALUES(?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET version=excluded.version,body=excluded.body,updated=excluded.updated",
                 (rid, p.kind, p.job, old["author"] if old else actor, p.version + 1, json.dumps(body), time.time()),
             )
             c.execute(
@@ -874,6 +875,8 @@ def create_app(data_dir=None, demo=False):
                 "schema": 1,
                 "records": [unpack(r) for r in c.execute("SELECT * FROM records")],
                 "attachments": [dict(r) for r in c.execute("SELECT * FROM attachments")],
+                "research_requests": [dict(r) for r in c.execute("SELECT * FROM research_requests")],
+                "research_events": [dict(r) for r in c.execute("SELECT * FROM research_events")],
                 "notice": "Attachment binaries require separate authenticated downloads. Export contains private data.",
             }
 

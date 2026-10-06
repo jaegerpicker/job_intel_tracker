@@ -61,3 +61,5 @@ Render setup: [exact service fields](docs/RENDER_SETUP.md). Optional [operator-a
 ## React Native companion
 
 The native TypeScript companion lives in [mobile/](mobile/README.md), in this same open-source project. Its first milestone is a synthetic-data demo of the board, status timeline, notes, interview preparation and evidence flows. Live mobile auth remains gated by the [owner-only authentication design](docs/MOBILE_AUTH.md).
+
+Owner-requested research and material preparation use a leased agent queue with visible missing deliverables. See [research queue/API and webhook setup](docs/RESEARCH_QUEUE.md). The durable outbox has no configured live transport; agents need their own approved connection and claim work explicitly.

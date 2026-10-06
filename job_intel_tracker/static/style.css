@@ -438,3 +438,9 @@ body.enrollment { display:block; }
 .detail details input, .detail details textarea, .detail details select { max-width:100%; }
 .planning-review button { margin:4px; }
 body.enrollment main { margin:0 auto; width:auto; max-width:700px; padding:40px 24px; }
+/* Research requests use the existing responsive evidence and form controls. */
+.research-queue {border-top: 1px solid var(--line); margin-top: 1rem; padding-top: 1rem; overflow-wrap: anywhere;}
+.research-queue fieldset {min-width: 0; display: grid; gap: .7rem;}
+.research-queue label {display: grid; gap: .3rem;}
+.research-queue select, .research-queue textarea {width: 100%; max-width: 100%; box-sizing: border-box;}
+.research-queue button {margin: .3rem .3rem .3rem 0;}

@@ -1,6 +1,7 @@
 import json
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 import pytest
 from test_app import env as env  # noqa: PLC0414 - re-export the shared pytest fixture
@@ -284,3 +285,83 @@ def test_projection_auth_and_mcp_get_workload(env):
         transport=httpx.MockTransport(lambda req: httpx.Response(200, json=response.json())),
     ) as client:
         assert not call_tool(client, "get_workload", {}).get("isError")
+
+
+def test_linked_roles_count_separately_while_attention_and_companies_are_distinct():
+    primary = job("role-one", company="Synthetic Shared Employer", tracking=applied())
+    linked = job(
+        "role-two",
+        company="Synthetic Shared Employer",
+        tracking=applied(review={"decision": "park", "on": "2026-09-15", "source": "Synthetic owner decision"}),
+    )
+    linked["body"]["primary_id"] = primary["id"]
+    rejected = job("rejected", stage="Rejected", company="Synthetic Closed Employer")
+    prospect = job("prospect", stage="Prospect", company="Synthetic Prospect")
+    result = projection([primary, linked, rejected, prospect])
+    assert result["counts"]["open_applications"] == 2
+    assert result["counts"]["parked"] == 1
+    assert result["counts"]["attention"] + result["counts"]["passive_waiting"] + result["counts"]["parked"] == 2
+    assert result["policy"]["open_application_limit"] == 15
+    assert not any(warning["code"] == "open_applications" for warning in result["warnings"])
+    primary["body"]["stage"] = linked["body"]["stage"] = "Interview"
+    result = projection([primary, linked, rejected, prospect])
+    assert result["counts"]["open_applications"] == 2
+    assert result["counts"]["interviewing_companies"] == 1
+
+
+def test_linked_application_api_idempotence_rejection_and_soft_limit(env):
+    _, owner, _agent = env
+    primary = put(owner, rid="synthetic-primary").json()
+    body = {**primary["body"], "title": "Different active role", "primary_id": primary["id"]}
+    linked = put(owner, rid="synthetic-linked", body=body, key="linked-operation")
+    assert linked.status_code == 200
+    assert put(owner, rid="synthetic-linked", body=body, key="linked-operation").json() == linked.json()
+    assert owner.get("/api/workload").json()["counts"]["open_applications"] == 2
+    changed = {**linked.json()["body"], "stage": "Rejected"}
+    assert put(owner, rid="synthetic-linked", version=1, body=changed).status_code == 200
+    assert owner.get("/api/workload").json()["counts"]["open_applications"] == 1
+    changed["stage"] = "Applied"
+    changed["tracking"] = {
+        "review": {
+            "decision": "park",
+            "on": datetime.now(ZoneInfo("America/New_York")).date().isoformat(),
+            "source": "Synthetic owner review",
+        }
+    }
+    assert put(owner, rid="synthetic-linked", version=2, body=changed).status_code == 200
+    result = owner.get("/api/workload").json()
+    assert result["counts"]["open_applications"] == 2 and result["counts"]["parked"] == 1
+    assert result["policy"]["open_application_limit"] == 15
+
+    # Same-employer roles count toward the real threshold and remain recordable above it.
+    for i in range(13):
+        assert (
+            put(
+                owner,
+                rid=f"synthetic-extra-{i}",
+                body={**primary["body"], "primary_id": primary["id"], "title": f"Synthetic role {i}"},
+            ).status_code
+            == 200
+        )
+    result = owner.get("/api/workload").json()
+    assert result["counts"]["open_applications"] == 15
+    assert "open_applications" in {warning["code"] for warning in result["warnings"]}
+    assert (
+        put(
+            owner,
+            rid="synthetic-above-limit",
+            body={**primary["body"], "primary_id": primary["id"], "title": "Synthetic above limit"},
+        ).status_code
+        == 200
+    )
+    assert owner.get("/api/workload").json()["counts"]["open_applications"] == 16
+
+
+@pytest.mark.parametrize("terminal", ["Rejected", "Closed", "Withdrawn"])
+def test_active_linked_role_counts_when_primary_role_is_terminal(terminal):
+    primary = job("primary", stage=terminal, company="Synthetic Shared Employer")
+    linked = job("linked", company="Synthetic Shared Employer", tracking=applied())
+    linked["body"]["primary_id"] = primary["id"]
+    result = projection([primary, linked])
+    assert result["counts"]["open_applications"] == 1
+    assert result["counts"]["attention"] + result["counts"]["passive_waiting"] + result["counts"]["parked"] == 1
