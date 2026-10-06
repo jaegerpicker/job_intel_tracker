@@ -1,18 +1,26 @@
 import { BoardError, BoardRecord, PendingWrite, Repository } from "./domain";
 import { SecretStorage } from "./auth";
-export interface WriteJournal {
-  read(): Promise<PendingWrite | null>;
-  put(write: PendingWrite): Promise<void>;
+import {
+  ResearchOperation,
+  ResearchRequest,
+  validResearchOperation,
+} from "./research";
+export interface WriteJournal<T = PendingWrite> {
+  read(): Promise<T | null>;
+  put(write: T): Promise<void>;
   clear(): Promise<void>;
 }
 const chunks = 37;
 /** Two encrypted banks: publish a manifest only after every chunk has persisted. */
-export class SecureWriteJournal implements WriteJournal {
+export class SecureWriteJournal<T = PendingWrite> implements WriteJournal<T> {
   private tail: Promise<unknown> = Promise.resolve();
   constructor(
     private store: SecretStorage,
     private origin: string,
     private hash: (value: string) => Promise<string>,
+    private validate: (value: unknown) => value is T = validWrite as (
+      value: unknown,
+    ) => value is T,
   ) {}
   private serial<T>(fn: () => Promise<T>): Promise<T> {
     const result = this.tail.then(fn);
@@ -37,7 +45,7 @@ export class SecureWriteJournal implements WriteJournal {
       throw new Error("Invalid journal");
     return m;
   }
-  read(): Promise<PendingWrite | null> {
+  read(): Promise<T | null> {
     return this.serial(async () => {
       try {
         const m = await this.manifest();
@@ -51,7 +59,7 @@ export class SecureWriteJournal implements WriteJournal {
         if ((await this.hash(value)) !== m.digest)
           throw new Error("Invalid journal");
         const p = JSON.parse(value);
-        if (p.origin !== this.origin || !validWrite(p.write))
+        if (p.origin !== this.origin || !this.validate(p.write))
           throw new Error("Wrong journal");
         return p.write;
       } catch {
@@ -62,9 +70,9 @@ export class SecureWriteJournal implements WriteJournal {
       }
     });
   }
-  put(write: PendingWrite): Promise<void> {
+  put(write: T): Promise<void> {
     return this.serial(async () => {
-      if (!validWrite(write))
+      if (!this.validate(write))
         throw new BoardError("invalid", "Invalid pending operation.");
       // ASCII escapes keep each SecureStore value below historical iOS byte limits.
       const value = JSON.stringify({ origin: this.origin, write }).replace(
@@ -143,12 +151,91 @@ export class JournalRepository implements Repository {
     private api: Repository,
     readonly journal: WriteJournal,
     private guard: () => void = () => {},
+    readonly researchJournal?: WriteJournal<ResearchOperation>,
   ) {}
   list() {
     return this.api.list();
   }
+  workload() {
+    if (!this.api.workload)
+      throw new BoardError(
+        "invalid",
+        "Planning is unavailable on this server.",
+      );
+    return this.api.workload();
+  }
   attachments(id: string) {
     return this.api.attachments(id);
+  }
+  researchRequests(job: string) {
+    if (!this.api.researchRequests)
+      throw new BoardError("invalid", "Research queue unavailable.");
+    return this.api.researchRequests(job);
+  }
+  async researchPending() {
+    return this.researchJournal ? this.researchJournal.read() : null;
+  }
+  async researchWrite(input: ResearchOperation): Promise<ResearchRequest> {
+    if (this.writing)
+      throw new BoardError(
+        "invalid",
+        "Another operation is already in progress.",
+      );
+    if (!this.researchJournal || !this.api.researchWrite)
+      throw new BoardError(
+        "forbidden",
+        "Secure research pending-work storage is required.",
+      );
+    this.writing = true;
+    try {
+      this.guard();
+      const operation = structuredClone(input);
+      if (!validResearchOperation(operation))
+        throw new BoardError(
+          "forbidden",
+          "Unsupported owner research operation.",
+        );
+      if (await this.journal.read())
+        throw new BoardError(
+          "conflict",
+          "Resolve the pending record edit first.",
+        );
+      const pending = await this.researchJournal.read();
+      this.guard();
+      if (pending && JSON.stringify(pending) !== JSON.stringify(operation))
+        throw new BoardError(
+          "conflict",
+          "Resolve the interrupted research operation first.",
+        );
+      if (!pending) {
+        this.guard();
+        await this.researchJournal.put(operation);
+        if (operation.action !== "request") {
+          const latest = (await this.researchRequests(operation.job)).find(
+            (r) => r.id === operation.id,
+          );
+          if (!latest || latest.version !== operation.payload.version)
+            throw new BoardError(
+              "conflict",
+              "Research progress changed. Refresh before acting.",
+            );
+        }
+      }
+      this.guard();
+      const result = await this.api.researchWrite(operation);
+      this.guard();
+      try {
+        await this.researchJournal.clear();
+      } catch {
+        throw new BoardError(
+          "network",
+          "Request may have completed. Retry the same operation to confirm it.",
+        );
+      }
+      return result;
+    } finally {
+      this.writing = false;
+    }
   }
   async save(input: PendingWrite): Promise<BoardRecord> {
     if (this.writing)
@@ -159,6 +246,11 @@ export class JournalRepository implements Repository {
     this.writing = true;
     try {
       this.guard();
+      if (await this.researchJournal?.read())
+        throw new BoardError(
+          "conflict",
+          "Resolve the interrupted research operation first.",
+        );
       const write = JSON.parse(JSON.stringify(input)) as PendingWrite;
       if (!validWrite(write))
         throw new BoardError(

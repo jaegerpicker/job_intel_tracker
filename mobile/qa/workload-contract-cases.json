@@ -1,0 +1,1326 @@
+[
+  {
+    "name": "six_days",
+    "records": [
+      {
+        "id": "synthetic-case",
+        "kind": "job",
+        "version": 1,
+        "job": null,
+        "author": "owner",
+        "updated": 0,
+        "body": {
+          "company": "Synthetic Company",
+          "title": "Synthetic Role",
+          "stage": "Applied",
+          "tracking": {
+            "applied_on": "2026-09-29",
+            "applied_source": "Synthetic"
+          }
+        }
+      }
+    ],
+    "expected": {
+      "as_of": "2026-10-05T16:00:00Z",
+      "local_date": "2026-10-05",
+      "timezone": "America/New_York",
+      "policy": {
+        "open_application_limit": 15,
+        "weekly_new_limit": 2,
+        "interviewing_company_limit": 3,
+        "waiting_days": 7,
+        "review_days": 14,
+        "promise_grace_business_days": 2,
+        "timezone": "America/New_York",
+        "business_holidays": [],
+        "pilot_days": 14,
+        "pilot_started_on": null
+      },
+      "counts": {
+        "open_applications": 1,
+        "passive_waiting": 1,
+        "attention": 0,
+        "parked": 0,
+        "interviewing_companies": 0,
+        "weekly_new": 0,
+        "unknown_application_dates": 0
+      },
+      "warnings": [],
+      "jobs": {
+        "synthetic-case": {
+          "record_version": 1,
+          "status": "waiting",
+          "label": "Waiting 6 days",
+          "waiting_days": 6,
+          "needs_decision": false,
+          "reasons": [],
+          "next_action": null,
+          "review_on": "2026-10-13",
+          "tracking": {
+            "applied_on": "2026-09-29",
+            "applied_source": "Synthetic",
+            "shortlisted_on": null,
+            "shortlisted_source": "",
+            "contacts": [],
+            "interview_on": null,
+            "interview_source": "",
+            "promised_response_on": null,
+            "promise_source": "",
+            "next_action": null,
+            "review": null
+          }
+        }
+      },
+      "decisions": []
+    }
+  },
+  {
+    "name": "seven_days",
+    "records": [
+      {
+        "id": "synthetic-case",
+        "kind": "job",
+        "version": 1,
+        "job": null,
+        "author": "owner",
+        "updated": 0,
+        "body": {
+          "company": "Synthetic Company",
+          "title": "Synthetic Role",
+          "stage": "Applied",
+          "tracking": {
+            "applied_on": "2026-09-28",
+            "applied_source": "Synthetic"
+          }
+        }
+      }
+    ],
+    "expected": {
+      "as_of": "2026-10-05T16:00:00Z",
+      "local_date": "2026-10-05",
+      "timezone": "America/New_York",
+      "policy": {
+        "open_application_limit": 15,
+        "weekly_new_limit": 2,
+        "interviewing_company_limit": 3,
+        "waiting_days": 7,
+        "review_days": 14,
+        "promise_grace_business_days": 2,
+        "timezone": "America/New_York",
+        "business_holidays": [],
+        "pilot_days": 14,
+        "pilot_started_on": null
+      },
+      "counts": {
+        "open_applications": 1,
+        "passive_waiting": 1,
+        "attention": 0,
+        "parked": 0,
+        "interviewing_companies": 0,
+        "weekly_new": 0,
+        "unknown_application_dates": 0
+      },
+      "warnings": [],
+      "jobs": {
+        "synthetic-case": {
+          "record_version": 1,
+          "status": "waiting_badge",
+          "label": "Waiting 7 days",
+          "waiting_days": 7,
+          "needs_decision": false,
+          "reasons": [],
+          "next_action": null,
+          "review_on": "2026-10-12",
+          "tracking": {
+            "applied_on": "2026-09-28",
+            "applied_source": "Synthetic",
+            "shortlisted_on": null,
+            "shortlisted_source": "",
+            "contacts": [],
+            "interview_on": null,
+            "interview_source": "",
+            "promised_response_on": null,
+            "promise_source": "",
+            "next_action": null,
+            "review": null
+          }
+        }
+      },
+      "decisions": []
+    }
+  },
+  {
+    "name": "fourteen_days",
+    "records": [
+      {
+        "id": "synthetic-case",
+        "kind": "job",
+        "version": 1,
+        "job": null,
+        "author": "owner",
+        "updated": 0,
+        "body": {
+          "company": "Synthetic Company",
+          "title": "Synthetic Role",
+          "stage": "Applied",
+          "tracking": {
+            "applied_on": "2026-09-21",
+            "applied_source": "Synthetic"
+          }
+        }
+      }
+    ],
+    "expected": {
+      "as_of": "2026-10-05T16:00:00Z",
+      "local_date": "2026-10-05",
+      "timezone": "America/New_York",
+      "policy": {
+        "open_application_limit": 15,
+        "weekly_new_limit": 2,
+        "interviewing_company_limit": 3,
+        "waiting_days": 7,
+        "review_days": 14,
+        "promise_grace_business_days": 2,
+        "timezone": "America/New_York",
+        "business_holidays": [],
+        "pilot_days": 14,
+        "pilot_started_on": null
+      },
+      "counts": {
+        "open_applications": 1,
+        "passive_waiting": 0,
+        "attention": 1,
+        "parked": 0,
+        "interviewing_companies": 0,
+        "weekly_new": 0,
+        "unknown_application_dates": 0
+      },
+      "warnings": [],
+      "jobs": {
+        "synthetic-case": {
+          "record_version": 1,
+          "status": "review_due",
+          "label": "Review waiting: keep, prepare follow-up or park",
+          "waiting_days": 14,
+          "needs_decision": true,
+          "reasons": [
+            "No automatic rejection, archive or outreach"
+          ],
+          "next_action": null,
+          "review_on": "2026-10-05",
+          "tracking": {
+            "applied_on": "2026-09-21",
+            "applied_source": "Synthetic",
+            "shortlisted_on": null,
+            "shortlisted_source": "",
+            "contacts": [],
+            "interview_on": null,
+            "interview_source": "",
+            "promised_response_on": null,
+            "promise_source": "",
+            "next_action": null,
+            "review": null
+          }
+        }
+      },
+      "decisions": [
+        {
+          "job_id": "synthetic-case",
+          "company": "Synthetic Company",
+          "title": "Synthetic Role",
+          "status": "review_due",
+          "label": "Review waiting: keep, prepare follow-up or park",
+          "reasons": [
+            "No automatic rejection, archive or outreach"
+          ],
+          "next_action": null
+        }
+      ]
+    }
+  },
+  {
+    "name": "unknown",
+    "records": [
+      {
+        "id": "synthetic-case",
+        "kind": "job",
+        "version": 1,
+        "job": null,
+        "author": "owner",
+        "updated": 0,
+        "body": {
+          "company": "Synthetic Company",
+          "title": "Synthetic Role",
+          "stage": "Applied",
+          "tracking": {}
+        }
+      }
+    ],
+    "expected": {
+      "as_of": "2026-10-05T16:00:00Z",
+      "local_date": "2026-10-05",
+      "timezone": "America/New_York",
+      "policy": {
+        "open_application_limit": 15,
+        "weekly_new_limit": 2,
+        "interviewing_company_limit": 3,
+        "waiting_days": 7,
+        "review_days": 14,
+        "promise_grace_business_days": 2,
+        "timezone": "America/New_York",
+        "business_holidays": [],
+        "pilot_days": 14,
+        "pilot_started_on": null
+      },
+      "counts": {
+        "open_applications": 1,
+        "passive_waiting": 0,
+        "attention": 1,
+        "parked": 0,
+        "interviewing_companies": 0,
+        "weekly_new": 0,
+        "unknown_application_dates": 1
+      },
+      "warnings": [],
+      "jobs": {
+        "synthetic-case": {
+          "record_version": 1,
+          "status": "dates_unknown",
+          "label": "Application / human-contact date unknown",
+          "waiting_days": null,
+          "needs_decision": true,
+          "reasons": [
+            "Add a sourced date only if known; record and timeline timestamps are not evidence"
+          ],
+          "next_action": null,
+          "review_on": null,
+          "tracking": {
+            "applied_on": null,
+            "applied_source": "",
+            "shortlisted_on": null,
+            "shortlisted_source": "",
+            "contacts": [],
+            "interview_on": null,
+            "interview_source": "",
+            "promised_response_on": null,
+            "promise_source": "",
+            "next_action": null,
+            "review": null
+          }
+        }
+      },
+      "decisions": [
+        {
+          "job_id": "synthetic-case",
+          "company": "Synthetic Company",
+          "title": "Synthetic Role",
+          "status": "dates_unknown",
+          "label": "Application / human-contact date unknown",
+          "reasons": [
+            "Add a sourced date only if known; record and timeline timestamps are not evidence"
+          ],
+          "next_action": null
+        }
+      ]
+    }
+  },
+  {
+    "name": "receipt_does_not_reset",
+    "records": [
+      {
+        "id": "synthetic-case",
+        "kind": "job",
+        "version": 1,
+        "job": null,
+        "author": "owner",
+        "updated": 0,
+        "body": {
+          "company": "Synthetic Company",
+          "title": "Synthetic Role",
+          "stage": "Applied",
+          "tracking": {
+            "applied_on": "2026-09-21",
+            "applied_source": "Synthetic",
+            "contacts": [
+              {
+                "id": "receipt",
+                "on": "2026-10-04",
+                "kind": "receipt",
+                "source": "Synthetic"
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "expected": {
+      "as_of": "2026-10-05T16:00:00Z",
+      "local_date": "2026-10-05",
+      "timezone": "America/New_York",
+      "policy": {
+        "open_application_limit": 15,
+        "weekly_new_limit": 2,
+        "interviewing_company_limit": 3,
+        "waiting_days": 7,
+        "review_days": 14,
+        "promise_grace_business_days": 2,
+        "timezone": "America/New_York",
+        "business_holidays": [],
+        "pilot_days": 14,
+        "pilot_started_on": null
+      },
+      "counts": {
+        "open_applications": 1,
+        "passive_waiting": 0,
+        "attention": 1,
+        "parked": 0,
+        "interviewing_companies": 0,
+        "weekly_new": 0,
+        "unknown_application_dates": 0
+      },
+      "warnings": [],
+      "jobs": {
+        "synthetic-case": {
+          "record_version": 1,
+          "status": "review_due",
+          "label": "Review waiting: keep, prepare follow-up or park",
+          "waiting_days": 14,
+          "needs_decision": true,
+          "reasons": [
+            "No automatic rejection, archive or outreach"
+          ],
+          "next_action": null,
+          "review_on": "2026-10-05",
+          "tracking": {
+            "applied_on": "2026-09-21",
+            "applied_source": "Synthetic",
+            "shortlisted_on": null,
+            "shortlisted_source": "",
+            "contacts": [
+              {
+                "id": "receipt",
+                "on": "2026-10-04",
+                "kind": "receipt",
+                "source": "Synthetic",
+                "summary": ""
+              }
+            ],
+            "interview_on": null,
+            "interview_source": "",
+            "promised_response_on": null,
+            "promise_source": "",
+            "next_action": null,
+            "review": null
+          }
+        }
+      },
+      "decisions": [
+        {
+          "job_id": "synthetic-case",
+          "company": "Synthetic Company",
+          "title": "Synthetic Role",
+          "status": "review_due",
+          "label": "Review waiting: keep, prepare follow-up or park",
+          "reasons": [
+            "No automatic rejection, archive or outreach"
+          ],
+          "next_action": null
+        }
+      ]
+    }
+  },
+  {
+    "name": "human_resets",
+    "records": [
+      {
+        "id": "synthetic-case",
+        "kind": "job",
+        "version": 1,
+        "job": null,
+        "author": "owner",
+        "updated": 0,
+        "body": {
+          "company": "Synthetic Company",
+          "title": "Synthetic Role",
+          "stage": "Applied",
+          "tracking": {
+            "applied_on": "2026-09-21",
+            "applied_source": "Synthetic",
+            "contacts": [
+              {
+                "id": "human",
+                "on": "2026-10-04",
+                "kind": "human",
+                "source": "Synthetic"
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "expected": {
+      "as_of": "2026-10-05T16:00:00Z",
+      "local_date": "2026-10-05",
+      "timezone": "America/New_York",
+      "policy": {
+        "open_application_limit": 15,
+        "weekly_new_limit": 2,
+        "interviewing_company_limit": 3,
+        "waiting_days": 7,
+        "review_days": 14,
+        "promise_grace_business_days": 2,
+        "timezone": "America/New_York",
+        "business_holidays": [],
+        "pilot_days": 14,
+        "pilot_started_on": null
+      },
+      "counts": {
+        "open_applications": 1,
+        "passive_waiting": 1,
+        "attention": 0,
+        "parked": 0,
+        "interviewing_companies": 0,
+        "weekly_new": 0,
+        "unknown_application_dates": 0
+      },
+      "warnings": [],
+      "jobs": {
+        "synthetic-case": {
+          "record_version": 1,
+          "status": "waiting",
+          "label": "Waiting 1 days",
+          "waiting_days": 1,
+          "needs_decision": false,
+          "reasons": [],
+          "next_action": null,
+          "review_on": "2026-10-18",
+          "tracking": {
+            "applied_on": "2026-09-21",
+            "applied_source": "Synthetic",
+            "shortlisted_on": null,
+            "shortlisted_source": "",
+            "contacts": [
+              {
+                "id": "human",
+                "on": "2026-10-04",
+                "kind": "human",
+                "source": "Synthetic",
+                "summary": ""
+              }
+            ],
+            "interview_on": null,
+            "interview_source": "",
+            "promised_response_on": null,
+            "promise_source": "",
+            "next_action": null,
+            "review": null
+          }
+        }
+      },
+      "decisions": []
+    }
+  },
+  {
+    "name": "scheduled",
+    "records": [
+      {
+        "id": "synthetic-case",
+        "kind": "job",
+        "version": 1,
+        "job": null,
+        "author": "owner",
+        "updated": 0,
+        "body": {
+          "company": "Synthetic Company",
+          "title": "Synthetic Role",
+          "stage": "Applied",
+          "tracking": {
+            "applied_on": "2026-09-21",
+            "applied_source": "Synthetic",
+            "interview_on": "2026-10-06",
+            "interview_source": "Synthetic"
+          }
+        }
+      }
+    ],
+    "expected": {
+      "as_of": "2026-10-05T16:00:00Z",
+      "local_date": "2026-10-05",
+      "timezone": "America/New_York",
+      "policy": {
+        "open_application_limit": 15,
+        "weekly_new_limit": 2,
+        "interviewing_company_limit": 3,
+        "waiting_days": 7,
+        "review_days": 14,
+        "promise_grace_business_days": 2,
+        "timezone": "America/New_York",
+        "business_holidays": [],
+        "pilot_days": 14,
+        "pilot_started_on": null
+      },
+      "counts": {
+        "open_applications": 1,
+        "passive_waiting": 0,
+        "attention": 1,
+        "parked": 0,
+        "interviewing_companies": 1,
+        "weekly_new": 0,
+        "unknown_application_dates": 0
+      },
+      "warnings": [],
+      "jobs": {
+        "synthetic-case": {
+          "record_version": 1,
+          "status": "interview_scheduled",
+          "label": "Interview scheduled 2026-10-06",
+          "waiting_days": 14,
+          "needs_decision": false,
+          "reasons": [],
+          "next_action": null,
+          "review_on": null,
+          "tracking": {
+            "applied_on": "2026-09-21",
+            "applied_source": "Synthetic",
+            "shortlisted_on": null,
+            "shortlisted_source": "",
+            "contacts": [],
+            "interview_on": "2026-10-06",
+            "interview_source": "Synthetic",
+            "promised_response_on": null,
+            "promise_source": "",
+            "next_action": null,
+            "review": null
+          }
+        }
+      },
+      "decisions": []
+    }
+  },
+  {
+    "name": "friday_promise",
+    "records": [
+      {
+        "id": "synthetic-case",
+        "kind": "job",
+        "version": 1,
+        "job": null,
+        "author": "owner",
+        "updated": 0,
+        "body": {
+          "company": "Synthetic Company",
+          "title": "Synthetic Role",
+          "stage": "Applied",
+          "tracking": {
+            "applied_on": "2026-09-21",
+            "applied_source": "Synthetic",
+            "promised_response_on": "2026-10-02",
+            "promise_source": "Synthetic"
+          }
+        }
+      }
+    ],
+    "expected": {
+      "as_of": "2026-10-05T16:00:00Z",
+      "local_date": "2026-10-05",
+      "timezone": "America/New_York",
+      "policy": {
+        "open_application_limit": 15,
+        "weekly_new_limit": 2,
+        "interviewing_company_limit": 3,
+        "waiting_days": 7,
+        "review_days": 14,
+        "promise_grace_business_days": 2,
+        "timezone": "America/New_York",
+        "business_holidays": [],
+        "pilot_days": 14,
+        "pilot_started_on": null
+      },
+      "counts": {
+        "open_applications": 1,
+        "passive_waiting": 1,
+        "attention": 0,
+        "parked": 0,
+        "interviewing_companies": 0,
+        "weekly_new": 0,
+        "unknown_application_dates": 0
+      },
+      "warnings": [],
+      "jobs": {
+        "synthetic-case": {
+          "record_version": 1,
+          "status": "promise_waiting",
+          "label": "Response promised 2026-10-02",
+          "waiting_days": 14,
+          "needs_decision": false,
+          "reasons": [],
+          "next_action": null,
+          "review_on": "2026-10-06",
+          "tracking": {
+            "applied_on": "2026-09-21",
+            "applied_source": "Synthetic",
+            "shortlisted_on": null,
+            "shortlisted_source": "",
+            "contacts": [],
+            "interview_on": null,
+            "interview_source": "",
+            "promised_response_on": "2026-10-02",
+            "promise_source": "Synthetic",
+            "next_action": null,
+            "review": null
+          }
+        }
+      },
+      "decisions": []
+    }
+  },
+  {
+    "name": "missed_promise",
+    "records": [
+      {
+        "id": "synthetic-case",
+        "kind": "job",
+        "version": 1,
+        "job": null,
+        "author": "owner",
+        "updated": 0,
+        "body": {
+          "company": "Synthetic Company",
+          "title": "Synthetic Role",
+          "stage": "Applied",
+          "tracking": {
+            "promised_response_on": "2026-09-26",
+            "promise_source": "Synthetic"
+          }
+        }
+      }
+    ],
+    "expected": {
+      "as_of": "2026-10-05T16:00:00Z",
+      "local_date": "2026-10-05",
+      "timezone": "America/New_York",
+      "policy": {
+        "open_application_limit": 15,
+        "weekly_new_limit": 2,
+        "interviewing_company_limit": 3,
+        "waiting_days": 7,
+        "review_days": 14,
+        "promise_grace_business_days": 2,
+        "timezone": "America/New_York",
+        "business_holidays": [],
+        "pilot_days": 14,
+        "pilot_started_on": null
+      },
+      "counts": {
+        "open_applications": 1,
+        "passive_waiting": 0,
+        "attention": 1,
+        "parked": 0,
+        "interviewing_companies": 0,
+        "weekly_new": 0,
+        "unknown_application_dates": 1
+      },
+      "warnings": [],
+      "jobs": {
+        "synthetic-case": {
+          "record_version": 1,
+          "status": "promise_review",
+          "label": "Promised response missed; review next step",
+          "waiting_days": null,
+          "needs_decision": true,
+          "reasons": [],
+          "next_action": null,
+          "review_on": "2026-09-29",
+          "tracking": {
+            "applied_on": null,
+            "applied_source": "",
+            "shortlisted_on": null,
+            "shortlisted_source": "",
+            "contacts": [],
+            "interview_on": null,
+            "interview_source": "",
+            "promised_response_on": "2026-09-26",
+            "promise_source": "Synthetic",
+            "next_action": null,
+            "review": null
+          }
+        }
+      },
+      "decisions": [
+        {
+          "job_id": "synthetic-case",
+          "company": "Synthetic Company",
+          "title": "Synthetic Role",
+          "status": "promise_review",
+          "label": "Promised response missed; review next step",
+          "reasons": [],
+          "next_action": null
+        }
+      ]
+    }
+  },
+  {
+    "name": "parked",
+    "records": [
+      {
+        "id": "synthetic-case",
+        "kind": "job",
+        "version": 1,
+        "job": null,
+        "author": "owner",
+        "updated": 0,
+        "body": {
+          "company": "Synthetic Company",
+          "title": "Synthetic Role",
+          "stage": "Applied",
+          "tracking": {
+            "review": {
+              "decision": "park",
+              "on": "2026-10-05",
+              "source": "Synthetic"
+            }
+          }
+        }
+      }
+    ],
+    "expected": {
+      "as_of": "2026-10-05T16:00:00Z",
+      "local_date": "2026-10-05",
+      "timezone": "America/New_York",
+      "policy": {
+        "open_application_limit": 15,
+        "weekly_new_limit": 2,
+        "interviewing_company_limit": 3,
+        "waiting_days": 7,
+        "review_days": 14,
+        "promise_grace_business_days": 2,
+        "timezone": "America/New_York",
+        "business_holidays": [],
+        "pilot_days": 14,
+        "pilot_started_on": null
+      },
+      "counts": {
+        "open_applications": 1,
+        "passive_waiting": 0,
+        "attention": 0,
+        "parked": 1,
+        "interviewing_companies": 0,
+        "weekly_new": 0,
+        "unknown_application_dates": 1
+      },
+      "warnings": [],
+      "jobs": {
+        "synthetic-case": {
+          "record_version": 1,
+          "status": "parked",
+          "label": "Parked by owner; application remains open",
+          "waiting_days": null,
+          "needs_decision": false,
+          "reasons": [],
+          "next_action": null,
+          "review_on": null,
+          "tracking": {
+            "applied_on": null,
+            "applied_source": "",
+            "shortlisted_on": null,
+            "shortlisted_source": "",
+            "contacts": [],
+            "interview_on": null,
+            "interview_source": "",
+            "promised_response_on": null,
+            "promise_source": "",
+            "next_action": null,
+            "review": {
+              "decision": "park",
+              "on": "2026-10-05",
+              "source": "Synthetic",
+              "note": ""
+            }
+          }
+        }
+      },
+      "decisions": []
+    }
+  },
+  {
+    "name": "unknown_keep_waiting",
+    "records": [
+      {
+        "id": "synthetic-case",
+        "kind": "job",
+        "version": 1,
+        "job": null,
+        "author": "owner",
+        "updated": 0,
+        "body": {
+          "company": "Synthetic Company",
+          "title": "Synthetic Role",
+          "stage": "Applied",
+          "tracking": {
+            "review": {
+              "decision": "keep_waiting",
+              "on": "2026-10-05",
+              "source": "Synthetic"
+            }
+          }
+        }
+      }
+    ],
+    "expected": {
+      "as_of": "2026-10-05T16:00:00Z",
+      "local_date": "2026-10-05",
+      "timezone": "America/New_York",
+      "policy": {
+        "open_application_limit": 15,
+        "weekly_new_limit": 2,
+        "interviewing_company_limit": 3,
+        "waiting_days": 7,
+        "review_days": 14,
+        "promise_grace_business_days": 2,
+        "timezone": "America/New_York",
+        "business_holidays": [],
+        "pilot_days": 14,
+        "pilot_started_on": null
+      },
+      "counts": {
+        "open_applications": 1,
+        "passive_waiting": 1,
+        "attention": 0,
+        "parked": 0,
+        "interviewing_companies": 0,
+        "weekly_new": 0,
+        "unknown_application_dates": 1
+      },
+      "warnings": [],
+      "jobs": {
+        "synthetic-case": {
+          "record_version": 1,
+          "status": "dates_unknown",
+          "label": "Dates unknown; owner waiting review 2026-10-19",
+          "waiting_days": null,
+          "needs_decision": false,
+          "reasons": [
+            "Add a sourced date only if known; record and timeline timestamps are not evidence"
+          ],
+          "next_action": null,
+          "review_on": "2026-10-19",
+          "tracking": {
+            "applied_on": null,
+            "applied_source": "",
+            "shortlisted_on": null,
+            "shortlisted_source": "",
+            "contacts": [],
+            "interview_on": null,
+            "interview_source": "",
+            "promised_response_on": null,
+            "promise_source": "",
+            "next_action": null,
+            "review": {
+              "decision": "keep_waiting",
+              "on": "2026-10-05",
+              "source": "Synthetic",
+              "note": ""
+            }
+          }
+        }
+      },
+      "decisions": []
+    }
+  },
+  {
+    "name": "owner_due_beats_park",
+    "records": [
+      {
+        "id": "synthetic-case",
+        "kind": "job",
+        "version": 1,
+        "job": null,
+        "author": "owner",
+        "updated": 0,
+        "body": {
+          "company": "Synthetic Company",
+          "title": "Synthetic Role",
+          "stage": "Applied",
+          "tracking": {
+            "review": {
+              "decision": "park",
+              "on": "2026-10-05",
+              "source": "Synthetic"
+            },
+            "next_action": {
+              "text": "Prepare questions",
+              "owner": "owner",
+              "due_on": "2026-10-05",
+              "source": "Synthetic"
+            }
+          }
+        }
+      }
+    ],
+    "expected": {
+      "as_of": "2026-10-05T16:00:00Z",
+      "local_date": "2026-10-05",
+      "timezone": "America/New_York",
+      "policy": {
+        "open_application_limit": 15,
+        "weekly_new_limit": 2,
+        "interviewing_company_limit": 3,
+        "waiting_days": 7,
+        "review_days": 14,
+        "promise_grace_business_days": 2,
+        "timezone": "America/New_York",
+        "business_holidays": [],
+        "pilot_days": 14,
+        "pilot_started_on": null
+      },
+      "counts": {
+        "open_applications": 1,
+        "passive_waiting": 0,
+        "attention": 1,
+        "parked": 0,
+        "interviewing_companies": 0,
+        "weekly_new": 0,
+        "unknown_application_dates": 1
+      },
+      "warnings": [],
+      "jobs": {
+        "synthetic-case": {
+          "record_version": 1,
+          "status": "action_due",
+          "label": "Prepare questions",
+          "waiting_days": null,
+          "needs_decision": true,
+          "reasons": [
+            "Next action belongs to the owner or an assigned agent; company aging is suppressed"
+          ],
+          "next_action": {
+            "text": "Prepare questions",
+            "owner": "owner",
+            "assignee": "",
+            "due_on": "2026-10-05",
+            "source": "Synthetic"
+          },
+          "review_on": null,
+          "tracking": {
+            "applied_on": null,
+            "applied_source": "",
+            "shortlisted_on": null,
+            "shortlisted_source": "",
+            "contacts": [],
+            "interview_on": null,
+            "interview_source": "",
+            "promised_response_on": null,
+            "promise_source": "",
+            "next_action": {
+              "text": "Prepare questions",
+              "owner": "owner",
+              "assignee": "",
+              "due_on": "2026-10-05",
+              "source": "Synthetic"
+            },
+            "review": {
+              "decision": "park",
+              "on": "2026-10-05",
+              "source": "Synthetic",
+              "note": ""
+            }
+          }
+        }
+      },
+      "decisions": [
+        {
+          "job_id": "synthetic-case",
+          "company": "Synthetic Company",
+          "title": "Synthetic Role",
+          "status": "action_due",
+          "label": "Prepare questions",
+          "reasons": [
+            "Next action belongs to the owner or an assigned agent; company aging is suppressed"
+          ],
+          "next_action": {
+            "text": "Prepare questions",
+            "owner": "owner",
+            "assignee": "",
+            "due_on": "2026-10-05",
+            "source": "Synthetic"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "DST_calendar_seven_days",
+    "records": [
+      {
+        "id": "synthetic-case",
+        "kind": "job",
+        "version": 1,
+        "job": null,
+        "author": "owner",
+        "updated": 0,
+        "body": {
+          "company": "Synthetic Company",
+          "title": "Synthetic Role",
+          "stage": "Applied",
+          "tracking": {
+            "applied_on": "2026-10-26",
+            "applied_source": "Synthetic DST application"
+          }
+        }
+      }
+    ],
+    "expected": {
+      "as_of": "2026-11-02T16:00:00Z",
+      "local_date": "2026-11-02",
+      "timezone": "America/New_York",
+      "policy": {
+        "open_application_limit": 15,
+        "weekly_new_limit": 2,
+        "interviewing_company_limit": 3,
+        "waiting_days": 7,
+        "review_days": 14,
+        "promise_grace_business_days": 2,
+        "timezone": "America/New_York",
+        "business_holidays": [],
+        "pilot_days": 14,
+        "pilot_started_on": null
+      },
+      "counts": {
+        "open_applications": 1,
+        "passive_waiting": 1,
+        "attention": 0,
+        "parked": 0,
+        "interviewing_companies": 0,
+        "weekly_new": 0,
+        "unknown_application_dates": 0
+      },
+      "warnings": [],
+      "jobs": {
+        "synthetic-case": {
+          "record_version": 1,
+          "status": "waiting_badge",
+          "label": "Waiting 7 days",
+          "waiting_days": 7,
+          "needs_decision": false,
+          "reasons": [],
+          "next_action": null,
+          "review_on": "2026-11-09",
+          "tracking": {
+            "applied_on": "2026-10-26",
+            "applied_source": "Synthetic DST application",
+            "shortlisted_on": null,
+            "shortlisted_source": "",
+            "contacts": [],
+            "interview_on": null,
+            "interview_source": "",
+            "promised_response_on": null,
+            "promise_source": "",
+            "next_action": null,
+            "review": null
+          }
+        }
+      },
+      "decisions": []
+    }
+  },
+  {
+    "name": "alternatives_distinct_employers_and_closed_weekly",
+    "records": [
+      {
+        "id": "synthetic-0",
+        "kind": "job",
+        "version": 1,
+        "job": null,
+        "author": "owner",
+        "updated": 0,
+        "body": {
+          "company": "Synthetic Employer",
+          "title": "Synthetic Role",
+          "stage": "Interview",
+          "tracking": {
+            "applied_on": "2026-10-05",
+            "applied_source": "Synthetic"
+          }
+        }
+      },
+      {
+        "id": "synthetic-1",
+        "kind": "job",
+        "version": 1,
+        "job": null,
+        "author": "owner",
+        "updated": 0,
+        "body": {
+          "company": "synthetic employer",
+          "title": "Synthetic Role",
+          "stage": "Applied",
+          "tracking": {
+            "shortlisted_on": "2026-10-05",
+            "shortlisted_source": "Synthetic",
+            "interview_on": "2026-10-07",
+            "interview_source": "Synthetic"
+          },
+          "primary_id": "synthetic-0"
+        }
+      },
+      {
+        "id": "synthetic-2",
+        "kind": "job",
+        "version": 1,
+        "job": null,
+        "author": "owner",
+        "updated": 0,
+        "body": {
+          "company": "Other Synthetic",
+          "title": "Synthetic Role",
+          "stage": "Closed",
+          "tracking": {
+            "applied_on": "2026-10-05",
+            "applied_source": "Synthetic"
+          }
+        }
+      },
+      {
+        "id": "synthetic-3",
+        "kind": "job",
+        "version": 1,
+        "job": null,
+        "author": "owner",
+        "updated": 0,
+        "body": {
+          "company": "Backlog Synthetic",
+          "title": "Synthetic Role",
+          "stage": "Prospect",
+          "tracking": {}
+        }
+      }
+    ],
+    "expected": {
+      "as_of": "2026-10-05T16:00:00Z",
+      "local_date": "2026-10-05",
+      "timezone": "America/New_York",
+      "policy": {
+        "open_application_limit": 15,
+        "weekly_new_limit": 2,
+        "interviewing_company_limit": 3,
+        "waiting_days": 7,
+        "review_days": 14,
+        "promise_grace_business_days": 2,
+        "timezone": "America/New_York",
+        "business_holidays": [],
+        "pilot_days": 14,
+        "pilot_started_on": null
+      },
+      "counts": {
+        "open_applications": 2,
+        "passive_waiting": 0,
+        "attention": 2,
+        "parked": 0,
+        "interviewing_companies": 1,
+        "weekly_new": 3,
+        "unknown_application_dates": 1
+      },
+      "warnings": [
+        {
+          "code": "weekly_new",
+          "message": "3 new strong matches / applications this week; planning threshold 2. Recording remains available."
+        }
+      ],
+      "jobs": {
+        "synthetic-0": {
+          "record_version": 1,
+          "status": "waiting",
+          "label": "Waiting 0 days",
+          "waiting_days": 0,
+          "needs_decision": false,
+          "reasons": [],
+          "next_action": null,
+          "review_on": "2026-10-19",
+          "tracking": {
+            "applied_on": "2026-10-05",
+            "applied_source": "Synthetic",
+            "shortlisted_on": null,
+            "shortlisted_source": "",
+            "contacts": [],
+            "interview_on": null,
+            "interview_source": "",
+            "promised_response_on": null,
+            "promise_source": "",
+            "next_action": null,
+            "review": null
+          }
+        },
+        "synthetic-1": {
+          "record_version": 1,
+          "status": "interview_scheduled",
+          "label": "Interview scheduled 2026-10-07",
+          "waiting_days": null,
+          "needs_decision": false,
+          "reasons": [],
+          "next_action": null,
+          "review_on": null,
+          "tracking": {
+            "applied_on": null,
+            "applied_source": "",
+            "shortlisted_on": "2026-10-05",
+            "shortlisted_source": "Synthetic",
+            "contacts": [],
+            "interview_on": "2026-10-07",
+            "interview_source": "Synthetic",
+            "promised_response_on": null,
+            "promise_source": "",
+            "next_action": null,
+            "review": null
+          }
+        },
+        "synthetic-2": {
+          "record_version": 1,
+          "status": "terminal",
+          "label": "Closed opportunity",
+          "waiting_days": null,
+          "needs_decision": false,
+          "reasons": [],
+          "next_action": null,
+          "review_on": null,
+          "tracking": {
+            "applied_on": "2026-10-05",
+            "applied_source": "Synthetic",
+            "shortlisted_on": null,
+            "shortlisted_source": "",
+            "contacts": [],
+            "interview_on": null,
+            "interview_source": "",
+            "promised_response_on": null,
+            "promise_source": "",
+            "next_action": null,
+            "review": null
+          }
+        },
+        "synthetic-3": {
+          "record_version": 1,
+          "status": "backlog",
+          "label": "Unapplied backlog",
+          "waiting_days": null,
+          "needs_decision": false,
+          "reasons": [],
+          "next_action": null,
+          "review_on": null,
+          "tracking": {
+            "applied_on": null,
+            "applied_source": "",
+            "shortlisted_on": null,
+            "shortlisted_source": "",
+            "contacts": [],
+            "interview_on": null,
+            "interview_source": "",
+            "promised_response_on": null,
+            "promise_source": "",
+            "next_action": null,
+            "review": null
+          }
+        }
+      },
+      "decisions": []
+    }
+  }
+]

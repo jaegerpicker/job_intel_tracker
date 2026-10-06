@@ -1,10 +1,8 @@
-import {
-  BoardRecord,
-  BoardError,
-  PendingWrite,
-  Repository,
-  active,
-} from "./domain";
+import { parseTracking } from "./planning";
+import { demoWorkload } from "./demo-workload";
+import { BoardRecord, BoardError, PendingWrite, Repository } from "./domain";
+import { DemoResearch } from "./demo-research";
+import { ResearchOperation } from "./research";
 const stamp = 1791028800;
 const job = (
   id: string,
@@ -42,12 +40,33 @@ export const fixtures: BoardRecord[] = [
     description:
       "Build thoughtful tools for creative people. Own native interactions, performance, and an accessible writing experience.",
     url: "https://example.com/cedar",
+    tracking: {
+      applied_on: "2026-09-15",
+      applied_source: "Synthetic application",
+      interview_on: "2026-10-07",
+      interview_source: "Synthetic invitation",
+    },
   }),
   job("demo-orbit", "Orbit Works", "Product Engineer", "Screening", {
     description: "A small team making complex workflows feel simple.",
+    tracking: {
+      applied_on: "2026-09-28",
+      applied_source: "Synthetic application",
+    },
   }),
   job("demo-fern", "Fern Labs", "React Native Engineer", "Prospect"),
-  job("demo-canvas", "Canvas Collective", "Staff Software Engineer", "Applied"),
+  job(
+    "demo-canvas",
+    "Canvas Collective",
+    "Staff Software Engineer",
+    "Applied",
+    {
+      tracking: {
+        applied_on: "2026-09-21",
+        applied_source: "Synthetic application",
+      },
+    },
+  ),
   {
     id: "search-policy",
     kind: "filters",
@@ -126,6 +145,7 @@ export const fixtures: BoardRecord[] = [
   },
 ];
 export class DemoRepository implements Repository {
+  readonly research = new DemoResearch();
   private records = structuredClone(fixtures);
   private completed = new Map<
     string,
@@ -145,6 +165,15 @@ export class DemoRepository implements Repository {
   async list() {
     await this.wait();
     return structuredClone(this.records);
+  }
+  async workload() {
+    return demoWorkload(this.records);
+  }
+  async researchRequests(job: string) {
+    return this.research.list(job, this.records);
+  }
+  async researchWrite(operation: ResearchOperation) {
+    return this.research.write(operation, this.records);
   }
   async attachments(job: string) {
     await this.wait();
@@ -187,20 +216,10 @@ export class DemoRepository implements Repository {
       updated: Date.now() / 1000,
     };
     if (next.kind === "job") {
+      if (next.body.tracking !== undefined)
+        parseTracking(next.body.tracking, "2026-10-05");
       if (!next.body.company?.trim() || !next.body.title?.trim())
         throw new BoardError("invalid", "Company and title are required.");
-      const cap = Number(
-        this.records.find((r) => r.kind === "filters")?.body.active_cap ?? 10,
-      );
-      if (
-        active(next) &&
-        (!old || !active(old)) &&
-        this.records.filter(active).length >= cap
-      )
-        throw new BoardError(
-          "conflict",
-          "Active opportunity limit reached. Review your board.",
-        );
       if (!old || old.body.stage !== next.body.stage)
         next.body.timeline = [
           ...(Array.isArray(old?.body.timeline) ? old.body.timeline : []),

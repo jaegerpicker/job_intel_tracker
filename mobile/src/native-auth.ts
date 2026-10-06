@@ -4,11 +4,19 @@ import * as SecureStore from "expo-secure-store";
 import * as WebBrowser from "expo-web-browser";
 import { MobileAuth, SecretStorage } from "./auth";
 import { SecureWriteJournal } from "./journal";
+import { ResearchOperation, validResearchOperation } from "./research";
 export const sha256 = (value: string) =>
   Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, value);
 const base64url = (value: string) =>
   value.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-export async function createNativeAuth(origin: string, redirect: string) {
+export async function createNativeAuth(
+  origin: string,
+  redirect: string,
+): Promise<{
+  auth: MobileAuth;
+  journal: SecureWriteJournal;
+  researchJournal?: SecureWriteJournal<ResearchOperation>;
+}> {
   if (Platform.OS === "web" || !(await SecureStore.isAvailableAsync()))
     throw new Error("Native secure storage is required.");
   const namespace = "job-intel-" + (await sha256(origin)).slice(0, 24) + "-";
@@ -46,5 +54,19 @@ export async function createNativeAuth(origin: string, redirect: string) {
         ),
     },
   });
-  return { auth, journal: new SecureWriteJournal(store, auth.origin, sha256) };
+  const researchStore: SecretStorage = {
+    get: (key) => store.get("research-" + key),
+    set: (key, value) => store.set("research-" + key, value),
+    remove: (key) => store.remove("research-" + key),
+  };
+  return {
+    auth,
+    journal: new SecureWriteJournal(store, auth.origin, sha256),
+    researchJournal: new SecureWriteJournal<ResearchOperation>(
+      researchStore,
+      auth.origin,
+      sha256,
+      validResearchOperation,
+    ),
+  };
 }

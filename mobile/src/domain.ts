@@ -1,3 +1,5 @@
+import type { Workload } from "./planning";
+import type { ResearchOperation, ResearchRequest } from "./research";
 export const stages = [
   "Prospect",
   "Applied",
@@ -42,6 +44,10 @@ export interface PendingWrite {
 }
 export interface Repository {
   list(): Promise<BoardRecord[]>;
+  workload?(): Promise<Workload>;
+  researchRequests?(job: string): Promise<ResearchRequest[]>;
+  researchWrite?(operation: ResearchOperation): Promise<ResearchRequest>;
+  researchPending?(): Promise<ResearchOperation | null>;
   save(write: PendingWrite): Promise<BoardRecord>;
   attachments(job: string): Promise<Attachment[]>;
 }
@@ -100,8 +106,7 @@ export function parseRecord(value: unknown): BoardRecord {
 export function active(record: BoardRecord): boolean {
   return (
     record.kind === "job" &&
-    !record.body.primary_id &&
-    !["Prospect", "Closed", "Rejected", "Withdrawn"].includes(
+    ["Applied", "Screening", "Interview", "Offer"].includes(
       record.body.stage ?? "",
     )
   );

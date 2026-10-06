@@ -1,3 +1,4 @@
+import { demoWorkload } from "../src/demo-workload";
 import React from "react";
 import {
   render,
@@ -175,7 +176,9 @@ test("injected owner read mode loads typed records but disables native mutations
   const transport = jest
     .fn()
     .mockResolvedValueOnce(response({ actor: "owner" }))
-    .mockResolvedValueOnce(response(fixtures));
+    .mockResolvedValueOnce(response(fixtures))
+    .mockResolvedValueOnce(response({ actor: "owner" }))
+    .mockResolvedValueOnce(response(demoWorkload(fixtures)));
   const runtime = createRuntime({
     mode: "live",
     origin: "https://example.com",
@@ -207,5 +210,5 @@ test("injected owner read mode loads typed records but disables native mutations
   await fireEvent.press(screen.getByRole("button", { name: "Notes" }));
   expect(screen.getByRole("button", { name: "Save entry" })).toBeDisabled();
   expect(screen.getByLabelText("New note")).toHaveProp("editable", false);
-  expect(transport).toHaveBeenCalledTimes(2);
+  await waitFor(() => expect(transport).toHaveBeenCalledTimes(4));
 });

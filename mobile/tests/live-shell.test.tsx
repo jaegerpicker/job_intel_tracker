@@ -14,6 +14,8 @@ import { createNativeAuth } from "../src/native-auth";
 import { fixtures } from "../src/demo";
 import { prepareWrite } from "../src/domain";
 import { createHash } from "node:crypto";
+import { ResearchOperation, validResearchOperation } from "../src/research";
+import { DemoRepository } from "../src/demo";
 jest.mock("../src/native-auth", () => ({ createNativeAuth: jest.fn() }));
 const originalAppState = Object.getOwnPropertyDescriptor(
   AppState,
@@ -155,4 +157,107 @@ test("restored operation requires explicit latest comparison before discard", as
   await screen.findByText("Board content");
   expect(await journal.read()).toBeNull();
   global.fetch = previous;
+});
+
+test("restored research conflict identifies matching current request before discard", async () => {
+  const origin = "https://example.com",
+    values = new Map<string, string>();
+  const storage = {
+    get: async (key: string) => values.get(key) ?? null,
+    set: async (key: string, value: string) => {
+      values.set(key, value);
+    },
+    remove: async (key: string) => {
+      values.delete(key);
+    },
+  };
+  await storage.set(
+    "owner-session",
+    JSON.stringify({
+      origin,
+      token: "mobile_" + "t".repeat(43),
+      expiresAt: Date.now() + 60000,
+    }),
+  );
+  const auth = new MobileAuth({
+    origin,
+    redirect: origin + "/auth/mobile/callback",
+    storage,
+    crypto: { random: jest.fn(), challenge: jest.fn() },
+    browser: { open: jest.fn() },
+  });
+  const hash = async (value: string) =>
+    createHash("sha256").update(value).digest("hex");
+  const journal = new SecureWriteJournal(storage, origin, hash);
+  const queueStore = {
+    get: (key: string) => storage.get("research-" + key),
+    set: (key: string, value: string) => storage.set("research-" + key, value),
+    remove: (key: string) => storage.remove("research-" + key),
+  };
+  const researchJournal = new SecureWriteJournal<ResearchOperation>(
+    queueStore,
+    origin,
+    hash,
+    validResearchOperation,
+  );
+  const [current] = await new DemoRepository().researchRequests("demo-orbit");
+  await researchJournal.put({
+    action: "cancel",
+    job: current.job,
+    id: current.id,
+    key: "synthetic-cancel",
+    payload: { version: 1 },
+  });
+  jest
+    .mocked(createNativeAuth)
+    .mockResolvedValue({ auth, journal, researchJournal });
+  const fetcher = jest.fn(async (url: URL | RequestInfo) => ({
+    ok: true,
+    status: 200,
+    json: async () =>
+      String(url).endsWith("/api/me")
+        ? { actor: "owner" }
+        : String(url).includes("research-requests")
+          ? [
+              { ...current, version: 2 },
+              {
+                ...current,
+                id: "unrelated-history",
+                version: 9,
+                status: "cancelled",
+              },
+            ]
+          : fixtures,
+  })) as unknown as typeof fetch;
+  global.fetch = fetcher;
+  render(
+    <LiveShell origin={origin} redirect={origin + "/auth/mobile/callback"}>
+      <Text>Board content</Text>
+    </LiveShell>,
+  );
+  await screen.findByText("Review interrupted research request");
+  expect(screen.getByText(/expected version 1/)).toBeOnTheScreen();
+  expect(
+    screen.getByRole("button", { name: "Discard reviewed research operation" }),
+  ).toBeDisabled();
+  expect(fetcher).not.toHaveBeenCalled();
+  await act(async () =>
+    fireEvent.press(
+      screen.getByRole("button", { name: "Compare latest research progress" }),
+    ),
+  );
+  await screen.findByText(/current version 2 · blocked/);
+  expect(screen.queryByText(/unrelated-history/)).toBeNull();
+  expect(
+    screen.getByRole("button", { name: "Discard reviewed research operation" }),
+  ).toBeEnabled();
+  await act(async () =>
+    fireEvent.press(
+      screen.getByRole("button", {
+        name: "Discard reviewed research operation",
+      }),
+    ),
+  );
+  await screen.findByText("Board content");
+  expect(await researchJournal.read()).toBeNull();
 });

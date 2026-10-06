@@ -1,3 +1,10 @@
+import { useWorkload } from "./src/use-workload";
+import { ResearchSection } from "./src/research-section";
+import {
+  AttentionBadge,
+  PlanningEditor,
+  PlanningSummary,
+} from "./src/planning-ui";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -20,7 +27,6 @@ import {
   BoardRecord,
   PendingWrite,
   Stage,
-  active,
   filterJobs,
   prepareWrite,
   safeSource,
@@ -30,7 +36,7 @@ import { useBoard } from "./src/store";
 import { useFocusEffect, useRouter } from "expo-router";
 import { Button, Field, Notice, colors, styles as s } from "./src/components";
 
-type Tab = "Overview" | "Notes" | "Prep" | "Evidence";
+type Tab = "Overview" | "Plan" | "Research" | "Notes" | "Prep" | "Evidence";
 type ScreenProps = { selectedId?: string; creating?: boolean };
 export default function App(props: ScreenProps) {
   return <BoardApp {...props} />;
@@ -47,6 +53,11 @@ export function BoardApp({ selectedId, creating = false }: ScreenProps) {
     canWrite,
     lockedReason,
   } = useBoard();
+  const planning = useWorkload(
+    repository,
+    records,
+    !loading && !error && !lockedReason,
+  );
   const router = useRouter();
   const selected = selectedId ?? null;
   const [query, setQuery] = useState("");
@@ -60,6 +71,12 @@ export function BoardApp({ selectedId, creating = false }: ScreenProps) {
   const [title, setTitle] = useState("");
 
   const [saving, setSaving] = useState(false);
+  const [researchBusy, setResearchBusy] = useState(false);
+  const researchLock = useRef(false);
+  const researchBusyChanged = useCallback((value: boolean) => {
+    researchLock.current = value;
+    setResearchBusy(value);
+  }, []);
   const [saveError, setSaveError] = useState("");
   const [message, setMessage] = useState("");
   const [files, setFiles] = useState<Attachment[]>([]);
@@ -72,13 +89,14 @@ export function BoardApp({ selectedId, creating = false }: ScreenProps) {
     useCallback(() => {
       const sub = BackHandler.addEventListener("hardwareBackPress", () => {
         if (selected || creating) {
-          if (!pending && !saving) router.dismissTo("/");
+          if (!pending && !saving && !researchLock.current)
+            router.dismissTo("/");
           return true;
         }
         return false;
       });
       return () => sub.remove();
-    }, [selected, creating, pending, saving, router]),
+    }, [selected, creating, pending, saving, researchBusy, router]),
   );
   const job = records.find((r) => r.id === selected);
   const policy = records.find((r) => r.kind === "filters");
@@ -107,7 +125,7 @@ export function BoardApp({ selectedId, creating = false }: ScreenProps) {
     };
   }, [tab, loadFiles]);
   async function save(write: PendingWrite) {
-    if (!canWrite || saveLock.current) return;
+    if (!canWrite || saveLock.current || researchLock.current) return;
     saveLock.current = true;
     setSaving(true);
     setPending(write);
@@ -125,6 +143,7 @@ export function BoardApp({ selectedId, creating = false }: ScreenProps) {
           ? "Saved to this demo session."
           : "Saved to your owner board.",
       );
+      return result;
     } catch (e) {
       setSaveError(e instanceof Error ? e.message : "Unable to save");
       if (e instanceof BoardError && e.code !== "network") setPending(null);
@@ -134,14 +153,16 @@ export function BoardApp({ selectedId, creating = false }: ScreenProps) {
     }
   }
   function open(id: string) {
+    if (researchLock.current) return;
     router.push({ pathname: "/job/[id]", params: { id } });
     setTab("Overview");
     setDraft("");
     setSaveError("");
     setMessage("");
   }
-  const busy = saving || pending !== null;
+  const busy = saving || pending !== null || researchBusy;
   const back = () => {
+    if (busy || researchLock.current) return;
     router.dismissTo("/");
     setDraft("");
     setMessage("");
@@ -308,13 +329,48 @@ export function BoardApp({ selectedId, creating = false }: ScreenProps) {
               <>
                 <View style={{ marginTop: 20 }}>
                   {chips(
-                    ["Overview", "Notes", "Prep", "Evidence"],
+                    [
+                      "Overview",
+                      "Plan",
+                      "Research",
+                      "Notes",
+                      "Prep",
+                      "Evidence",
+                    ],
                     tab,
                     (v) => {
                       setTab(v as Tab);
                       setMessage("");
                     },
                   )}
+                </View>
+                <View style={{ display: tab === "Research" ? "flex" : "none" }}>
+                  <ResearchSection
+                    key={job.id}
+                    jobId={job.id}
+                    records={records}
+                    repository={repository}
+                    canWrite={canWrite}
+                    busy={busy}
+                    enabled={
+                      tab === "Research" && !loading && !error && !lockedReason
+                    }
+                    onBusyChange={researchBusyChanged}
+                    mode={mode}
+                    onRefreshBoard={() => void load()}
+                  />
+                </View>
+                <View style={{ display: tab === "Plan" ? "flex" : "none" }}>
+                  <PlanningEditor
+                    key={job.id}
+                    job={job}
+                    derived={planning.data?.jobs[job.id]}
+                    localDate={planning.data?.local_date}
+                    canWrite={canWrite}
+                    busy={busy}
+                    onSave={save}
+                    onRefresh={() => void load()}
+                  />
                 </View>
                 {tab === "Overview" ? (
                   <>
@@ -374,7 +430,8 @@ export function BoardApp({ selectedId, creating = false }: ScreenProps) {
                         ),
                       )}
                   </>
-                ) : tab === "Notes" || tab === "Prep" ? (
+                ) : tab === "Plan" || tab === "Research" ? null : tab ===
+                    "Notes" || tab === "Prep" ? (
                   <>
                     <Text style={s.section}>
                       {tab === "Prep"
@@ -533,22 +590,46 @@ export function BoardApp({ selectedId, creating = false }: ScreenProps) {
               <>
                 {pageHeader}
                 <View>
-                  <View
-                    style={[s.card, s.row, { justifyContent: "space-between" }]}
-                  >
-                    <View>
-                      <Text style={s.cardTitle}>
-                        {records.filter(active).length} /{" "}
-                        {String(policy?.body.active_cap ?? "—")}
-                      </Text>
-                      <Text style={s.label}>active opportunities</Text>
+                  <PlanningSummary
+                    data={planning.data}
+                    error={planning.error}
+                    loading={planning.loading}
+                    retry={() => void planning.refresh()}
+                  />
+                  {planning.data && (
+                    <View style={s.card}>
+                      <Text style={s.section}>Decisions needed</Text>
+                      {planning.data.decisions
+                        .filter((d) =>
+                          records.some(
+                            (r) =>
+                              r.id === d.job_id &&
+                              r.version ===
+                                planning.data?.jobs[d.job_id]?.record_version,
+                          ),
+                        )
+                        .map((d) => (
+                          <Button
+                            key={d.job_id}
+                            quiet
+                            label={`Review ${d.company}: ${d.label}`}
+                            onPress={() => {
+                              open(d.job_id);
+                            }}
+                          />
+                        ))}
+                      {!planning.data.decisions.length && (
+                        <Text style={s.text}>
+                          No decisions requested by this snapshot.
+                        </Text>
+                      )}
                     </View>
-                    <View>
-                      <Text style={s.cardTitle}>
-                        ${Number(policy?.body.base_floor ?? 0).toLocaleString()}
-                      </Text>
-                      <Text style={s.label}>base salary floor</Text>
-                    </View>
+                  )}
+                  <View style={s.card}>
+                    <Text style={s.cardTitle}>
+                      ${Number(policy?.body.base_floor ?? 0).toLocaleString()}
+                    </Text>
+                    <Text style={s.label}>base salary floor</Text>
                   </View>
                   <Field
                     label="Search company, role, or lane"
