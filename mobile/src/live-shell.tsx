@@ -7,7 +7,12 @@ import { createRuntime } from "./runtime";
 import { BoardProvider } from "./store";
 import { BoardRecord, PendingWrite } from "./domain";
 import { Button, Notice, styles, colors } from "./components";
-type Native = { auth: MobileAuth; journal: SecureWriteJournal };
+import { ResearchOperation } from "./research";
+type Native = {
+  auth: MobileAuth;
+  journal: SecureWriteJournal;
+  researchJournal?: SecureWriteJournal<ResearchOperation>;
+};
 export function LiveShell({
   origin,
   redirect,
@@ -23,7 +28,10 @@ export function LiveShell({
     let cancelled = false;
     void createNativeAuth(origin, redirect)
       .then(async (value) => {
-        await value.auth.restore(() => value.journal.purge());
+        await value.auth.restore(async () => {
+          await value.journal.purge();
+          await value.researchJournal?.purge();
+        });
         if (!cancelled) setNative(value);
       })
       .catch(() => {
@@ -49,7 +57,7 @@ export function LiveShell({
   );
 }
 function Authenticated({
-  native: { auth, journal },
+  native: { auth, journal, researchJournal },
   children,
 }: {
   native: Native;
@@ -57,6 +65,11 @@ function Authenticated({
 }) {
   const snapshot = useSyncExternalStore(auth.subscribe, auth.getSnapshot);
   const [pending, setPending] = useState<PendingWrite | null>(null);
+  const [researchPending, setResearchPending] =
+    useState<ResearchOperation | null>(null);
+  const [researchReviewed, setResearchReviewed] = useState(false);
+  const [researchReady, setResearchReady] = useState(!researchJournal);
+  const [researchLatest, setResearchLatest] = useState("");
   const [latest, setLatest] = useState<BoardRecord | null>(null);
   const [reviewed, setReviewed] = useState(false);
   const [working, setWorking] = useState(false);
@@ -67,6 +80,7 @@ function Authenticated({
       origin: auth.origin,
       session: snapshot.status === "signedIn" ? auth.source() : undefined,
       journal,
+      researchJournal,
     });
     const save = value.repository.save.bind(value.repository);
     value.repository.save = async (write) => {
@@ -83,8 +97,30 @@ function Authenticated({
           );
       }
     };
+    if (value.repository.researchWrite) {
+      const writeResearch = value.repository.researchWrite.bind(
+        value.repository,
+      );
+      value.repository.researchWrite = async (operation) => {
+        try {
+          return await writeResearch(operation);
+        } finally {
+          await researchJournal
+            ?.read()
+            .then((value) => {
+              setResearchPending(value);
+              setResearchReviewed(false);
+            })
+            .catch(() =>
+              setError(
+                "Research pending work could not be verified. Sign out to clear secure storage.",
+              ),
+            );
+        }
+      };
+    }
     return value;
-  }, [auth, journal, snapshot]);
+  }, [auth, journal, researchJournal, snapshot]);
   useEffect(() => {
     const sub = Linking.addEventListener("url", (event) => {
       if (event.url.startsWith(auth.redirect + "?"))
@@ -123,6 +159,27 @@ function Authenticated({
     };
   }, [journal, snapshot.revision]);
   useEffect(() => {
+    let canceled = false;
+    void researchJournal
+      ?.read()
+      .then((value) => {
+        if (!canceled) {
+          setResearchPending(value);
+          setResearchReviewed(false);
+          setResearchReady(true);
+        }
+      })
+      .catch(() => {
+        if (!canceled)
+          setError(
+            "Research pending work could not be verified. Sign out to clear secure storage.",
+          );
+      });
+    return () => {
+      canceled = true;
+    };
+  }, [researchJournal, snapshot.revision]);
+  useEffect(() => {
     if (snapshot.status !== "signedIn") return;
     const timer = setInterval(() => {
       void auth
@@ -134,8 +191,14 @@ function Authenticated({
   }, [auth, snapshot.status]);
   const logout = async () => {
     setWorking(true);
-    await auth.logout(() => journal.purge());
+    await auth.logout(async () => {
+      await journal.purge();
+      await researchJournal?.purge();
+    });
     setPending(null);
+    setResearchPending(null);
+    setResearchReviewed(false);
+    setResearchReady(true);
     setLatest(null);
     setReviewed(false);
     setError("");
@@ -225,6 +288,107 @@ function Authenticated({
           Google is a future provider boundary. No email-based ownership or demo
           fallback.
         </Text>
+      </ScrollView>
+    );
+  if (!researchReady || researchPending)
+    return (
+      <ScrollView contentContainerStyle={styles.header}>
+        <Text style={styles.title}>Review interrupted research request</Text>
+        <Text style={styles.text}>
+          Nothing is sent automatically. Retry confirms the original request.
+          Refresh progress before discarding pending work.
+        </Text>
+        {researchPending && (
+          <Text selectable style={styles.text}>
+            {researchPending.action === "request"
+              ? `Job ${researchPending.job} · package ${researchPending.payload.package}\n${researchPending.payload.note}`
+              : `Job ${researchPending.job} · ${researchPending.action} request ${researchPending.id} · expected version ${researchPending.payload.version}`}
+          </Text>
+        )}
+        {!!researchLatest && <Notice text={researchLatest} />}
+        {!!error && <Notice text={error} />}
+        <Button
+          label="Retry same research operation"
+          disabled={working || !researchPending}
+          onPress={() => {
+            if (!researchPending || !runtime.repository.researchWrite) return;
+            setWorking(true);
+            setError("");
+            void runtime.repository
+              .researchWrite(researchPending)
+              .then(() => {
+                setResearchPending(null);
+                setResearchReviewed(false);
+              })
+              .catch(() =>
+                setError(
+                  "Research operation remains pending. Retry or refresh progress before discarding it.",
+                ),
+              )
+              .finally(() => setWorking(false));
+          }}
+        />
+        <Button
+          label="Compare latest research progress"
+          quiet
+          disabled={working || !researchPending}
+          onPress={() => {
+            if (!researchPending || !runtime.repository.researchRequests)
+              return;
+            setWorking(true);
+            setError("");
+            void runtime.repository
+              .researchRequests(researchPending.job)
+              .then((rows) => {
+                setResearchLatest(
+                  rows
+                    .filter((r) =>
+                      researchPending.action === "request"
+                        ? r.package === researchPending.payload.package
+                        : r.id === researchPending.id,
+                    )
+                    .map(
+                      (r) =>
+                        `Request ${r.id} · package ${r.package} · current version ${r.version} · ${r.status}${r.reason ? `: ${r.reason}` : ""}`,
+                    )
+                    .join("\n") || "The matching research request is missing.",
+                );
+                setResearchReviewed(true);
+              })
+              .catch(() =>
+                setError(
+                  "Research progress could not be loaded. Pending work is retained.",
+                ),
+              )
+              .finally(() => setWorking(false));
+          }}
+        />
+        <Button
+          label="Discard reviewed research operation"
+          quiet
+          disabled={working || !researchReviewed}
+          onPress={() => {
+            setWorking(true);
+            void researchJournal
+              ?.purge()
+              .then(() => {
+                setResearchPending(null);
+                setResearchReviewed(false);
+                setResearchLatest("");
+                setError("");
+              })
+              .catch(() =>
+                setError("Secure research work could not be cleared."),
+              )
+              .finally(() => setWorking(false));
+          }}
+        />
+        <Button
+          label="Sign out and clear local work"
+          quiet
+          disabled={working}
+          onPress={() => void logout()}
+        />
       </ScrollView>
     );
   if (pending)

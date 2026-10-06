@@ -1,4 +1,5 @@
 import { useWorkload } from "./src/use-workload";
+import { ResearchSection } from "./src/research-section";
 import {
   AttentionBadge,
   PlanningEditor,
@@ -35,7 +36,7 @@ import { useBoard } from "./src/store";
 import { useFocusEffect, useRouter } from "expo-router";
 import { Button, Field, Notice, colors, styles as s } from "./src/components";
 
-type Tab = "Overview" | "Plan" | "Notes" | "Prep" | "Evidence";
+type Tab = "Overview" | "Plan" | "Research" | "Notes" | "Prep" | "Evidence";
 type ScreenProps = { selectedId?: string; creating?: boolean };
 export default function App(props: ScreenProps) {
   return <BoardApp {...props} />;
@@ -70,6 +71,12 @@ export function BoardApp({ selectedId, creating = false }: ScreenProps) {
   const [title, setTitle] = useState("");
 
   const [saving, setSaving] = useState(false);
+  const [researchBusy, setResearchBusy] = useState(false);
+  const researchLock = useRef(false);
+  const researchBusyChanged = useCallback((value: boolean) => {
+    researchLock.current = value;
+    setResearchBusy(value);
+  }, []);
   const [saveError, setSaveError] = useState("");
   const [message, setMessage] = useState("");
   const [files, setFiles] = useState<Attachment[]>([]);
@@ -82,13 +89,14 @@ export function BoardApp({ selectedId, creating = false }: ScreenProps) {
     useCallback(() => {
       const sub = BackHandler.addEventListener("hardwareBackPress", () => {
         if (selected || creating) {
-          if (!pending && !saving) router.dismissTo("/");
+          if (!pending && !saving && !researchLock.current)
+            router.dismissTo("/");
           return true;
         }
         return false;
       });
       return () => sub.remove();
-    }, [selected, creating, pending, saving, router]),
+    }, [selected, creating, pending, saving, researchBusy, router]),
   );
   const job = records.find((r) => r.id === selected);
   const policy = records.find((r) => r.kind === "filters");
@@ -117,7 +125,7 @@ export function BoardApp({ selectedId, creating = false }: ScreenProps) {
     };
   }, [tab, loadFiles]);
   async function save(write: PendingWrite) {
-    if (!canWrite || saveLock.current) return;
+    if (!canWrite || saveLock.current || researchLock.current) return;
     saveLock.current = true;
     setSaving(true);
     setPending(write);
@@ -145,14 +153,16 @@ export function BoardApp({ selectedId, creating = false }: ScreenProps) {
     }
   }
   function open(id: string) {
+    if (researchLock.current) return;
     router.push({ pathname: "/job/[id]", params: { id } });
     setTab("Overview");
     setDraft("");
     setSaveError("");
     setMessage("");
   }
-  const busy = saving || pending !== null;
+  const busy = saving || pending !== null || researchBusy;
   const back = () => {
+    if (busy || researchLock.current) return;
     router.dismissTo("/");
     setDraft("");
     setMessage("");
@@ -319,13 +329,36 @@ export function BoardApp({ selectedId, creating = false }: ScreenProps) {
               <>
                 <View style={{ marginTop: 20 }}>
                   {chips(
-                    ["Overview", "Plan", "Notes", "Prep", "Evidence"],
+                    [
+                      "Overview",
+                      "Plan",
+                      "Research",
+                      "Notes",
+                      "Prep",
+                      "Evidence",
+                    ],
                     tab,
                     (v) => {
                       setTab(v as Tab);
                       setMessage("");
                     },
                   )}
+                </View>
+                <View style={{ display: tab === "Research" ? "flex" : "none" }}>
+                  <ResearchSection
+                    key={job.id}
+                    jobId={job.id}
+                    records={records}
+                    repository={repository}
+                    canWrite={canWrite}
+                    busy={busy}
+                    enabled={
+                      tab === "Research" && !loading && !error && !lockedReason
+                    }
+                    onBusyChange={researchBusyChanged}
+                    mode={mode}
+                    onRefreshBoard={() => void load()}
+                  />
                 </View>
                 <View style={{ display: tab === "Plan" ? "flex" : "none" }}>
                   <PlanningEditor
@@ -397,8 +430,8 @@ export function BoardApp({ selectedId, creating = false }: ScreenProps) {
                         ),
                       )}
                   </>
-                ) : tab === "Plan" ? null : tab === "Notes" ||
-                  tab === "Prep" ? (
+                ) : tab === "Plan" || tab === "Research" ? null : tab ===
+                    "Notes" || tab === "Prep" ? (
                   <>
                     <Text style={s.section}>
                       {tab === "Prep"

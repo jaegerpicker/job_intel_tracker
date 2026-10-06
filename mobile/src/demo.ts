@@ -1,6 +1,8 @@
 import { parseTracking } from "./planning";
 import { demoWorkload } from "./demo-workload";
 import { BoardRecord, BoardError, PendingWrite, Repository } from "./domain";
+import { DemoResearch } from "./demo-research";
+import { ResearchOperation } from "./research";
 const stamp = 1791028800;
 const job = (
   id: string,
@@ -143,6 +145,7 @@ export const fixtures: BoardRecord[] = [
   },
 ];
 export class DemoRepository implements Repository {
+  readonly research = new DemoResearch();
   private records = structuredClone(fixtures);
   private completed = new Map<
     string,
@@ -165,6 +168,12 @@ export class DemoRepository implements Repository {
   }
   async workload() {
     return demoWorkload(this.records);
+  }
+  async researchRequests(job: string) {
+    return this.research.list(job, this.records);
+  }
+  async researchWrite(operation: ResearchOperation) {
+    return this.research.write(operation, this.records);
   }
   async attachments(job: string) {
     await this.wait();

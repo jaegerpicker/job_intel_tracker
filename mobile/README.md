@@ -21,7 +21,7 @@ No account, API key, `.env`, signing credential, paid EAS service, or running se
 
 ## First milestone
 
-- Search actual role titles, companies and lanes; filter all eight stages; active primary-opportunity capacity and base-floor summary.
+- Search actual role titles, companies and lanes; filter all eight stages; active application capacity and base-floor summary. Linked company roles each count separately.
 - Native routes for board, detail and creating a Prospect. Shared board state, focused Android back handling, safe-area layout, keyboard avoidance, 48-point buttons, accessible labels and selected/disabled states.
 - Versioned status updates and immutable timeline entries, notes and interview preparation with separate drafts and authorship.
 - Separate independent ratings, research provenance and permitted source links; inert attachment metadata. Unknown compensation remains explicitly unknown.
@@ -30,6 +30,8 @@ No account, API key, `.env`, signing credential, paid EAS service, or running se
 The demo implements create/status/contribution flows. Editing every job field, deleting records, policy administration, uploads/downloads, revision diffs and actual production provider acceptance remain outside the verified demo milestone. A filename/size preflight helper is tested, but private native file transfer is not enabled.
 
 ## Architecture
+
+The Research tab lets the owner request research, tailored application documents, interview preparation or a full package; inspect queue progress and available artifact previews; cancel open work; and requeue blocked work. The client never claims or completes work as an agent. Research edits use a separate secure journal and exact-key recovery through the existing owner session. Demo fixtures include queued, blocked and completed requests. See [research-request acceptance and release dependencies](qa/RESEARCH_REQUEST_ACCEPTANCE.md).
 
 `src/app` supplies Expo Router screens. `src/store.tsx` shares records across them and suppresses late reads that would overwrite a committed write. `src/domain.ts` contains server envelope types, runtime response validation, policy counting, field-preserving write preparation and safe URL/file preflight helpers. `src/runtime.ts` selects explicit demo/live mode and wraps live reads/writes in an owner-identity boundary with a secure operation journal; `src/api.ts` is an injectable HTTPS-only REST adapter with a 15-second timeout, explicit ephemeral authorization headers, no ambient cookies, URL-encoded IDs and sanitized errors. `src/demo.ts` implements the same repository interface with synthetic fixtures, version conflicts, stable idempotency results, cap checks and server-style attribution/timelines. `src/components.tsx` supplies reusable accessible controls. Screen tests exercise actual drafts, retry behavior and recovery, beyond primitive unit tests.
 

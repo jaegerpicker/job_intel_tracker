@@ -1,5 +1,10 @@
 import { parseWorkload } from "./planning";
 import {
+  parseResearchRequest,
+  ResearchOperation,
+  validResearchOperation,
+} from "./research";
+import {
   Attachment,
   BoardError,
   PendingWrite,
@@ -88,6 +93,39 @@ export class ApiRepository implements Repository {
   }
   async workload() {
     return parseWorkload(await this.request("/api/workload"));
+  }
+  async researchRequests(job: string) {
+    const data = await this.request(
+      `/api/research-requests?job=${encodeURIComponent(job)}`,
+    );
+    if (!Array.isArray(data))
+      throw new BoardError("invalid", "Invalid research queue response.");
+    const rows = data.map((v) => parseResearchRequest(v, job));
+    if (new Set(rows.map((r) => r.id)).size !== rows.length)
+      throw new BoardError("invalid", "Invalid research queue response.");
+    return rows;
+  }
+  async researchWrite(operation: ResearchOperation) {
+    if (!validResearchOperation(operation))
+      throw new BoardError(
+        "forbidden",
+        "Only owner request, cancel and requeue operations are supported.",
+      );
+    const path =
+      operation.action === "request"
+        ? `/api/jobs/${encodeURIComponent(operation.job)}/research-requests`
+        : `/api/research-requests/${encodeURIComponent(operation.id)}/${operation.action}`;
+    return parseResearchRequest(
+      await this.request(path, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Idempotency-Key": operation.key,
+        },
+        body: JSON.stringify(operation.payload),
+      }),
+      operation.job,
+    );
   }
   async save(write: PendingWrite) {
     return parseRecord(

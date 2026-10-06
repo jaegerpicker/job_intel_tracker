@@ -1,4 +1,5 @@
 import type { Workload } from "./planning";
+import type { ResearchOperation, ResearchRequest } from "./research";
 export const stages = [
   "Prospect",
   "Applied",
@@ -44,6 +45,9 @@ export interface PendingWrite {
 export interface Repository {
   list(): Promise<BoardRecord[]>;
   workload?(): Promise<Workload>;
+  researchRequests?(job: string): Promise<ResearchRequest[]>;
+  researchWrite?(operation: ResearchOperation): Promise<ResearchRequest>;
+  researchPending?(): Promise<ResearchOperation | null>;
   save(write: PendingWrite): Promise<BoardRecord>;
   attachments(job: string): Promise<Attachment[]>;
 }

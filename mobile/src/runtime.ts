@@ -2,6 +2,7 @@ import { ApiRepository } from "./api";
 import { DemoRepository } from "./demo";
 import { BoardError, PendingWrite, Repository } from "./domain";
 import { JournalRepository, WriteJournal } from "./journal";
+import { ResearchOperation } from "./research";
 export type AppMode = "demo" | "live";
 /** Supplied only by a future approved owner-session exchange. Never read credentials from build variables. */
 export interface OwnerSessionSource {
@@ -57,6 +58,12 @@ class OwnerRepository implements Repository {
   async workload() {
     return this.read(() => this.api.workload());
   }
+  async researchRequests(job: string) {
+    return this.read(() => this.api.researchRequests(job));
+  }
+  async researchWrite(operation: ResearchOperation) {
+    return this.read(() => this.api.researchWrite(operation));
+  }
   async attachments(job: string) {
     return this.read(() => this.api.attachments(job));
   }
@@ -72,6 +79,7 @@ export function createRuntime(options: {
   transport?: typeof fetch;
   now?: () => number;
   journal?: WriteJournal;
+  researchJournal?: WriteJournal<ResearchOperation>;
 }): AppRuntime {
   if (options.mode === undefined || options.mode === "demo")
     return { mode: "demo", repository: new DemoRepository(), canWrite: true };
@@ -151,10 +159,13 @@ export function createRuntime(options: {
                     "Session ended. Pending work cannot be sent.",
                   );
               },
+              options.researchJournal,
             )
           : {
               list: () => new OwnerRepository(api, source).list(),
               workload: () => new OwnerRepository(api, source).workload(),
+              researchRequests: (job) =>
+                new OwnerRepository(api, source).researchRequests(job),
               attachments: (id) =>
                 new OwnerRepository(api, source).attachments(id),
               save: async () => {
