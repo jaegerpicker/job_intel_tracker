@@ -2,6 +2,8 @@
 
 ## Current combined rollout status — October 6
 
+Direct owner approval was subsequently received in this execution session. The reviewed branch was pushed and draft PR #10 opened against backend PR #9. This supersedes the earlier publication rejection below. Exact-head CI passed the backend verification and mobile test suite, then requested four newer SDK 57 patch versions through Expo compatibility validation; the release is correcting that mismatch before merge. No phone installation or backend deployment is implied by publication.
+
 After backend PR #9 merged, the isolated mobile branch was rebased without conflicts onto `c3a2988076ca5288f39aec84e4e84114983f9ee9`. Mobile contents match the previously reviewed tree exactly; only the commit ancestry changed. This new backend baseline supersedes the earlier main base below. Publication remains paused at the same direct-approval gate; no retry of the rejected push was made.
 
 PR #7 is merged, installed and narrowly accepted for physical safe-area layout. The sections below are historical preparation snapshots; their pending PR #7 merge/install statements are superseded.

@@ -19,7 +19,7 @@ for (const path of maps) {
   if (!Array.isArray(map.sources))
     throw new Error("Missing bundle source inventory: " + path);
   const dangerous = map.sources.filter((s) =>
-    /(?:^|\/)node_modules\/(?:braces|node-forge|uuid)\//.test(s),
+    /(?:^|\/)node_modules\/(?:braces|node-forge|uuid|sprintf-js)\//.test(s),
   );
   if (dangerous.length)
     throw new Error(
@@ -37,7 +37,7 @@ for (const path of maps) {
   platforms.add(platform);
   console.log(
     platform +
-      ": patched decoder present; braces/node-forge/uuid absent from runtime source inventory.",
+      ": patched decoder present; braces/node-forge/uuid/sprintf-js absent from runtime source inventory.",
   );
 }
 if (platforms.size !== 3)
