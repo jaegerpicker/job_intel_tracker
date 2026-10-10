@@ -17,6 +17,7 @@ from pydantic import BaseModel, ConfigDict
 SCOPES = {"read", "jobs:write", "contribute", "attachments:metadata"}
 TABLES = """
 CREATE TABLE IF NOT EXISTS mobile_flows(hash TEXT PRIMARY KEY, redirect TEXT, challenge TEXT, state TEXT, expires REAL, code_hash TEXT UNIQUE, code_expires REAL);
+CREATE TABLE IF NOT EXISTS mobile_providers(hash TEXT PRIMARY KEY REFERENCES mobile_flows(hash) ON DELETE CASCADE,provider TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS mobile_sessions(hash TEXT PRIMARY KEY, expires REAL, revoked INTEGER DEFAULT 0);
 CREATE TABLE IF NOT EXISTS mobile_apple_flows(hash TEXT PRIMARY KEY, ticket TEXT);
 """
@@ -81,7 +82,9 @@ def configure(app, db, public_origin, owner, configured_owner):
             ).fetchone()
         if not row:
             raise HTTPException(401, "Login unavailable or expired")
-        return row
+        with db() as c:
+            provider = c.execute("SELECT provider FROM mobile_providers WHERE hash=?", (digest(raw),)).fetchone()
+        return {**dict(row), "provider": provider["provider"] if provider else "apple"}
 
     class Start(BaseModel):
         model_config = ConfigDict(extra="forbid")
@@ -106,7 +109,7 @@ def configure(app, db, public_origin, owner, configured_owner):
         origin(req)
         if (
             p.redirect_uri not in callbacks
-            or p.provider != "apple"
+            or p.provider not in ("apple", "google")
             or p.code_challenge_method != "S256"
             or not re.fullmatch(r"[A-Za-z0-9_-]{43}", p.code_challenge)
             or not re.fullmatch(r"[A-Za-z0-9_-]{43,128}", p.client_state)
@@ -128,6 +131,7 @@ def configure(app, db, public_origin, owner, configured_owner):
                 "INSERT INTO mobile_flows VALUES(?,?,?,?,?,NULL,NULL)",
                 (digest(raw), p.redirect_uri, p.code_challenge, p.client_state, expires),
             )
+            c.execute("INSERT INTO mobile_providers VALUES(?,?)", (digest(raw), p.provider))
         return {"authorization_url": public_origin + "/auth/mobile/authorize?ticket=" + raw, "expires_at": expires}
 
     @app.get("/auth/mobile/authorize")
@@ -139,7 +143,7 @@ def configure(app, db, public_origin, owner, configured_owner):
         except HTTPException as error:
             if error.status_code != 401:
                 raise
-            return RedirectResponse("/auth/apple?mobile_ticket=" + ticket, status_code=303)
+            return RedirectResponse("/auth/" + row["provider"] + "?mobile_ticket=" + ticket, status_code=303)
         with db() as c:
             s = c.execute(
                 "SELECT csrf FROM sessions WHERE hash=?", (digest(req.cookies.get("session", "")),)

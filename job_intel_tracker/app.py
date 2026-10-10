@@ -5,7 +5,6 @@ import json
 import logging
 import os
 import secrets
-import sqlite3
 import time
 import uuid
 from pathlib import Path
@@ -20,7 +19,7 @@ from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from . import enrollment, mobile_auth, research_queue, workload
+from . import database, enrollment, google_auth, mobile_auth, research_queue, workload
 
 STAGES = ["Prospect", "Applied", "Screening", "Interview", "Offer", "Closed", "Rejected", "Withdrawn"]
 
@@ -32,29 +31,12 @@ def create_app(data_dir=None, demo=False):
     root.mkdir(mode=0o700, parents=True, exist_ok=True)
     uploads = root / "uploads"
     uploads.mkdir(mode=0o700, exist_ok=True)
-    dbpath = root / "tracker.sqlite3"
+    db = database.factory(root, demo=demo)
 
-    def db():
-        c = sqlite3.connect(dbpath, timeout=20)
-        c.row_factory = sqlite3.Row
-        c.execute("PRAGMA foreign_keys=ON")
-        return c
-
-    with db() as c:
-        c.executescript("""
-        CREATE TABLE IF NOT EXISTS records(id TEXT PRIMARY KEY, kind TEXT NOT NULL, job TEXT, author TEXT NOT NULL, version INTEGER NOT NULL, body TEXT NOT NULL, updated REAL NOT NULL);
-        CREATE TABLE IF NOT EXISTS revisions(id TEXT, version INTEGER, actor TEXT, body TEXT, timestamp REAL, PRIMARY KEY(id,version));
-        CREATE TABLE IF NOT EXISTS audit(id INTEGER PRIMARY KEY, actor TEXT, action TEXT, resource TEXT, timestamp REAL);
-        CREATE TABLE IF NOT EXISTS tokens(hash TEXT PRIMARY KEY, name TEXT UNIQUE, scopes TEXT, jobs TEXT, expires REAL, revoked INTEGER DEFAULT 0);
-        CREATE TABLE IF NOT EXISTS sessions(hash TEXT PRIMARY KEY, csrf TEXT, expires REAL);
-        CREATE TABLE IF NOT EXISTS flows(hash TEXT PRIMARY KEY, nonce TEXT, expires REAL);
-        CREATE TABLE IF NOT EXISTS idem(actor TEXT, key TEXT, digest TEXT, result TEXT, PRIMARY KEY(actor,key));
-        CREATE TABLE IF NOT EXISTS attachments(id TEXT PRIMARY KEY, job TEXT REFERENCES records(id), author TEXT, filename TEXT, mime TEXT, version INTEGER, timestamp REAL);
-        """)
-    with db() as c:
-        c.execute(enrollment.TABLE)
+    database.initialize(db)
     try:
         configured_owner = enrollment.owner_subject()
+        google_owner = google_auth.owner_subject()
     except (ValueError, TypeError, OSError):
         raise RuntimeError("Invalid owner allowlist; service refuses to start") from None
     app = FastAPI(title="job_intel_tracker", version="0.1.0", docs_url=None, redoc_url=None, openapi_url=None)
@@ -139,7 +121,8 @@ def create_app(data_dir=None, demo=False):
         response.set_cookie("session", raw, httponly=True, secure=not demo, samesite="lax", max_age=28800)
         return response
 
-    mobile_auth.configure(app, db, public_origin, owner, configured_owner)
+    mobile_auth.configure(app, db, public_origin, owner, configured_owner or google_owner)
+    google_auth.configure(app, db, public_origin, demo, google_owner, session)
     research_queue.configure(app, db, principal, audit, lambda aid: (uploads / aid).is_file())
 
     @app.get("/.well-known/apple-app-site-association")
@@ -216,7 +199,13 @@ def create_app(data_dir=None, demo=False):
                 "APPLE_PRIVATE_KEY_FILE",
             )
         ) and os.getenv("APPLE_REDIRECT_URI", "").startswith("https://")
-        return {"demo": demo, "configured": bool(configured and configured_owner)}
+        apple_ready = bool(configured and configured_owner)
+        google_ready = app.state.google_configured
+        return {
+            "demo": demo,
+            "configured": apple_ready or google_ready,
+            "providers": {"apple": apple_ready, "google": google_ready},
+        }
 
     @app.post("/auth/demo")
     def demo_login(req: Request):
@@ -229,7 +218,8 @@ def create_app(data_dir=None, demo=False):
         if mobile_ticket:
             if not app.state.mobile_enabled:
                 raise HTTPException(404)
-            app.state.mobile_ticket(mobile_ticket)
+            if app.state.mobile_ticket(mobile_ticket)["provider"] != "apple":
+                raise HTTPException(401, "Provider mismatch")
         client, redirect = [os.getenv(x) for x in ("APPLE_CLIENT_ID", "APPLE_REDIRECT_URI")]
         sub = configured_owner
         if not all(
@@ -369,6 +359,7 @@ def create_app(data_dir=None, demo=False):
             and os.getenv("APPLE_ENROLLMENT_ENABLED") == "1"
             and bool(owner_file)
             and not configured_owner
+            and not google_owner
             and not os.getenv("APPLE_OWNER_SUB")
             and not os.path.lexists(owner_file or "")
         )
@@ -430,7 +421,7 @@ def create_app(data_dir=None, demo=False):
             )
             r.set_cookie("enroll_flow", state, secure=True, httponly=True, samesite="none", max_age=300)
             return r
-        except (ValueError, OSError, sqlite3.Error):
+        except (ValueError, OSError, *database.ERRORS):
             raise HTTPException(401, "Enrollment unavailable or capability invalid") from None
 
     async def enrollment_callback(req, form):
@@ -476,7 +467,7 @@ def create_app(data_dir=None, demo=False):
                     (ticket["instance"],),
                 )
             raise
-        except (ValueError, OSError, sqlite3.Error):
+        except (ValueError, OSError, *database.ERRORS):
             raise HTTPException(401, "Enrollment unavailable or expired") from None
 
     @app.get("/healthz")
@@ -844,6 +835,7 @@ def create_app(data_dir=None, demo=False):
             raise HTTPException(403, "Credentials cannot be issued in demo")
         raw = secrets.token_urlsafe(32)
         with db() as c:
+            c.execute("BEGIN IMMEDIATE")
             if c.execute("SELECT name FROM tokens WHERE name=?", (p.name,)).fetchone():
                 raise HTTPException(409, "Revoke and choose a new credential name")
             c.execute(

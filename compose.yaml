@@ -1,11 +1,19 @@
 services:
   tracker:
-    build: .
+    build:
+      context: .
+      args:
+        TRACKER_EXTRAS: ${TRACKER_EXTRAS:-}
     ports:
       - "127.0.0.1:8000:8000"
     environment:
       APP_ENV: production
       DATA_DIR: /data
+      DATABASE_URL: ${DATABASE_URL:-}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-}
+      GOOGLE_OWNER_SUB: ${GOOGLE_OWNER_SUB:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       APPLE_CLIENT_ID: ${APPLE_CLIENT_ID:-}
       APPLE_REDIRECT_URI: ${APPLE_REDIRECT_URI:-}
       APPLE_OWNER_SUB: ${APPLE_OWNER_SUB:-}

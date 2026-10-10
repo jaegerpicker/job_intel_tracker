@@ -78,7 +78,7 @@ def authenticated(browser, client):
     [
         {"redirect_uri": CALLBACK + "/evil"},
         {"redirect_uri": "javascript:alert(1)"},
-        {"provider": "google"},
+        {"provider": "unknown"},
         {"code_challenge_method": "plain"},
         {"code_challenge": "x"},
         {"client_state": "<script>"},

@@ -34,3 +34,13 @@ Used the connected in-app browser against a loopback-only isolated demo:
 Independent read-only review found a caller-supplied parent scope bypass and missing create-time owner exception protection. Both were fixed and covered by regression tests before publication. This is scoped code review, not a security certification.
 
 Locked production-mode localhost UI verified with no Apple settings: private workspace screen, no demo entry, unavailable Apple setup message; screenshot locked-deployment.png. Enrollment integration tests use inert capability fixtures and ephemeral signing keys, never live Apple credentials.
+
+## PostgreSQL and Google feature verification (October 10, 2026)
+
+Current local feature checks use synthetic fixtures only. SQLite: 142 passed, one PostgreSQL-only migration test skipped. PostgreSQL 14: 140 passed, two SQLite-only checks skipped, the SQLite backup test deselected; this includes a read-only SQLite migration rehearsal with preserved records/history/agent scopes/files and nonempty-target rejection. Full parity covers concurrent credential-name issuance, versions/idempotency, queue claims/outbox, owner/agent restrictions, Apple compatibility and Google state/nonce/issuer/audience/signature/expiry/authorized-party/replay/non-owner rejection. Google token exchange/JWKS are mocked; JWT signing and validation are real.
+
+Mobile: vendor verification, TypeScript, ESLint, 126 Jest tests across 18 suites and four scene-plugin tests pass; two opt-in local-contract suites remain skipped. Apple and Google selection use the same native PKCE/confirmation/session flow. Server web authentication routes and all five browser-script syntax checks pass. No new interactive browser, simulator, signed iOS/Android or live provider acceptance was performed. Expo web live mode remains unsupported and locked.
+
+Ruff lint/format, mypy and Python sdist/wheel packaging pass. Local Docker image/runtime checks are unrun because the daemon is stopped. Expo dependency compatibility uses the installed offline SDK map; authoritative online validation was unavailable. No native bundle export/build was created during this feature work. PostgreSQL CI was added but has not run remotely; these changes have not been pushed.
+
+Live setup requires an approved Google web OAuth client, private client secret, exact HTTPS callback and independently verified operator-approved Google subject, followed by provider and signed-device acceptance. No live credentials, production records, settings or deployment were used. See [Google setup](GOOGLE_SETUP.md) and [PostgreSQL setup](POSTGRES_SETUP.md).
