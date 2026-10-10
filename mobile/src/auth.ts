@@ -205,14 +205,14 @@ export class MobileAuth {
       expiresAt - this.now() <= 15 * 60 * 1000
     );
   }
-  signIn(): Promise<void> {
+  signIn(provider: "apple" | "google" = "apple"): Promise<void> {
     if (this.busy) return this.busy;
-    this.busy = this.begin().finally(() => {
+    this.busy = this.begin(provider).finally(() => {
       this.busy = undefined;
     });
     return this.busy;
   }
-  private async begin() {
+  private async begin(provider: "apple" | "google") {
     if (this.snapshot.status === "signedIn" || this.cleanupBlocked) return;
     const generation = ++this.generation;
     this.publish("signingIn");
@@ -231,7 +231,7 @@ export class MobileAuth {
         code_challenge: challenge,
         code_challenge_method: "S256",
         client_state: state,
-        provider: "apple",
+        provider,
       })) as { authorization_url?: unknown; expires_at?: unknown };
       const url = new URL(String(result.authorization_url));
       const expiresAt = Number(result.expires_at) * 1000;

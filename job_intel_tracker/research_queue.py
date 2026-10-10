@@ -215,13 +215,15 @@ def configure(app, db, principal, audit, attachment_exists):
             c.execute("BEGIN")
             if job:
                 require_job(c, job)
-            rows = c.execute("SELECT * FROM research_requests ORDER BY rowid DESC").fetchall()
+            rows = c.execute("SELECT * FROM research_requests").fetchall()
             result = [
                 view(c, r, now, attachment_exists)
                 for r in rows
                 if (not job or r["job"] == job) and (not jobs or r["job"] in jobs)
             ]
-        return [r for r in result if not status or r.status == status]
+        return sorted(
+            (r for r in result if not status or r.status == status), key=lambda r: (r.created_at, r.id), reverse=True
+        )
 
     @app.post("/api/jobs/{job}/research-requests", response_model=WorkRequest)
     def create(job: str, p: NewRequest, req: Request):

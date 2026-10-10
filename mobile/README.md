@@ -37,7 +37,7 @@ The Research tab lets the owner request research, tailored application documents
 
 Expo SDK 57 targets React Native 0.86 and React 19.2.3. Expo was chosen because this project has no custom native SDK dependency and benefits from local iOS/Android iteration plus a web preview. Expo Go supports the demo and native secure-storage UI checks; real claimed-link authentication requires a signed development or production build. See [Expo's SDK matrix](https://docs.expo.dev/versions/v57.0.0/) and [project setup](https://docs.expo.dev/get-started/create-a-project/).
 
-The REST contract isolates the client from SQLite versus a possible PostgreSQL implementation. Database portability belongs behind server transactions, especially version/cap checks and idempotency. No migrations or multitenancy are added here.
+The REST contract isolates the client from SQLite versus optional PostgreSQL. Database portability belongs behind server transactions, especially version/cap checks and idempotency. Server migration/setup is documented in [PostgreSQL setup](../docs/POSTGRES_SETUP.md); this client adds no multitenancy.
 
 ## Explicit demo and live modes
 
@@ -57,6 +57,6 @@ See [QA](qa/README.md). The path-filtered mobile CI workflow runs the same check
 
 ## Native owner session milestone
 
-The local branch now implements the disabled-by-default PKCE browser handoff, 15-minute owner bearer sessions and secure durable live record writes. `EXPO_PUBLIC_TRACKER_MODE=live`, `EXPO_PUBLIC_TRACKER_API_ORIGIN`, and `EXPO_PUBLIC_TRACKER_MOBILE_REDIRECT` are public configuration only; the callback must equal the API origin plus `/auth/mobile/callback`. Missing configuration remains locked and live never falls back to synthetic demo. Google, private binary files and native policy administration remain gated.
+The local branch now implements the disabled-by-default PKCE browser handoff, 15-minute owner bearer sessions and secure durable live record writes. `EXPO_PUBLIC_TRACKER_MODE=live`, `EXPO_PUBLIC_TRACKER_API_ORIGIN`, and `EXPO_PUBLIC_TRACKER_MOBILE_REDIRECT` are public configuration only; the callback must equal the API origin plus `/auth/mobile/callback`. Missing configuration remains locked and live never falls back to synthetic demo. Apple and Google use the server browser handoff with explicit provider-specific owner approval. Private binary files and native policy administration remain gated. New Google signed-device acceptance remains pending.
 
 Read [the complete mobile protocol and remaining setup](../docs/MOBILE_AUTH.md) before enabling anything. No real provider configuration, signing identity, association hosting or deployment is performed by the demo commands. `npm run check` covers native storage boundaries, login/logout interruption, exact journal retries and conflict review; `npm run verify:bundles` checks exported dependencies. Expo Go can exercise UI and secure-storage availability but cannot certify your signed application's claimed links.
