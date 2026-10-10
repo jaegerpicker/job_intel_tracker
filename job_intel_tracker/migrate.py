@@ -27,6 +27,21 @@ TABLES = (
 )
 
 
+def validate_source_version(src):
+    """Reject unknown versioned sources before creating files or opening a target."""
+    marker = src.execute("SELECT type FROM sqlite_master WHERE name='schema_migrations'").fetchone()
+    if marker is None:
+        return  # supported pre-versioned SQLite database
+    if marker[0] != "table":
+        raise ValueError("Unsupported SQLite source schema version")
+    columns = src.execute("PRAGMA table_info(schema_migrations)").fetchall()
+    if len(columns) != 1 or columns[0][1:3] != ("version", "INTEGER") or columns[0][5] != 1:
+        raise ValueError("Unsupported SQLite source schema version")
+    versions = [row[0] for row in src.execute("SELECT version FROM schema_migrations")]
+    if versions != [1]:
+        raise ValueError("Unsupported SQLite source schema version")
+
+
 def migrate(source: Path, destination: Path, *, confirmed=False):
     if not confirmed or not os.getenv("DATABASE_URL"):
         raise ValueError("Explicit stopped-source/empty-target confirmation and PostgreSQL DATABASE_URL required")
@@ -42,6 +57,7 @@ def migrate(source: Path, destination: Path, *, confirmed=False):
         src.execute("BEGIN")
         if src.execute("PRAGMA integrity_check").fetchone()[0] != "ok":
             raise ValueError("Source integrity check failed")
+        validate_source_version(src)
         destination.mkdir(mode=0o700, parents=True)
         db = database.factory(destination)
         database.initialize(db)

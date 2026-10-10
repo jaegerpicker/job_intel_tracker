@@ -1,5 +1,6 @@
 """Real JWT cryptography with inert codes and mocked Google transport/JWKS."""
 
+import base64
 import hashlib
 import json
 import time
@@ -33,6 +34,7 @@ def google(tmp_path, monkeypatch):
     private = rsa.generate_private_key(public_exponent=65537, key_size=2048)
     token = {"value": ""}
     exchanges = []
+    authorization_challenges = {}
 
     class Transport:
         def __init__(self, **kwargs):
@@ -46,7 +48,10 @@ def google(tmp_path, monkeypatch):
 
         async def post(self, url, data):
             assert url == "https://oauth2.googleapis.com/token"
-            assert data["code_verifier"]
+            challenge = (
+                base64.urlsafe_b64encode(hashlib.sha256(data["code_verifier"].encode()).digest()).decode().rstrip("=")
+            )
+            assert challenge == authorization_challenges[data["code"]]
             assert data["redirect_uri"] == ORIGIN + "/auth/google/callback"
             assert data["grant_type"] == "authorization_code"
             exchanges.append(data)
@@ -69,6 +74,7 @@ def google(tmp_path, monkeypatch):
         values = {k: v[0] for k, v in parse_qs(urlparse(response.headers["location"]).query).items()}
         assert values["scope"] == "openid" and values["code_challenge_method"] == "S256"
         assert "Secure" in response.headers["set-cookie"] and "HttpOnly" in response.headers["set-cookie"]
+        authorization_challenges["inert-test-code"] = values["code_challenge"]
         token["value"] = jwt.encode(
             {
                 "iss": google_auth.ISSUER,

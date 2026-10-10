@@ -28,7 +28,7 @@ With `DATABASE_URL` privately set to a **new empty PostgreSQL target**:
   --confirm-stopped-source-and-empty-target
 ```
 
-The source opens read-only. Target emptiness is checked under the writer lock. Records, revisions, audit, agent credential hashes/scopes/revocation, idempotency, attachments, requests, events and delivery state copy in one database transaction, with row-count checks. Uploads copy to the new directory before commit. Browser/mobile sessions and pending OAuth/enrollment capabilities do not migrate; sign in again. Reapply the independently approved provider owner configuration privately. Keep the old database and backup until validation is complete. On a failure or uncertain commit, inspect the new directory/target before retrying; neither is automatically removed. Do not run both copies as active boards.
+The source opens read-only. Before opening the target or creating the destination directory, the migration accepts unversioned legacy or schema version 1 and rejects newer/incompatible version markers. Target emptiness is checked under the writer lock. Records, revisions, audit, agent credential hashes/scopes/revocation, idempotency, attachments, requests, events and delivery state copy in one database transaction, with row-count checks. Uploads copy to the new directory before commit. Browser/mobile sessions and pending OAuth/enrollment capabilities do not migrate; sign in again. Reapply the independently approved provider owner configuration privately. Keep the old database and backup until validation is complete. On a failure or uncertain commit, inspect the new directory/target before retrying; neither is automatically removed. Do not run both copies as active boards.
 
 ## Backup and operational limits
 
