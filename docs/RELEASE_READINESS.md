@@ -1,9 +1,9 @@
 # Release-readiness checkpoint — 2026-10-13
 
-**Source PR #12 is open at the owner-approved commit; release decisions remain.**
+**Source PR #12 is open; release decisions remain.**
 No merge, visibility/settings change, deployment, live tracker access, credential
-revocation or shared-history rewrite was performed. The automatic third-party
-PR integration's billing remains unverified; see below.
+revocation or shared-history rewrite was performed. The owner reports that the
+automatic third-party integration uses its free plan with no payment added.
 
 ## Verified source and architecture
 
@@ -57,8 +57,9 @@ The owner's existing Apple authentication and private records were untouched.
   permissions, no persisted checkout credential, timeouts and superseded-run
   cancellation. YAML was checked locally. The authorized push/PR triggered the
   existing standard-runner workflows; backend tests, package builds and Docker
-  runtime checks passed. Mobile tests/lint passed, then its online Expo catalog
-  check failed on newly recommended patch versions. See the follow-up below.
+  runtime checks passed. The original mobile run failed on newly recommended
+  online Expo catalog versions; both workflows passed on the approved CI
+  follow-up. See below.
 
 ## Verification evidence
 
@@ -85,16 +86,16 @@ but the authorized PR's existing GitHub CI successfully exercised the modified
 image context, root-owned disk, runtime privileges, PORT and restart. No signed native
 build, device installation or provider acceptance was attempted.
 
-### Local CI follow-up awaiting publication approval
+### Published CI follow-up and review corrections
 
-[PR #12](https://github.com/jaegerpicker/job_intel_tracker/pull/12) remains at
-`aa37984ff45925fd441727b82a7b5bea10ae0e0c`, the exact authorized commit.
-Its mobile run passed `npm run check`, but Expo's online catalog now recommends
+[PR #12](https://github.com/jaegerpicker/job_intel_tracker/pull/12) includes the
+approved CI follow-up `5c7a7edf7e2ce47a81f588187626f98825deb7f9`.
+The original mobile run passed `npm run check`, but Expo's online catalog recommends
 Expo 57.0.28, expo-crypto 57.0.4 and expo-router 57.0.26. The lockfile retains
 the locally tested versions; this is a catalog drift failure, not a failed app
 test or a newly established vulnerability finding.
 
-The local follow-up sets `EXPO_OFFLINE=1` and `EXPO_NO_TELEMETRY=1` for mobile
+The follow-up sets `EXPO_OFFLINE=1` and `EXPO_NO_TELEMETRY=1` for mobile
 CI. The actual installed SDK CLI uses its packaged `bundledNativeModules.json`
 for version checks in this mode. This keeps compatibility validation tied to
 the lockfile. It does **not** check the newest upstream patch recommendations
@@ -103,16 +104,31 @@ do not suppress it or claim current remote-catalog freshness. Before a release,
 review upstream patch changes and update/retest the lockfile deliberately.
 See [Expo CLI environment variables](https://docs.expo.dev/more/expo-cli/#environment-variables).
 
-Local follow-up verification: the actual offline CLI accepts the locked packages
+Follow-up verification: the actual offline CLI accepts the locked packages
 and rejects a disposable synthetic installed expo-crypto 0.0.0 with exit 1.
 With the new CI environment, vendor checks, TypeScript, ESLint, all 126 Jest
 tests (11.256 seconds) and all four scene-plugin tests pass; the same two live
 tests remain skipped. Workflow YAML parses and retains the 15-minute job bound.
+GitHub's existing mobile and backend/Docker workflows both passed on this commit,
+including all three mobile exports and bundle-inventory checks.
+
+Review identified two valid source-release issues. A synthetic 40 KB `.A` run
+without an email address exceeded a two-second external process bound in the
+original regex. The corrected pattern starts only at the beginning of a local
+part, preventing repeated suffix searches; the audit also checks its deadline
+before each pattern. A full CLI no-match regression uses an 800 KB synthetic
+run with an external five-second timeout and a four-second audit budget.
+The source manifest now includes `requirements-lock.txt`, the linked security
+policy and synthetic import sample. The isolated archive test verifies the
+lockfile's exact contents and linked-file retention alongside private-file
+exclusion. The contributor guide distinguishes this Python source archive
+from the full mobile Git checkout. All 132 backend/web tests passed in 10.84
+seconds; Ruff check/format and mypy passed.
 
 The existing Greptile integration started automatically when the PR opened.
-Its billing status is unverified; no direct Greptile request or settings change
-was made by this lane. The owner should verify that integration against the
-zero-spending constraint before further PR activity.
+The owner subsequently reported its free plan and absence of a payment method
+and approved the follow-up push. No invoice or billing telemetry was inspected;
+no direct Greptile request or settings change was made by this lane.
 
 Final npm audit: **49 high, 0 moderate, 0 critical** dependency-chain entries
 from **two distinct advisories/two installed instances** (braces and node-forge).

@@ -18,7 +18,9 @@ PATTERNS = {
     "github-token": re.compile(rb"\b(?:gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{40,})\b"),
     "openai-key": re.compile(rb"\bsk-(?:proj-|svcacct-)?[A-Za-z0-9_-]{32,}\b"),
     "credential-url": re.compile(rb"\b[a-z][a-z0-9+.-]{0,31}://[^\s/:]+:[^\s/@]+@", re.IGNORECASE),
-    "email-address": re.compile(rb"\b[A-Z0-9._%+-]+@([A-Z0-9.-]+\.[A-Z]{2,})\b", re.IGNORECASE),
+    # Start only at the beginning of a local-part run. A word boundary retries
+    # the same suffix after every dot/plus/etc. in large no-match inputs.
+    "email-address": re.compile(rb"(?<![A-Z0-9._%+-])[A-Z0-9._%+-]+@([A-Z0-9.-]+\.[A-Z]{2,})\b", re.IGNORECASE),
 }
 PRIVATE_PATH = re.compile(
     r"(?:^|/)(?:\.env(?:\.(?!example$|sample$)[^/]*)?|credentials(?:\.[^/]+)?|"
@@ -125,6 +127,9 @@ def audit(repo, *, max_objects=2000, max_bytes=2_000_000, max_seconds=45):
                 content = content.partition(b"\n\n")[2]
             newlines = [m.start() for m in re.finditer(b"\n", content)]
             for name, pattern in PATTERNS.items():
+                if time.monotonic() - start >= max_seconds:
+                    report["incomplete"].append("time limit reached")
+                    break
                 lines = set()
                 for match in pattern.finditer(content):
                     if time.monotonic() - start >= max_seconds:

@@ -96,6 +96,22 @@ class AuditTests(unittest.TestCase):
             git(self.repo, "fetch", "https://synthetic.example.invalid/repo.git")
         self.assertIn(b"transport 'https' not allowed", result.exception.stderr)
 
+    def test_no_match_email_runs_cannot_retry_overlapping_suffixes(self):
+        self.write("large-no-match.txt", ".A" * 400_000 + "\n")
+        self.commit()
+        output = Path(self.temp.name) / "no-match.json"
+        script = Path(__file__).resolve().parents[1] / "scripts" / "release_preflight.py"
+        result = subprocess.run(
+            [sys.executable, str(script), str(self.repo), "--report", str(output), "--max-seconds", "4"],
+            timeout=5,
+            check=True,
+            capture_output=True,
+        )
+        self.assertEqual(0, result.returncode)
+        report = json.loads(output.read_text())
+        self.assertFalse(report["incomplete"])
+        self.assertEqual([], report["findings"])
+
     def test_binary_document_requires_manual_review(self):
         (self.repo / "synthetic-resume.pdf").write_bytes(b"%PDF\x00synthetic fixture")
         self.commit()

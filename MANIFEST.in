@@ -1,7 +1,10 @@
 include THIRD_PARTY_NOTICES.md
 include CONTRIBUTING.md
+include SECURITY.md
+include requirements-lock.txt
 include docs/DEPENDENCY_LICENSES.json
 include docs/FORK_SETUP.md
+include docs/sample-import.json
 include docs/RELEASE_READINESS.md
 include docs/SECURITY_REVIEW.md
 include docs/PUBLIC_METADATA_REVIEW.md

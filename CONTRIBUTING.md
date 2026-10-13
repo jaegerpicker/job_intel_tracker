@@ -28,6 +28,9 @@ Use one test process; no real account login or live tracker calls belong in test
 
 ## Mobile checks
 
+The Python source archive contains the backend and web component. Mobile
+development requires a full Git checkout, including `mobile/`.
+
 Read [mobile/AGENTS.md](mobile/AGENTS.md) before editing native code. Use Node 22
 and the checked-in npm lockfile. From `mobile`:
 
