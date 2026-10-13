@@ -1,8 +1,8 @@
 # Deployment and private backups
 
-Supported: one FastAPI instance with SQLite and private files on one persistent filesystem. No paid APIs. Run on an existing private computer or an already-owned small Linux server; Docker Compose is supplied. No hosting signup, spending, DNS change or public server deployment has been performed.
+Supported: one FastAPI instance with SQLite or optional PostgreSQL and private files on one persistent filesystem. See [PostgreSQL schema, offline migration and backup](POSTGRES_SETUP.md). No paid APIs. Run on an existing private computer or an already-owned small Linux server; Docker Compose is supplied. No hosting signup, spending, DNS change or public server deployment has been performed.
 
-Docker runs as UID 10001 with dropped capabilities. Compose binds port 8000 to loopback; place a configured HTTPS reverse proxy in front only after Apple setup and approval. Mount Apple key read-only separately; never build it into the image. `.dockerignore` allowlists only source and package metadata. Protect `.env`, data, credentials and backups outside Git. The Docker daemon was not running in the initial local environment; CI builds the image separately.
+Docker runs as UID 10001 with dropped capabilities. Compose binds port 8000 to loopback; place a configured HTTPS reverse proxy in front only after owner-provider setup and approval. Mount Apple key read-only separately; never build it into the image. `.dockerignore` allowlists only source and package metadata. Protect `.env`, data, credentials and backups outside Git. The Docker daemon was not running in the initial local environment; CI builds the image separately.
 
 A persistent disk is required. Free hosts with ephemeral application filesystems are unsuitable for durable SQLite/uploads. Paid platforms can require minimum fees plus usage: compare their current pricing before any purchase; none is assumed or configured here. For lowest incremental cost, use existing hardware and owner-managed backups.
 

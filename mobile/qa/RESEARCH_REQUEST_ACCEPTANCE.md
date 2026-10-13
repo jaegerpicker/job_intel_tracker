@@ -1,11 +1,12 @@
-# Research requests — local acceptance
+# Research request acceptance
 
-Verified 2026-10-06 on `feat/mobile-research-requests`, stacked on the unpublished mobile aging work at `b6961284c95fd3afbae2cf975087a14512233595`. This feature is separate from merged PR #7 and its accepted physical iPhone safe-area release.
+Native research requests use the server queue contract and the same short-lived owner session whether the owner signs in with Apple or Google. Database selection stays behind the REST API. The client never grants agent authority or embeds provider secrets.
 
-## Behavior and boundaries
+Automated synthetic checks cover request parsing, duplicate prevention, missing deliverables, cancel/stale-version conflicts, exact-key retry after lost responses, durable interruption recovery and session clearing. Backend parity covers SQLite and PostgreSQL queue transitions, scope isolation, concurrent claims and outbox retries. See [verification evidence](../../docs/QA.md) for current run results.
 
-The Research tab offers research, application documents, interview preparation, or a full package. Owners request, cancel, and requeue blocked work; agent claim/complete controls are absent. Progress shows the backend's actual status, claimant, lease, reason, missing deliverables, and event attribution. Artifact previews require matching job, type and version; document metadata is displayed without downloading private files. Historical filenames are never used to infer resume or cover-letter coverage.
+Before live release, test the current signed build with approved synthetic fixtures: explicit request creation, progress refresh, interrupted action review, conflict handling and logout/expiry. Verify text/keyboard/accessibility behavior on device. Screenshots establish rendering only, not interaction or provider acceptance.
 
+The durable backend outbox has no configured live transport. Requests do not promise immediate agent execution. Real provider, signed-device and deployment acceptance are separate from protocol tests; see [release dependencies](RELEASE_DEPENDENCIES.md). No private owner/device/operational history is required for this public checklist.
 Typed runtime validation follows backend research contract commit `0880bef4f71836651e0f6fff8933c591283f1c19`. The HTTPS API boundary uses existing ephemeral owner authorization and credential isolation. Research writes have a separate encrypted device-only journal with the existing storage protocol. Both journals share a write lock; navigation and other edits remain blocked while a research operation is unresolved. Recovery preserves the exact operation and idempotency key. Logout/session clearing purges both journals. No credentials, provider grants, production configuration, or new native dependencies were created.
 
 The active application summary now says “active applications.” Separate mobile count commit `546cac1` is preserved on `fix/mobile-active-application-count`. The legacy local primary-role exclusion is removed: Applied, Screening, Interview and Offer each count, including linked and waiting/parked records. Regressions verify that the primary relationship stays intact and terminal/missing stages do not count. Live workload totals continue to come from the server. This matches backend count contract `759b9c2806a3c205e61760f6b7e1f35965e95901`.

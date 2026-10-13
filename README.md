@@ -14,7 +14,7 @@ python3 -m venv .venv
 TRACKER_DEMO=1 DEMO_DATA_DIR=.demo-data .venv/bin/uvicorn job_intel_tracker.app:app --host 127.0.0.1 --port 8000 --no-access-log
 ```
 
-Open http://127.0.0.1:8000, enter the isolated demo, then load synthetic examples. Demo is loopback-only, requires an explicit separate data directory, refuses `APP_ENV=production`, and cannot issue agent credentials. Never use it for private records or expose it through a tunnel. Real mode has no registration or automatic first-user ownership and stays locked until Apple is configured.
+Open http://127.0.0.1:8000, enter the isolated demo, then load synthetic examples. Demo is loopback-only, requires an explicit separate data directory, refuses `APP_ENV=production`, and cannot issue agent credentials. Never use it for private records or expose it through a tunnel. Real mode has no registration or automatic first-user ownership and stays locked until an explicitly approved Apple or Google owner identity is configured.
 
 ## What it does
 
@@ -36,13 +36,13 @@ Give an authorized agent [AGENT_GUIDE.md](AGENT_GUIDE.md). Machine schema: authe
 
 ## Production and operations
 
-See [Apple setup and live validation](docs/APPLE_SETUP.md), [security model](SECURITY.md), and [deployment/backup](docs/DEPLOYMENT.md). Docker Compose defaults to loopback port binding and a persistent volume. No deployment or DNS changes are performed by this repository.
+See [Apple setup and live validation](docs/APPLE_SETUP.md), [Google owner setup](docs/GOOGLE_SETUP.md), [optional PostgreSQL and migration](docs/POSTGRES_SETUP.md), [security model](SECURITY.md), and [deployment/backup](docs/DEPLOYMENT.md). Docker Compose defaults to loopback port binding and a persistent volume. No deployment or DNS changes are performed by this repository.
 
 ```sh
 docker compose up --build -d
 ```
 
-Production needs HTTPS, a private persistent volume, Apple configuration and an independently verified owner subject. One application instance is the supported architecture. SQLite uses `BEGIN IMMEDIATE` for conflict checks, capacity checks and idempotency. There are no outbound agent/model calls or application-triggered emails.
+Production needs HTTPS, a private persistent volume, Apple or Google configuration and an independently verified, explicitly approved provider subject. One application instance is the supported architecture. SQLite uses `BEGIN IMMEDIATE`; optional PostgreSQL uses a transaction advisory writer lock for the same conflict/capacity/idempotency rules. There are no outbound agent/model calls or application-triggered emails.
 
 ## Verification
 
@@ -53,6 +53,7 @@ Production needs HTTPS, a private persistent volume, Apple configuration and an 
 .venv/bin/mypy job_intel_tracker
 .venv/bin/python -m build
 ```
+
 
 CI also validates browser-JavaScript syntax and Docker image construction. See [QA evidence](docs/QA.md). Live Apple acceptance belongs to each configured installation; these checks use locally generated inert keys and mocked Apple endpoints. Historical native acceptance and its remaining limits are documented separately.
 

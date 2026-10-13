@@ -284,9 +284,20 @@ function Authenticated({
             void logout();
           }}
         />
+        <Button
+          label="Continue with Google"
+          disabled={
+            snapshot.status === "signingIn" ||
+            snapshot.status === "restoring" ||
+            working
+          }
+          onPress={() => {
+            void auth.signIn("google");
+          }}
+        />
         <Text style={styles.label}>
-          Google is a future provider boundary. No email-based ownership or demo
-          fallback.
+          Sign-in requires the selected provider to be configured for the same
+          owner.
         </Text>
       </ScrollView>
     );

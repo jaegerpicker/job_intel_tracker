@@ -5,12 +5,13 @@ import hashlib
 import json
 import os
 import secrets
-import sqlite3
 import stat
 import time
 import uuid
 from pathlib import Path
 from urllib.parse import urlparse
+
+from . import database
 
 ISSUER = "https://appleid.apple.com"
 TABLE = """CREATE TABLE IF NOT EXISTS owner_enrollment(
@@ -103,7 +104,7 @@ def private_root(root: Path) -> Path:
     if not stat.S_ISDIR(metadata.st_mode) or metadata.st_uid != os.getuid() or stat.S_IMODE(metadata.st_mode) & 0o077:
         raise ValueError("Use an operator-owned private data directory (0700)")
     path = root / "tracker.sqlite3"
-    if path.is_symlink() or not path.is_file():
+    if not os.getenv("DATABASE_URL") and (path.is_symlink() or not path.is_file()):
         raise ValueError("Initialize the locked app database first; no symlink databases")
     return root.resolve()
 
@@ -127,14 +128,27 @@ def write_private(root: Path, target: Path, payload: dict) -> None:
 
 def connection(root: Path):
     root = private_root(root)
-    c = sqlite3.connect(root / "tracker.sqlite3", timeout=20)
-    c.row_factory = sqlite3.Row
+    c = database.factory(root)()
     c.execute(TABLE)
+    c.commit()
     return c
 
 
 def fresh(c) -> None:
-    for table in ("records", "attachments", "tokens", "sessions", "revisions", "idem", "audit", "flows"):
+    for table in (
+        "records",
+        "attachments",
+        "tokens",
+        "sessions",
+        "revisions",
+        "idem",
+        "audit",
+        "flows",
+        "google_flows",
+        "mobile_flows",
+        "mobile_sessions",
+        "mobile_apple_flows",
+    ):
         if c.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]:
             raise ValueError("Enrollment requires a fresh empty board with no credentials or sessions")
     prior = c.execute("SELECT phase FROM owner_enrollment WHERE id=1").fetchone()
@@ -143,7 +157,9 @@ def fresh(c) -> None:
 
 
 def require_unowned() -> None:
-    if owner_subject() or has_owner_file():
+    from .google_auth import owner_subject as google_owner
+
+    if owner_subject() or has_owner_file() or google_owner():
         raise ValueError("Owner already configured; enrollment cannot replace ownership")
     if not os.getenv("APPLE_OWNER_SUB_FILE"):
         raise ValueError("Set an explicit private APPLE_OWNER_SUB_FILE destination first")
@@ -168,7 +184,7 @@ def begin(root: Path, code_file: Path) -> None:
         write_private(root, code_file, {"code": code, "expires": time.time() + 600})
         try:
             c.execute(
-                "INSERT OR REPLACE INTO owner_enrollment VALUES(1,?,?,?,?,?,?,?,?,?,?)",
+                "INSERT INTO owner_enrollment VALUES(1,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET instance=excluded.instance,phase=excluded.phase,code_hash=excluded.code_hash,state_hash=excluded.state_hash,nonce=excluded.nonce,candidate_sub=excluded.candidate_sub,client_id=excluded.client_id,redirect_uri=excluded.redirect_uri,issuer=excluded.issuer,expires=excluded.expires",
                 (
                     uuid.uuid4().hex,
                     "pending",
@@ -182,7 +198,7 @@ def begin(root: Path, code_file: Path) -> None:
                     time.time() + 600,
                 ),
             )
-        except sqlite3.Error:
+        except database.ERRORS:
             code_file.unlink(missing_ok=True)
             raise
 
@@ -272,7 +288,7 @@ def main() -> None:
         else:
             cancel(args.data_dir)
         print("Local enrollment action completed. No board session or agent credential was created.")
-    except (ValueError, TypeError, OSError, sqlite3.Error):
+    except (ValueError, TypeError, OSError, *database.ERRORS):
         parser.exit(
             1, "Enrollment refused; check private paths, configuration, current state and local confirmation.\n"
         )

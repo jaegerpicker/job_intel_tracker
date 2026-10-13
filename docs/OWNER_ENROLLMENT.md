@@ -33,3 +33,5 @@ python -m job_intel_tracker.enrollment cancel --data-dir /var/data/tracker
 ```
 
 Cancellation invalidates in-flight verification and cannot undo approved ownership. Restart is mandatory to activate the new allowlist. Existing or malformed allowlist files fail closed. Restoring a backup cancels pending enrollment, removes sessions/login flows and revokes agent tokens. Ownership migration after data exists requires a separately reviewed operator procedure; public enrollment does not support it.
+
+This helper supports the selected SQLite or PostgreSQL backend and refuses enrollment if a Google owner is already approved. Google uses deliberate operator approval of its independently verified subject; see [Google enrollment/linking model](GOOGLE_SETUP.md).

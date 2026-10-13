@@ -658,7 +658,9 @@ $('#logout').onclick = () => guarded(async () => {
     $('#demo').hidden = !demo;
     $('#seed').hidden = !demo;
     $('#mode').textContent = demo ? 'ISOLATED LOCAL DEMO' : 'Private by design';
-    $('#auth-status').textContent = info.configured ? '' : 'Live Apple login is not configured. See setup documentation.';
+    $('#apple-login').hidden = !info.providers.apple;
+    $('#google-login').hidden = !info.providers.google;
+    $('#auth-status').textContent = info.configured ? '' : 'Owner sign-in is not configured. See setup documentation.';
     try {
         await enter();
     } catch (e) {

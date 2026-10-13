@@ -1,12 +1,17 @@
 """Offline private backup/restore. Never place archives in a public repository."""
 
 import argparse
+import os
 import shutil
 import sqlite3
 from pathlib import Path
 
 
 def backup(source: Path, destination: Path):
+    if os.getenv("DATABASE_URL"):
+        raise ValueError(
+            "SQLite backup/restore cannot operate on PostgreSQL; use the documented offline pg_dump procedure"
+        )
     if destination.exists():
         raise ValueError("Backup destination must be new")
     if destination.resolve().is_relative_to(source.resolve()):
@@ -26,6 +31,10 @@ def backup(source: Path, destination: Path):
 
 
 def restore(source: Path, destination: Path):
+    if os.getenv("DATABASE_URL"):
+        raise ValueError(
+            "SQLite backup/restore cannot operate on PostgreSQL; use the documented offline pg_dump procedure"
+        )
     if destination.exists():
         raise ValueError("Restore only to a new destination with service stopped")
     with sqlite3.connect(source / "tracker.sqlite3") as c:
@@ -37,6 +46,9 @@ def restore(source: Path, destination: Path):
     with sqlite3.connect(destination / "tracker.sqlite3") as c:
         c.execute("DELETE FROM sessions")
         c.execute("DELETE FROM flows")
+        for table in ("google_flows", "mobile_flows", "mobile_sessions", "mobile_apple_flows", "mobile_providers"):
+            if c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table,)).fetchone():
+                c.execute(f"DELETE FROM {table}")
         c.execute("UPDATE tokens SET revoked=1")
         if c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='owner_enrollment'").fetchone():
             c.execute(

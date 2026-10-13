@@ -293,3 +293,13 @@ test("session issued before storage cleanup failure is revoked and never restore
   );
   expect(h.auth.getSnapshot().message).not.toContain(token);
 });
+
+test("Google uses the same PKCE handoff with an explicit provider", async () => {
+  const h = harness();
+  await h.auth.restore();
+  await h.auth.signIn("google");
+  expect(h.auth.getSnapshot().status).toBe("signedIn");
+  expect(JSON.parse(String(h.transport.mock.calls[0][1]?.body)).provider).toBe(
+    "google",
+  );
+});
