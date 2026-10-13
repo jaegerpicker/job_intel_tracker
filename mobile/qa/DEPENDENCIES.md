@@ -1,24 +1,63 @@
-# Dependency exposure and remediation — 2026-10-04
+# Dependency security review — 2026-10-13
 
-October 6 release update: Expo's compatibility check required SDK 57 patch updates to expo57.0.27, constants57.0.21, linking57.0.12 and router57.0.25. Security overrides remain intact. The current audit reports 49 high and five moderate dependency-chain entries, zero critical, from the two high advisories below plus [sprintf-js precision denial of service](https://github.com/advisories/GHSA-hp3w-g68c-fv3c). The latter is installed through Jest coverage tooling → js-yaml → argparse → sprintf-js1.0.3; application input never reaches this formatting path. Fresh production source inventories exclude sprintf-js on all three platforms, now enforced by verify:bundles. No forced SDK or Jest major change was applied. This snapshot supersedes the older totals below; it is still not a clean audit.
+The final clean lockfile audit reports **49 high dependency-chain entries, zero
+moderate/critical, from two distinct advisories and two installed vulnerable
+package instances**. The 49 entries are overlapping consumer paths, not 49
+separate flaws or 49 deployed runtime vulnerabilities. The prior snapshot had
+three advisories (49 high + 5 moderate). No audit allowlist or suppression is used.
 
-The post-remediation `npm audit` snapshot reports **50 high dependency-chain entries, zero moderate/critical**, arising from **two underlying unpatched advisories**. This is not a clean audit and not fifty separate flaws. The prior snapshot reported 60 entries from four advisories.
+## Compatible remediation completed
 
-## Fixed paths
+The only installed `sprintf-js@1.0.3` caller was legacy `argparse@1.0.10`, pulled
+by `@istanbuljs/load-nyc-config@1.1.0` → `js-yaml@3.15.2` in Jest coverage tooling.
+The loader calls `js-yaml.load` for YAML files; YAML 4 retains that API. A targeted
+parent override to **js-yaml 4.3.2** removes the old argparse/formatter subtree
+and deduplicates YAML to one patched instance. An actual loader regression checks
+synthetic YAML fields, anchors, extends, camelcased keys and cwd handling. No
+application/job input reaches this configuration parser.
 
-- Runtime Router query decoding: replace transitive `decode-uri-component@0.2.2` with the exact upstream patched 0.5.0 scanner adapted to CommonJS under `vendor/decode-uri-component`. The old exponential decoder is no longer installed or bundled. Upstream 0.5.0 is ESM-only while Router57's query-string7 caller needs a function from `require`; a raw version override would break it. Source provenance, Unicode/malformed query behavior and a bounded malicious-input subprocess are tested. [Advisory](https://github.com/advisories/GHSA-vcc3-ghjq-m6fr).
-- Xcode generation: override `xcode`'s UUID dependency from 7.0.3 to patched 11.1.1, whose package still provides CommonJS exports. Xcode's actual `generateUuid()` v4 path is exercised with an initialized synthetic project object. The advisory affects v3/v5/v6 buffer writes, not that v4 path; nevertheless the vulnerable package is removed. App operation IDs continue to use expo-crypto. [Advisory](https://github.com/advisories/GHSA-w5hq-g745-h8pq).
-- Native peer compatibility: explicitly install Expo SDK57's declared `react-native-worklets@0.10.1` and `react-native-reanimated@4.5.1`; this replaces the implicitly installed worklets0.13 peer mismatch. Expo Doctor and SDK package checks pass.
+YAML 4.2.0 was a discarded local candidate: fresh audit found three later YAML
+advisories. The retained 4.3.2 version meets their patched bounds. npm initially
+kept a stale nested resolution; it was refreshed, then verified with a clean
+`npm ci --ignore-scripts --no-audit --no-fund` and caller resolution. Nonstandard
+YAML 3 JavaScript tags are not claimed compatible; this repository uses no such
+NYC config. See the [YAML patch advisory](https://github.com/advisories/GHSA-2883-xcg3-v3hh).
 
-## Remaining actual exposure
+The Expo SDK 57 Jest preset also received its compatible **57.0.5 → 57.0.6**
+patch through Expo's dev-dependency installer. Expo 57.0.27, React 19.2.3, React
+Native 0.86.3 and Jest 29.7.0 stay fixed. The SDK 57 preset still depends on Jest
+29 components; no test-framework/SDK major migration is smuggled into this fix.
 
-| Package | Advisory and reachable path | Current mitigation and limit |
-| --- | --- | --- |
-| braces3.0.3 — high | [GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm): deeply nested brace patterns can exhaust recursive AST walkers. Installed through micromatch in Jest and Metro file/glob tooling. | Tests/builds use checked-in, trusted glob patterns and repo files; no job/research/link input is forwarded to these tools. Do not execute untrusted repository configuration or expose Metro publicly. No patched upstream release is listed; keep tracking the fix. |
-| node-forge1.4.0 — high | [GHSA-86w9-cpqp-85rv](https://github.com/advisories/GHSA-86w9-cpqp-85rv): low-exponent RSA PKCS#1 v1.5 signature verification can accept malformed nested DigestAlgorithm data. Installed in Expo CLI and @expo/code-signing-certificates. Local Keychain PEM parsing and configured code-signing certificate/CSR validation/signing paths use forge; Expo development signing can consume fetched/cached certificates. | This project configures no EAS project ID, update signing certificate or private signing key; current Expo Go/production bundle export flow does not rely on forge to authorize an owner. CLI's expo-root development-signing path returns without fetching a project certificate when no EAS project ID exists. Only trusted local config/certificates; no signing enrollment/publication performed. Do not certify future signing/update flows safe until patched or independently reviewed. No patched release is listed. |
+## Remaining distinct advisories and applicability
 
-All iOS/Android/web **production JavaScript source inventories** include the patched decoder and exclude the npm `braces`, `node-forge`, and `uuid` packages. `npm run verify:bundles` checks this from fresh external source maps. Expo's separate native UUID wrapper is present; it has no caller-supplied output-buffer interface implicated by the npm UUID advisory. This inventory check establishes absence from these JS bundles, not blanket safety of Expo Go, native libraries, CI tooling, or future SDK updates.
+| Package / one installed instance each | Representative callers | Local evidence and exposure | Upgrade blocker |
+| --- | --- | --- | --- |
+| braces 3.0.3 — [GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm) | micromatch → Jest config and Metro file/glob tooling | An isolated 8,003-character nested pattern, below the actual 10,000 limit, causes RangeError in compile. This confirms stack-exhaustion behavior. Repository/config globs are the relevant input; job/research/link data is never forwarded to it. Keep Metro on loopback and treat repo/config changes as executable tooling input. | Registry latest is 3.0.3 and the advisory lists no patched release. npm's Jest 30.5.2 proposal is a major migration, incompatible with the current preset's Jest 29 contract, and does not establish removal of Metro's separate path. |
+| node-forge 1.4.0 — [GHSA-86w9-cpqp-85rv](https://github.com/advisories/GHSA-86w9-cpqp-85rv) | Expo CLI / @expo/code-signing-certificates | A fresh in-memory synthetic RSA signer confirms acceptance of an extra nested DigestAlgorithm element. This is a structural-validation diagnostic, not a claim of an actual low-exponent signature forgery. The affected verifier is used for signing certificate/CSR validation. This app has no EAS project, update signing certificate or private signing configuration; CLI returns before development certificate lookup when no project ID exists. Future signing/update workflows need separate review. | Registry latest is 1.4.0 and the advisory lists no patched release. npm's Expo 44.0.6 proposal downgrades across SDK/RN contracts and is not a safe compatible remediation. No custom cryptographic patch is claimed reviewed here. |
 
-Dev commands now bind localhost by default. No runtime credential is passed to Expo CLI, and live mode stays locked without a separately supplied approved owner session. Hostile app links can still reach Router's decoder, so replacing the runtime decoder was necessary even with live auth disabled.
+The local diagnostics catch errors and use synthetic data only. No real signing
+key/certificate, EAS endpoint, Keychain credential or production request is used.
+One physical package instance per advisory was identified; graph traversal is
+bounded and deduplicated. npm's prod/dev labels are insufficient to prove app
+reachability because Expo's CLI can sit under a production package dependency.
 
-The audit's forced proposals included incompatible Expo44/React Native0.72 downgrades and Jest/Expo-preset major changes; no forced downgrade was used. Compatible upstream updates and the two targeted overrides were tested with a clean `npm ci`, rather than hiding findings with an audit allowlist. Public release still needs the usual dependency review; current work is a gated native milestone, not a production auth/file-transfer release.
+All three fresh production JavaScript source inventories must continue to
+include the patched URI decoder and exclude braces, node-forge, npm uuid and
+sprintf-js (`npm run verify:bundles`). This establishes JS-bundle absence only;
+it does not certify native libraries, Expo Go, CI tooling or future signing.
+The deployed Python service's dependency set has no npm packages. Its owner JWT
+verification uses PyJWT/cryptography, not node-forge. No running deployment was
+queried or changed by this audit.
+
+## Existing targeted fixes retained
+
+- The vendored URI decoder retains upstream 0.5.0 logic with a CommonJS export
+  adaptation; provenance/Unicode/malformed input checks remain enforced.
+- Xcode generation uses compatible uuid 11.1.1; actual generateUuid behavior is
+  tested. App operation IDs continue to use expo-crypto.
+- Native worklets/reanimated stay aligned with the current SDK contract.
+
+Before approving release tooling, choose reviewed upstream fixes when available,
+review a separate major migration if needed, or explicitly accept the two scoped
+remaining tooling risks. Do not call this a clean dependency audit. No forced
+major update, audit suppression, publication, signing or deployment occurred.

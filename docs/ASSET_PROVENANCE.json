@@ -1,0 +1,156 @@
+{
+  "schema": 1,
+  "reviewed_on": "2026-10-13",
+  "method": "local SHA-256 comparison to integrity-verified public upstream tarball; no local asset transmission",
+  "icons": {
+    "android-icon-background.png": {
+      "package": "expo-template-blank-typescript",
+      "version": "57.0.30",
+      "upstream_path": "package/assets/android-icon-background.png",
+      "source": "https://registry.npmjs.org/expo-template-blank-typescript/-/expo-template-blank-typescript-57.0.30.tgz",
+      "integrity": "sha512-TNrGiF/Umul4rIhio5+iuDRZYUidKjh0vje04ox0KUTQIWViDZXeUtHa23tU56i+hZFE1bhuVnMCeqsq6XWY8w==",
+      "sha256": "fb139c2dee362ebf2070e23b96da6fc0d43f8492de38b8af1fd7223e19b5861d",
+      "license_metadata": "0BSD"
+    },
+    "android-icon-foreground.png": {
+      "package": "expo-template-blank-typescript",
+      "version": "57.0.30",
+      "upstream_path": "package/assets/android-icon-foreground.png",
+      "source": "https://registry.npmjs.org/expo-template-blank-typescript/-/expo-template-blank-typescript-57.0.30.tgz",
+      "integrity": "sha512-TNrGiF/Umul4rIhio5+iuDRZYUidKjh0vje04ox0KUTQIWViDZXeUtHa23tU56i+hZFE1bhuVnMCeqsq6XWY8w==",
+      "sha256": "9e3d0315a33c6799de601dd34cd8bf8cc3a8d16f3bf75592baec2ceb7240b391",
+      "license_metadata": "0BSD"
+    },
+    "android-icon-monochrome.png": {
+      "package": "expo-template-blank-typescript",
+      "version": "57.0.30",
+      "upstream_path": "package/assets/android-icon-monochrome.png",
+      "source": "https://registry.npmjs.org/expo-template-blank-typescript/-/expo-template-blank-typescript-57.0.30.tgz",
+      "integrity": "sha512-TNrGiF/Umul4rIhio5+iuDRZYUidKjh0vje04ox0KUTQIWViDZXeUtHa23tU56i+hZFE1bhuVnMCeqsq6XWY8w==",
+      "sha256": "6371fc2c12e33ad2215a86c281db3d682a81bebe7c957a842c13b8bf00cceb83",
+      "license_metadata": "0BSD"
+    },
+    "favicon.png": {
+      "package": "expo-template-blank-typescript",
+      "version": "57.0.30",
+      "upstream_path": "package/assets/favicon.png",
+      "source": "https://registry.npmjs.org/expo-template-blank-typescript/-/expo-template-blank-typescript-57.0.30.tgz",
+      "integrity": "sha512-TNrGiF/Umul4rIhio5+iuDRZYUidKjh0vje04ox0KUTQIWViDZXeUtHa23tU56i+hZFE1bhuVnMCeqsq6XWY8w==",
+      "sha256": "a4e030697a7571b3e95d31860e4da55d2f98e5e861e2b55e414f45a8556828ba",
+      "license_metadata": "0BSD"
+    },
+    "icon.png": {
+      "package": "expo-template-blank-typescript",
+      "version": "57.0.30",
+      "upstream_path": "package/assets/icon.png",
+      "source": "https://registry.npmjs.org/expo-template-blank-typescript/-/expo-template-blank-typescript-57.0.30.tgz",
+      "integrity": "sha512-TNrGiF/Umul4rIhio5+iuDRZYUidKjh0vje04ox0KUTQIWViDZXeUtHa23tU56i+hZFE1bhuVnMCeqsq6XWY8w==",
+      "sha256": "119462bb78eb240a65c869fc067ee599639b3cb5a41953f25c07b17d2a8c7e0f",
+      "license_metadata": "0BSD"
+    },
+    "splash-icon.png": {
+      "package": "expo-template-blank-typescript",
+      "version": "57.0.30",
+      "upstream_path": "package/assets/splash-icon.png",
+      "source": "https://registry.npmjs.org/expo-template-blank-typescript/-/expo-template-blank-typescript-57.0.30.tgz",
+      "integrity": "sha512-TNrGiF/Umul4rIhio5+iuDRZYUidKjh0vje04ox0KUTQIWViDZXeUtHa23tU56i+hZFE1bhuVnMCeqsq6XWY8w==",
+      "sha256": "5f4c0a732b6325bf4071d9124d2ae67e037cb24fcc9c482ef82bea742109a3b8",
+      "license_metadata": "0BSD"
+    }
+  },
+  "screenshots": [
+    {
+      "path": "docs/board.jpg",
+      "sha256": "c5fb152b62302839b98e9e84997b3cca000df5b8902fb1f4d35c547297480e0b",
+      "first_added_ancestor_commit": "a940e51269cafe9acbec36c21dc57938b03c3ee8",
+      "origin": "project-produced documentation/simulator capture; no matching third-party photograph",
+      "ocr_email_count": 0,
+      "ocr_synthetic_marker": true,
+      "scope": "source provenance and local OCR; not a universal privacy/rights guarantee",
+      "actual_pixel_review": "Inspected directly on 2026-10-13 without CUA: synthetic board/prep/research data or locked/signed-out UI; no account identifier, credential or real job/resume content observed."
+    },
+    {
+      "path": "docs/locked-deployment.png",
+      "sha256": "643b056fe7db7e9cb048a4779948ceb6a592e4bbddfc8ee6d09f7eea09464628",
+      "first_added_ancestor_commit": "062ccc0c70a74e886e75ccb7d441114b680fc4e0",
+      "origin": "project-produced documentation/simulator capture; no matching third-party photograph",
+      "ocr_email_count": 0,
+      "ocr_synthetic_marker": false,
+      "scope": "source provenance and local OCR; not a universal privacy/rights guarantee",
+      "actual_pixel_review": "Inspected directly on 2026-10-13 without CUA: synthetic board/prep/research data or locked/signed-out UI; no account identifier, credential or real job/resume content observed."
+    },
+    {
+      "path": "docs/mobile.jpg",
+      "sha256": "47f84446d8065690fe39fa8d76c229f8918ddee165509ea723d780cc21c99da4",
+      "first_added_ancestor_commit": "a940e51269cafe9acbec36c21dc57938b03c3ee8",
+      "origin": "project-produced documentation/simulator capture; no matching third-party photograph",
+      "ocr_email_count": 0,
+      "ocr_synthetic_marker": true,
+      "scope": "source provenance and local OCR; not a universal privacy/rights guarantee",
+      "actual_pixel_review": "Inspected directly on 2026-10-13 without CUA: synthetic board/prep/research data or locked/signed-out UI; no account identifier, credential or real job/resume content observed."
+    },
+    {
+      "path": "mobile/qa/ios-board.png",
+      "sha256": "a6b36c2e39d2316be67f0d232ffe4a9311176155b144b93e05dbc0ad7130d304",
+      "first_added_ancestor_commit": "0fd126f967fc3bdb2d16df0937e10ed92a922586",
+      "origin": "project-produced documentation/simulator capture; no matching third-party photograph",
+      "ocr_email_count": 0,
+      "ocr_synthetic_marker": true,
+      "scope": "source provenance and local OCR; not a universal privacy/rights guarantee",
+      "actual_pixel_review": "Inspected directly on 2026-10-13 without CUA: synthetic board/prep/research data or locked/signed-out UI; no account identifier, credential or real job/resume content observed."
+    },
+    {
+      "path": "mobile/qa/ios-prep.png",
+      "sha256": "104c5871baa94765b07870101442c13d187f92b25aea279f9d7e1cdac18f973e",
+      "first_added_ancestor_commit": "0fd126f967fc3bdb2d16df0937e10ed92a922586",
+      "origin": "project-produced documentation/simulator capture; no matching third-party photograph",
+      "ocr_email_count": 0,
+      "ocr_synthetic_marker": true,
+      "scope": "source provenance and local OCR; not a universal privacy/rights guarantee",
+      "actual_pixel_review": "Inspected directly on 2026-10-13 without CUA: synthetic board/prep/research data or locked/signed-out UI; no account identifier, credential or real job/resume content observed."
+    },
+    {
+      "path": "mobile/qa/ios-owner-signin.png",
+      "sha256": "a2d2ba0d8542de508200302f927fb1656293b95e14cb4490360db7f7643b2fb7",
+      "first_added_ancestor_commit": "0adff471ae2e5c638c00c50002b1929a526dcded",
+      "origin": "project-produced documentation/simulator capture; no matching third-party photograph",
+      "ocr_email_count": 0,
+      "ocr_synthetic_marker": true,
+      "scope": "source provenance and local OCR; not a universal privacy/rights guarantee",
+      "actual_pixel_review": "Inspected directly on 2026-10-13 without CUA: synthetic board/prep/research data or locked/signed-out UI; no account identifier, credential or real job/resume content observed."
+    },
+    {
+      "path": "mobile/qa/ios-research-request.png",
+      "sha256": "d5d74a77cc42a57707179d9e7d0408c0d6c0fb056ad105b5e140ca6b011a119d",
+      "first_added_ancestor_commit": "55f79f2ed01510e0f342cbbbc53a3278ce4ef1dd",
+      "origin": "project-produced documentation/simulator capture; no matching third-party photograph",
+      "ocr_email_count": 0,
+      "ocr_synthetic_marker": true,
+      "scope": "source provenance and local OCR; not a universal privacy/rights guarantee",
+      "actual_pixel_review": "Inspected directly on 2026-10-13 without CUA: synthetic board/prep/research data or locked/signed-out UI; no account identifier, credential or real job/resume content observed."
+    }
+  ],
+  "license_note": "Template metadata says 0BSD; actual tarball LICENSE is MIT. The full shipped MIT notice is retained in mobile/notices/expo-template/LICENSE.",
+  "generated_assets": [
+    {
+      "package": "@expo-google-fonts/material-symbols",
+      "version": "0.4.48",
+      "asset": "MaterialSymbols_400Regular.ttf",
+      "notice_directory": "mobile/notices/material-symbols",
+      "license_metadata": "MIT AND Apache-2.0"
+    },
+    {
+      "package": "expo-router",
+      "version": "57.0.25",
+      "assets": "navigation/route PNG and XML icons in exported bundles",
+      "notice": "mobile/notices/expo-router/LICENSE and mobile/notices/react-navigation-elements/LICENCE at the installed Router upstream revision",
+      "license_metadata": "MIT"
+    }
+  ],
+  "artifact_privacy_review": {
+    "reviewed_on": "2026-10-13",
+    "python_source_and_wheel": "Archive entries and contents inspected; the only private-key signature candidate is the inert synthetic audit regression fixture, not key material. No runtime DB/export/resume/signing file is packaged.",
+    "generated_mobile": "Actual HTML/JSON/JS/source-map content signature-scanned. No credential-signature candidates; zero absolute Mac source paths in all three maps. Runtime source inventories exclude flagged tooling.",
+    "limitations": "Heuristic/visual review is not universal clearance; artifact notices and final target-device/provider behavior remain separate release gates."
+  }
+}

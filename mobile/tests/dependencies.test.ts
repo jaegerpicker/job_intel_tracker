@@ -38,3 +38,30 @@ test("patched UUID remains compatible with Xcode project generation", () => {
   expect(result.error).toBeUndefined();
   expect(result.status).toBe(0);
 });
+
+test("NYC YAML override loads real config and extensions without the vulnerable formatter", () => {
+  const result = spawnSync(
+    process.execPath,
+    [
+      "-e",
+      `const assert=require('node:assert/strict'),fs=require('node:fs'),os=require('node:os'),path=require('node:path');
+const {createRequire}=require('node:module');
+const loaderPath=require.resolve('@istanbuljs/load-nyc-config');
+const fromLoader=createRequire(loaderPath);
+assert.equal(fromLoader('js-yaml/package.json').version,'4.3.2');
+const root=fs.mkdtempSync(path.join(os.tmpdir(),'synthetic-nyc-'));
+(async()=>{try{
+ fs.writeFileSync(path.join(root,'package.json'),JSON.stringify({name:'synthetic-fixture'}));
+ fs.writeFileSync(path.join(root,'base.yml'),'extension: [ts, tsx]\\nexclude: &ignored [tests/**]\\ninclude: [src/**]\\n');
+ fs.writeFileSync(path.join(root,'.nycrc.yml'),'extends: ./base.yml\\nall: true\\ncheck-coverage: true\\n');
+ const cfg=await require(loaderPath).loadNycConfig({cwd:root});
+ assert.deepEqual(cfg.extension,['ts','tsx']); assert.deepEqual(cfg.exclude,['tests/**']);
+ assert.deepEqual(cfg.include,['src/**']); assert.equal(cfg.all,true); assert.equal(cfg.checkCoverage,true);
+ assert.equal(cfg.cwd,root);
+}finally{fs.rmSync(root,{recursive:true,force:true});}})().catch(error=>{console.error(error);process.exitCode=1;});`,
+    ],
+    { cwd: resolve(__dirname, ".."), timeout: 5000, encoding: "utf8" },
+  );
+  expect(result.error).toBeUndefined();
+  expect(result.status).toBe(0);
+});

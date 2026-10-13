@@ -1,0 +1,12 @@
+{
+  "package": "expo-router",
+  "version": "57.0.25",
+  "package_source": "https://registry.npmjs.org/expo-router/-/expo-router-57.0.25.tgz",
+  "package_integrity": "sha512-S/xWUGeVqMozG8gFJT0CHOVErZEbQnsAEAqlBIvHJSUZPH0hBcxy2kduUrV7ZDLNI4xCPIlOJ4SI29X/1z/hxw==",
+  "upstream_repository": "expo/expo",
+  "revision": "50ac74f1ab5682c8e32b24da6e5e97dd4dbbb80f",
+  "notice_source": "https://raw.githubusercontent.com/expo/expo/50ac74f1ab5682c8e32b24da6e5e97dd4dbbb80f/LICENSE",
+  "notice_sha256": "fb3ca4a837f5779e83cef89b78253a8949cfb9429c340309f62d0465ec6610b4",
+  "license_metadata": "MIT",
+  "note": "npm tarball omits license file; retained official repository notice at npm gitHead for exported navigation/route assets"
+}

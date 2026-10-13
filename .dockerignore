@@ -1,5 +1,13 @@
 *
 !pyproject.toml
+!LICENSE
+!THIRD_PARTY_NOTICES.md
 !job_intel_tracker/
-!job_intel_tracker/**
+!job_intel_tracker/*.py
+!job_intel_tracker/static/
+!job_intel_tracker/static/*.html
+!job_intel_tracker/static/*.css
+!job_intel_tracker/static/*.js
+**/private-*
+**/.env*
 **/__pycache__

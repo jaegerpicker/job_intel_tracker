@@ -1,0 +1,10 @@
+{
+  "component": "React Navigation fork bundled by expo-router",
+  "containing_package": "expo-router",
+  "version": "57.0.25",
+  "revision": "50ac74f1ab5682c8e32b24da6e5e97dd4dbbb80f",
+  "notice_source": "https://raw.githubusercontent.com/expo/expo/50ac74f1ab5682c8e32b24da6e5e97dd4dbbb80f/packages/expo-router/src/react-navigation/LICENCE",
+  "notice_sha256": "0043ee96973338643dab286d7963ee92995565799bfb8af19f2e0d702aa7cdab",
+  "license": "MIT",
+  "note": "Actual React Navigation LICENCE in Expo source at the installed Router npm gitHead; covers fork/copy provenance without inventing an installed standalone dependency."
+}

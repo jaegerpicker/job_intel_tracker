@@ -6,21 +6,30 @@ on:
     paths: ['mobile/**', '.github/workflows/mobile.yml']
 permissions:
   contents: read
+concurrency:
+  group: mobile-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      # Validate against npm ci's locked SDK map, not a changing remote catalog.
+      EXPO_OFFLINE: '1'
+      EXPO_NO_TELEMETRY: '1'
     defaults:
       run:
         working-directory: mobile
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '22'
-          cache: npm
-          cache-dependency-path: mobile/package-lock.json
-      - run: npm ci
+      - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: npm run check
-      - run: npx expo install --check
+      - name: Check compatibility with the locked SDK
+        run: npx expo install --check
       - run: npx expo export --platform all --source-maps
       - run: npm run verify:bundles
