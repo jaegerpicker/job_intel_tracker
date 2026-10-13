@@ -13,6 +13,10 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      # Validate against npm ci's locked SDK map, not a changing remote catalog.
+      EXPO_OFFLINE: '1'
+      EXPO_NO_TELEMETRY: '1'
     defaults:
       run:
         working-directory: mobile
@@ -25,6 +29,7 @@ jobs:
           node-version: '22'
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: npm run check
-      - run: npx expo install --check
+      - name: Check compatibility with the locked SDK
+        run: npx expo install --check
       - run: npx expo export --platform all --source-maps
       - run: npm run verify:bundles
