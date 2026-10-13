@@ -45,20 +45,22 @@ The owner's existing Apple authentication and private records were untouched.
   established identity is still the default, and only the exact native callback
   is claimed. Invalid values fail before storage creation. Tests preserve
   anonymous denial and disabled native-login boundaries.
-- [x] Inventoried 37 Python and 1087 npm lock entries. Retained Expo/decoder
+- [x] Inventoried 37 Python and 1084 npm lock entries. Retained Expo/decoder
   notices and added the bundled Material Symbols wrapper/font notices with
-  provenance. Binary app-icon ownership still needs confirmation.
+  provenance. All six PNG icons byte-match the verified official SDK 57 template;
+  its actual MIT notice is retained despite 0BSD registry metadata. See
+  ASSET_PROVENANCE.json for all icons, captures and generated-asset origins.
 - [x] CI configuration uses verified immutable action commits, read-only
   permissions, no persisted checkout credential, timeouts and superseded-run
   cancellation. YAML was checked locally. No workflow was triggered.
 
 ## Verification evidence
 
-Backend/web: **131 tests passed in 10.54 seconds**, including the final audit and
+Backend/web: **131 tests passed in 10.81 seconds**, including the final audit and
 source/wheel privacy regressions. Ruff check and format and mypy passed. One
 existing Starlette/httpx deprecation warning remains.
 
-Mobile: vendor provenance, TypeScript and ESLint passed; 125 serial Jest tests
+Mobile: vendor provenance, TypeScript and ESLint passed; 126 serial Jest tests
 and four scene-plugin tests passed. Two opt-in live-contract tests were skipped.
 Cold single-worker export reached its 45-second budget and its process group
 was stopped. A bounded warm-cache retry completed Android/iOS/web export and
@@ -67,23 +69,33 @@ sprintf-js absent from those runtime JavaScript source inventories. Source-map
 source entries have no absolute `/Users/` paths. This does not certify native,
 tooling or signed-device safety.
 
+The dependency-remediation increment also completed all three fresh production
+exports within one 45-second single-worker budget after the clean install;
+runtime inventories passed again. The NYC loader regression verifies the actual
+patched YAML 4.3.2 resolution and supported configuration/extends behavior.
+
 Python source and wheel builds passed locally. No Docker daemon is available,
 so the modified image context/runtime was not exercised. No signed native
 build, device installation or provider acceptance was attempted.
 
-Fresh npm audit: **49 high, 5 moderate, 0 critical** dependency-chain entries
-from three advisories (braces, node-forge, sprintf-js). Tooling exposure remains;
+Final npm audit: **49 high, 0 moderate, 0 critical** dependency-chain entries
+from **two distinct advisories/two installed instances** (braces and node-forge).
+The formatter path is removed by the tested YAML 4.3.2 caller override; a
+compatible SDK 57 Jest-preset patch is included. Tooling exposure remains;
 no compatibility-breaking forced SDK/Jest change was applied. See
 `mobile/qa/DEPENDENCIES.md` and THIRD_PARTY_NOTICES.md for scope and mitigations.
+Fresh auth/packaging review: SECURITY_REVIEW.md. Exact owner-metadata paths,
+baseline lines, commit scope and minimal forward/history plan:
+PUBLIC_METADATA_REVIEW.md. Identifier values are omitted.
 
 ## Owner decisions and remaining release gates
 
-- [ ] Review the exact proposed tree and confirm screenshot/icon ownership,
+- [ ] Review the exact proposed tree and confirm screenshot visual/privacy content,
   synthetic-only visual content and intended public signing metadata.
 - [ ] Choose whether to retain reviewed historical operator context or produce
   a reviewed clean release export. Local removals do not erase already-public
   history; no destructive rewrite or visibility change is authorized here.
-- [ ] Resolve the remaining tooling advisories or explicitly accept their
+- [ ] Resolve the two unpatched tooling advisories or explicitly accept their
   documented exposure for the intended release process. Review exact bundled
   native/data/font artifacts and required notices before distributing binaries.
 - [ ] Enable private vulnerability reporting or provide a private maintainer

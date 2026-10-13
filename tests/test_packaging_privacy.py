@@ -12,7 +12,14 @@ def test_source_and_wheel_exclude_private_assets_and_retain_public_ui(tmp_path):
     root = Path(__file__).resolve().parents[1]
     source = tmp_path / "synthetic-source"
     source.mkdir()
-    for name in ["pyproject.toml", "LICENSE", "MANIFEST.in", "THIRD_PARTY_NOTICES.md", "CONTRIBUTING.md"]:
+    for name in [
+        "pyproject.toml",
+        "LICENSE",
+        "MANIFEST.in",
+        "THIRD_PARTY_NOTICES.md",
+        "CONTRIBUTING.md",
+        ".env.example",
+    ]:
         shutil.copy2(root / name, source / name)
     shutil.copytree(
         root / "job_intel_tracker", source / "job_intel_tracker", ignore=shutil.ignore_patterns("__pycache__")
@@ -41,3 +48,4 @@ def test_source_and_wheel_exclude_private_assets_and_retain_public_ui(tmp_path):
         names = archive.getnames()
         assert public_names <= {Path(name).name for name in names}
         assert all(Path(name).name not in private_names for name in names)
+        assert any(name.endswith("/.env.example") for name in names)

@@ -29,7 +29,7 @@
     "eslint": "^9.39.5",
     "eslint-config-expo": "^57.0.2",
     "jest": "~29.7.0",
-    "jest-expo": "~57.0.5",
+    "jest-expo": "~57.0.6",
     "prettier": "^3.9.9",
     "react-test-renderer": "19.2.3",
     "typescript": "~6.0.3"
@@ -55,6 +55,9 @@
     "watchman": false
   },
   "overrides": {
+    "@istanbuljs/load-nyc-config": {
+      "js-yaml": "4.3.2"
+    },
     "decode-uri-component": "file:./vendor/decode-uri-component",
     "xcode": {
       "uuid": "11.1.1"

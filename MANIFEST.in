@@ -3,5 +3,9 @@ include CONTRIBUTING.md
 include docs/DEPENDENCY_LICENSES.json
 include docs/FORK_SETUP.md
 include docs/RELEASE_READINESS.md
+include docs/SECURITY_REVIEW.md
+include docs/PUBLIC_METADATA_REVIEW.md
+include docs/ASSET_PROVENANCE.json
 recursive-include scripts *.py
 global-exclude private-* .env* *.sqlite3* *.db *.db-* *.pem *.p8 *.key *.p12 *.pfx *.encrypted.json
+include .env.example
