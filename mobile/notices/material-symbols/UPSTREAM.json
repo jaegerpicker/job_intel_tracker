@@ -1,0 +1,11 @@
+{
+  "package": "@expo-google-fonts/material-symbols",
+  "version": "0.4.48",
+  "source": "https://registry.npmjs.org/@expo-google-fonts/material-symbols/-/material-symbols-0.4.48.tgz",
+  "integrity": "sha512-aZztj44PyA/sj3TXSwwpLJwqMlTUJ49okbZJYURzEcuERxMQB0KbX7RrLBi8WJnuWz5HFOLlTRxORrJfNnUPNQ==",
+  "license_metadata": "MIT AND Apache-2.0",
+  "notice_sha256": {
+    "LICENSE": "f81a99a72ec5e64e3f74fad0db3df27ab69ab0edd4878368f83379d3e4fc9313",
+    "LICENSE_FONT": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd"
+  }
+}

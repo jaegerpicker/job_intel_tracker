@@ -2,6 +2,8 @@
 name = "job_intel_tracker"
 version = "0.1.0"
 description = "Private single-owner, multi-agent job intelligence board"
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.12"
 dependencies = ["fastapi==0.142.2", "uvicorn==0.54.0", "python-multipart==0.0.32", "PyJWT[crypto]==2.15.1", "httpx==0.28.1", "tzdata==2026.5"]
 [project.optional-dependencies]
@@ -16,9 +18,11 @@ testpaths = ["tests"]
 ignore_missing_imports = true
 check_untyped_defs = true
 [build-system]
-requires = ["setuptools>=75"]
+requires = ["setuptools==84.0.0"]
 build-backend = "setuptools.build_meta"
 [tool.setuptools.packages.find]
 include = ["job_intel_tracker*"]
 [tool.setuptools.package-data]
-job_intel_tracker = ["static/*"]
+job_intel_tracker = ["static/*.html", "static/*.css", "static/*.js"]
+[tool.setuptools.exclude-package-data]
+job_intel_tracker = ["static/private-*", "static/.env*"]

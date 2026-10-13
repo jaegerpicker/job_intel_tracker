@@ -38,7 +38,7 @@ Install this repository's Python package in a local virtual environment. Use tha
 .venv/bin/python -m job_intel_tracker.local_credentials \
   ~/Downloads/job-intel-agent-Eva-pilot.encrypted.json \
   --service job_intel_tracker.Eva-pilot --agent Eva-pilot \
-  --base-url https://jobs.sandkcampbell.com --confirm-store
+  --base-url https://tracker.example.com --confirm-store
 ```
 
 The importer prompts privately for the handoff passphrase. The `--confirm-store` option is the explicit local storage action; it creates no server grant. Delete the encrypted download privately after successful import. For Hanna, repeat with her own distinct approved name and service, such as `Hanna-pilot` / `job_intel_tracker.Hanna-pilot`. Never import Eva's credential into Hanna's service.
@@ -52,7 +52,7 @@ Example secret-free stdio configuration for Eva:
 ```toml
 [mcp_servers.job_intel_eva]
 command = "/absolute/path/to/.venv/bin/python"
-args = ["-m", "job_intel_tracker.mcp", "--keychain-service", "job_intel_tracker.Eva-pilot", "--agent", "Eva-pilot", "--base-url", "https://jobs.sandkcampbell.com"]
+args = ["-m", "job_intel_tracker.mcp", "--keychain-service", "job_intel_tracker.Eva-pilot", "--agent", "Eva-pilot", "--base-url", "https://tracker.example.com"]
 cwd = "/absolute/path/to/job_intel_tracker"
 ```
 

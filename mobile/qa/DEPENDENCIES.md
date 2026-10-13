@@ -1,5 +1,15 @@
 # Dependency exposure and remediation — 2026-10-04
 
+October 13 release audit: a fresh public-registry response against the unchanged
+lockfile again reports **49 high and five moderate dependency-chain entries,
+zero critical**, from the three advisories described below. No forced
+Expo/Jest downgrade or major upgrade was applied. Clean installation with
+lifecycle scripts disabled passes vendor verification, TypeScript, ESLint,
+125 serial Jest tests and four scene-plugin checks; two opt-in integration
+tests remain skipped. The release audit never supplies live credentials to
+these tools. License metadata is inventoried separately in
+`../../docs/DEPENDENCY_LICENSES.json` and `../../THIRD_PARTY_NOTICES.md`.
+
 October 6 release update: Expo's compatibility check required SDK 57 patch updates to expo57.0.27, constants57.0.21, linking57.0.12 and router57.0.25. Security overrides remain intact. The current audit reports 49 high and five moderate dependency-chain entries, zero critical, from the two high advisories below plus [sprintf-js precision denial of service](https://github.com/advisories/GHSA-hp3w-g68c-fv3c). The latter is installed through Jest coverage tooling → js-yaml → argparse → sprintf-js1.0.3; application input never reaches this formatting path. Fresh production source inventories exclude sprintf-js on all three platforms, now enforced by verify:bundles. No forced SDK or Jest major change was applied. This snapshot supersedes the older totals below; it is still not a clean audit.
 
 The post-remediation `npm audit` snapshot reports **50 high dependency-chain entries, zero moderate/critical**, arising from **two underlying unpatched advisories**. This is not a clean audit and not fifty separate flaws. The prior snapshot reported 60 entries from four advisories.
