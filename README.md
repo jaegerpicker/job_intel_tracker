@@ -54,12 +54,20 @@ Production needs HTTPS, a private persistent volume, Apple configuration and an 
 .venv/bin/python -m build
 ```
 
-CI also validates browser-JavaScript syntax and Docker image construction. See [QA evidence](docs/QA.md). Live Apple authentication requires real configuration and has **not** been validated end to end; protocol tests use locally generated inert keys and mocked Apple endpoints.
+CI also validates browser-JavaScript syntax and Docker image construction. See [QA evidence](docs/QA.md). Live Apple acceptance belongs to each configured installation; these checks use locally generated inert keys and mocked Apple endpoints. Historical native acceptance and its remaining limits are documented separately.
+
+Node 22 is also required for the browser regression fixtures in the Python test
+suite. Start with [contributor setup](CONTRIBUTING.md), the synthetic
+[configuration example](.env.example), and [fork/native identity setup](docs/FORK_SETUP.md).
+The backend does not automatically load `.env` files. Public-release scope,
+audit limits and remaining owner decisions are in the
+[release checklist](docs/RELEASE_READINESS.md) and
+[third-party inventory](THIRD_PARTY_NOTICES.md).
 
 Render setup: [exact service fields](docs/RENDER_SETUP.md). Optional [operator-approved owner enrollment](docs/OWNER_ENROLLMENT.md) discovers a verified Apple subject without granting a session.
 
 ## React Native companion
 
-The native TypeScript companion lives in [mobile/](mobile/README.md), in this same open-source project. Its first milestone is a synthetic-data demo of the board, status timeline, notes, interview preparation and evidence flows. Live mobile auth remains gated by the [owner-only authentication design](docs/MOBILE_AUTH.md).
+The native TypeScript companion lives in [mobile/](mobile/README.md), in this same open-source project. It defaults to a synthetic-data demo of the board, status timeline, notes, interview preparation and evidence flows. Live mobile use requires the configured owner-only flow, signed app associations and acceptance described in [mobile authentication](docs/MOBILE_AUTH.md).
 
 Owner-requested research and material preparation use a leased agent queue with visible missing deliverables. See [research queue/API and webhook setup](docs/RESEARCH_QUEUE.md). The durable outbox has no configured live transport; agents need their own approved connection and claim work explicitly.

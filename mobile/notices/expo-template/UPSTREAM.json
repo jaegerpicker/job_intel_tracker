@@ -1,0 +1,10 @@
+{
+  "package": "expo-template-blank-typescript",
+  "version": "57.0.30",
+  "source": "https://registry.npmjs.org/expo-template-blank-typescript/-/expo-template-blank-typescript-57.0.30.tgz",
+  "integrity": "sha512-TNrGiF/Umul4rIhio5+iuDRZYUidKjh0vje04ox0KUTQIWViDZXeUtHa23tU56i+hZFE1bhuVnMCeqsq6XWY8w==",
+  "license_metadata": "0BSD",
+  "byte_matched_asset_count": 6,
+  "shipped_license": "MIT",
+  "metadata_mismatch": "Registry package declares 0BSD while its integrity-verified tarball ships an MIT LICENSE; preserve the actual MIT notice."
+}

@@ -6,6 +6,7 @@ services:
     environment:
       APP_ENV: production
       DATA_DIR: /data
+      MOBILE_APP_ID: ${MOBILE_APP_ID-VHWFV2V25Z.com.sandkcampbell.jobinteltracker}
       APPLE_CLIENT_ID: ${APPLE_CLIENT_ID:-}
       APPLE_REDIRECT_URI: ${APPLE_REDIRECT_URI:-}
       APPLE_OWNER_SUB: ${APPLE_OWNER_SUB:-}

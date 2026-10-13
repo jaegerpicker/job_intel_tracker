@@ -1,5 +1,14 @@
 # Security model
 
+For a vulnerability report, use GitHub's private "Report a vulnerability" flow
+if the repository enables it. A read-only check on 2026-10-13 found this setting
+disabled. If it is unavailable, ask the maintainer for a
+private reporting channel without posting exploit details publicly. Include
+the affected revision and a minimal synthetic reproduction. Never attach a
+real database, resume, private record, session, token or signing file. A named
+maintainer contact and private-reporting availability need owner confirmation
+before release; do not assume this repository accepts sensitive public issues.
+
 Single human owner, approved agents, private data. No registration, first-login ownership, cloud model calls, scraping, automatic external communications, analytics or remote script dependencies.
 
 Apple authorization-code flow uses one-time five-minute server state, browser-bound Secure/HttpOnly/SameSite=None flow cookie for cross-site `form_post`, nonce, server-side ES256 client secret and code exchange, Apple JWKS/RS256 signature verification, issuer/audience/expiry/required claims, and preconfigured stable owner `sub` allowlist. No email-based authorization. Session tokens are random and stored hashed, expire after eight hours, and use Secure/HttpOnly/SameSite=Lax cookies outside isolated demo. Logout invalidates server session. Mutation requests require a per-session CSRF header and reject foreign Origin. Bearer requests are scope-authorized separately and never authenticate through cookies alone.

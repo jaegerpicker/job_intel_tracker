@@ -4,6 +4,7 @@ import hashlib
 import json
 import logging
 import os
+import re
 import secrets
 import sqlite3
 import time
@@ -26,6 +27,11 @@ STAGES = ["Prospect", "Applied", "Screening", "Interview", "Offer", "Closed", "R
 
 
 def create_app(data_dir=None, demo=False):
+    # Public signing identity, not an owner subject or credential. Keep the
+    # established default for existing installations; forks opt in explicitly.
+    mobile_app_id = os.getenv("MOBILE_APP_ID", "VHWFV2V25Z.com.sandkcampbell.jobinteltracker")
+    if not re.fullmatch(r"[A-Z0-9]{10}\.[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+", mobile_app_id):
+        raise RuntimeError("MOBILE_APP_ID must be a team prefix and explicit bundle identifier")
     if demo and (os.getenv("APP_ENV") == "production" or not data_dir):
         raise RuntimeError("Demo requires an explicit isolated directory and non-production environment")
     root = Path(data_dir or os.getenv("DATA_DIR", "data")).resolve()
@@ -152,12 +158,12 @@ def create_app(data_dir=None, demo=False):
                     "apps": [],
                     "details": [
                         {
-                            "appID": "VHWFV2V25Z.com.sandkcampbell.jobinteltracker",
+                            "appID": mobile_app_id,
                             "paths": ["/auth/mobile/callback"],
                         }
                     ],
                 },
-                "webcredentials": {"apps": ["VHWFV2V25Z.com.sandkcampbell.jobinteltracker"]},
+                "webcredentials": {"apps": [mobile_app_id]},
             },
         )
 
