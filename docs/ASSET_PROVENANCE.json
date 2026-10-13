@@ -66,7 +66,8 @@
       "origin": "project-produced documentation/simulator capture; no matching third-party photograph",
       "ocr_email_count": 0,
       "ocr_synthetic_marker": true,
-      "scope": "source provenance and local OCR; not a universal privacy/rights guarantee"
+      "scope": "source provenance and local OCR; not a universal privacy/rights guarantee",
+      "actual_pixel_review": "Inspected directly on 2026-10-13 without CUA: synthetic board/prep/research data or locked/signed-out UI; no account identifier, credential or real job/resume content observed."
     },
     {
       "path": "docs/locked-deployment.png",
@@ -75,7 +76,8 @@
       "origin": "project-produced documentation/simulator capture; no matching third-party photograph",
       "ocr_email_count": 0,
       "ocr_synthetic_marker": false,
-      "scope": "source provenance and local OCR; not a universal privacy/rights guarantee"
+      "scope": "source provenance and local OCR; not a universal privacy/rights guarantee",
+      "actual_pixel_review": "Inspected directly on 2026-10-13 without CUA: synthetic board/prep/research data or locked/signed-out UI; no account identifier, credential or real job/resume content observed."
     },
     {
       "path": "docs/mobile.jpg",
@@ -84,7 +86,8 @@
       "origin": "project-produced documentation/simulator capture; no matching third-party photograph",
       "ocr_email_count": 0,
       "ocr_synthetic_marker": true,
-      "scope": "source provenance and local OCR; not a universal privacy/rights guarantee"
+      "scope": "source provenance and local OCR; not a universal privacy/rights guarantee",
+      "actual_pixel_review": "Inspected directly on 2026-10-13 without CUA: synthetic board/prep/research data or locked/signed-out UI; no account identifier, credential or real job/resume content observed."
     },
     {
       "path": "mobile/qa/ios-board.png",
@@ -93,7 +96,8 @@
       "origin": "project-produced documentation/simulator capture; no matching third-party photograph",
       "ocr_email_count": 0,
       "ocr_synthetic_marker": true,
-      "scope": "source provenance and local OCR; not a universal privacy/rights guarantee"
+      "scope": "source provenance and local OCR; not a universal privacy/rights guarantee",
+      "actual_pixel_review": "Inspected directly on 2026-10-13 without CUA: synthetic board/prep/research data or locked/signed-out UI; no account identifier, credential or real job/resume content observed."
     },
     {
       "path": "mobile/qa/ios-prep.png",
@@ -102,7 +106,8 @@
       "origin": "project-produced documentation/simulator capture; no matching third-party photograph",
       "ocr_email_count": 0,
       "ocr_synthetic_marker": true,
-      "scope": "source provenance and local OCR; not a universal privacy/rights guarantee"
+      "scope": "source provenance and local OCR; not a universal privacy/rights guarantee",
+      "actual_pixel_review": "Inspected directly on 2026-10-13 without CUA: synthetic board/prep/research data or locked/signed-out UI; no account identifier, credential or real job/resume content observed."
     },
     {
       "path": "mobile/qa/ios-owner-signin.png",
@@ -111,7 +116,8 @@
       "origin": "project-produced documentation/simulator capture; no matching third-party photograph",
       "ocr_email_count": 0,
       "ocr_synthetic_marker": true,
-      "scope": "source provenance and local OCR; not a universal privacy/rights guarantee"
+      "scope": "source provenance and local OCR; not a universal privacy/rights guarantee",
+      "actual_pixel_review": "Inspected directly on 2026-10-13 without CUA: synthetic board/prep/research data or locked/signed-out UI; no account identifier, credential or real job/resume content observed."
     },
     {
       "path": "mobile/qa/ios-research-request.png",
@@ -120,7 +126,8 @@
       "origin": "project-produced documentation/simulator capture; no matching third-party photograph",
       "ocr_email_count": 0,
       "ocr_synthetic_marker": true,
-      "scope": "source provenance and local OCR; not a universal privacy/rights guarantee"
+      "scope": "source provenance and local OCR; not a universal privacy/rights guarantee",
+      "actual_pixel_review": "Inspected directly on 2026-10-13 without CUA: synthetic board/prep/research data or locked/signed-out UI; no account identifier, credential or real job/resume content observed."
     }
   ],
   "license_note": "Template metadata says 0BSD; actual tarball LICENSE is MIT. The full shipped MIT notice is retained in mobile/notices/expo-template/LICENSE.",
@@ -139,5 +146,11 @@
       "notice": "mobile/notices/expo-router/LICENSE and mobile/notices/react-navigation-elements/LICENCE at the installed Router upstream revision",
       "license_metadata": "MIT"
     }
-  ]
+  ],
+  "artifact_privacy_review": {
+    "reviewed_on": "2026-10-13",
+    "python_source_and_wheel": "Archive entries and contents inspected; the only private-key signature candidate is the inert synthetic audit regression fixture, not key material. No runtime DB/export/resume/signing file is packaged.",
+    "generated_mobile": "Actual HTML/JSON/JS/source-map content signature-scanned. No credential-signature candidates; zero absolute Mac source paths in all three maps. Runtime source inventories exclude flagged tooling.",
+    "limitations": "Heuristic/visual review is not universal clearance; artifact notices and final target-device/provider behavior remain separate release gates."
+  }
 }

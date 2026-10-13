@@ -1,7 +1,7 @@
 # Release-readiness checkpoint — 2026-10-13
 
-**Prepared locally; owner release decisions remain.** No publication, push,
-merge, visibility/settings change, deployment, live tracker access, credential
+**Prepared for the owner-approved source push and PR; release decisions remain.**
+No merge, visibility/settings change, deployment, live tracker access, credential
 revocation, shared-history rewrite or paid service was performed.
 
 ## Verified source and architecture
@@ -30,7 +30,9 @@ The owner's existing Apple authentication and private records were untouched.
   all historical binary objects match the 13 locally reviewed current assets.
 - [x] Local OCR reviewed all 13 binary image assets, without transmitting their
   text. Seven captures: six have synthetic/demo markers; one is unconfigured
-  owner sign-in. Six icons have no recognized text. No email address was found.
+  owner sign-in. Six icons have no recognized text. No email address was found. All seven captures were also inspected directly:
+  synthetic content or locked/signed-out UI only; no real account, credential,
+  job or resume content observed. Historical UI limitations are dated evidence.
 - [x] Added a bounded, read-only history/index audit with private reports,
   disabled Git transports/hooks, ambient-Git isolation, limits and synthetic
   regression coverage. Keep reports outside Git; paths may be private.
@@ -103,8 +105,9 @@ PUBLIC_METADATA_REVIEW.md. Identifier values are omitted.
 - [ ] Exercise the revised Docker image locally when an authorized local daemon
   is available. Signed-device/accessibility/session/live-write acceptance remains
   separate, using owner-approved disposable fixtures where needed.
-- [ ] Independently authorize any eventual publication, push, merge, package
-  distribution, hosting, deployment, signing or changes to the owner's instance.
+- [x] Owner authorized the sanitized source branch push and PR on 2026-10-13.
+- [ ] Independently authorize any merge, package distribution, hosting,
+  deployment, signing or changes to the owner's instance.
 
 The scan excludes ignored/untracked and unstaged files, dangling/force-deleted
 remote objects, GitHub PR-only refs, reflogs, submodules, LFS payloads, encoded

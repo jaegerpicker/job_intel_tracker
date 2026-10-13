@@ -1,6 +1,6 @@
 # Public metadata scope and minimal mitigation
 
-Reviewed source baseline: `977ed94f0c7fc87d5172718097ea74b5951d6b2f` (already-public main). Forward cleanup is local commit `7019a89bc3f68491af63de3d8560e68e5eef794c`. No remote source/settings or shared history has changed. Values are intentionally omitted.
+Reviewed source baseline: `977ed94f0c7fc87d5172718097ea74b5951d6b2f` (already-public main). Forward cleanup is local commit `7019a89bc3f68491af63de3d8560e68e5eef794c`. Source branch push/PR is owner-authorized; shared main, live configuration/settings and shared history are not changed. Values are intentionally omitted.
 
 | Category | Exact baseline source path and lines | First containing commit on baseline ancestry | Forward cleanup |
 | --- | --- | --- | --- |
@@ -24,7 +24,7 @@ The containing-commit column is a bounded search on the baseline’s ancestor hi
 
 ## Minimal plan
 
-1. Review and independently authorize publication of the forward-cleaned tree. Confirm any retained public signing identity and review the seven existing captures locally. A local commit does not change the currently public main branch.
+1. Review the owner-authorized source PR for the forward-cleaned tree before any separately approved merge. Confirm any retained public signing identity and review the seven existing captures locally. A local commit does not change the currently public main branch.
 2. Keep new operator/device/Library/deployment and approval details in private operational records. Public examples use reserved domains, synthetic records and no private identifiers.
 3. Separately decide whether the historical operator context is acceptable or whether a reviewed clean release export is needed. An export avoids carrying old history into that new artifact but does not erase the existing public repository, refs, caches or previous downloads.
 4. Any shared-history rewrite/force-push or visibility change needs separate explicit authority and coordination with existing branches/clones. None is performed or scheduled here. Metadata alone is not a confirmed credential leak; no credential revocation/rotation is inferred.

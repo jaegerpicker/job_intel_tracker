@@ -64,13 +64,15 @@ libraries. See mobile/qa/DEPENDENCIES.md for exact scope and blockers.
 
 All six PNG icons byte-match an integrity-verified public Expo template; the
 actual tarball MIT notice is retained despite its 0BSD metadata. Font/decoder
-notices and provenance are preserved. Seven project-produced captures have Git
-introduction and local OCR evidence, but final visual/privacy review remains an
-owner gate. No local asset was uploaded for provenance matching.
+notices and provenance are preserved. Seven project-produced captures have Git introduction, local OCR and now
+direct pixel review. Only synthetic board/prep/research or locked/signed-out
+content was observed, with no real account/credential/job/resume content.
+Historical sign-in copy and a status-bar overlap are dated QA evidence, not
+current device acceptance. Final intended-artifact approval remains an owner gate. No local asset was uploaded for provenance matching.
 
 PUBLIC_METADATA_REVIEW.md lists exact paths, baseline lines and containing
 commits for owner device/Library/deployment/approval context, without values.
-The forward cleanup is local only; historical public refs/caches/copies remain.
-No history rewrite, visibility/security-setting change, push or deployment is
-implied. Private vulnerability reporting remains disabled pending an owner
+The forward cleanup is on the review branch; historical public refs/caches/copies remain.
+Source branch push/PR is now owner-authorized. No merge, history rewrite,
+visibility/security-setting change or deployment is implied. Private vulnerability reporting remains disabled pending an owner
 choice of reporting channel.
