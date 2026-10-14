@@ -17,31 +17,71 @@ pre-PR-#11 source scope; it does not establish clearance for those additions.
 The new PostgreSQL CI job lacked a timeout. This local follow-up gives it the
 same 15-minute bound as the existing backend and mobile jobs. All three job
 bounds were verified by parsing the workflow YAML. This follow-up is unpublished
-and did not start CI, create a database service or change provider configuration.
+and did not start CI or change provider configuration.
 
 Fresh default-backend verification on the merged source: **167 passed, two
 skipped in 11.92 seconds**. Google token transport/JWKS are mocked and signing
 keys are ephemeral fixtures. Tests used a clean environment with a temporary
 data directory; no inherited provider/database settings were used. The two
-skips are PostgreSQL migration cases. This lane did not run `--postgres`,
-connect to a PostgreSQL service, invoke real OAuth, or perform device acceptance.
+skips are PostgreSQL migration cases. That default-backend run did not connect
+to PostgreSQL. Real OAuth and signed-device acceptance were not attempted.
 Ruff check/format and mypy passed. The existing Starlette/httpx deprecation
 warning remains.
 
-Follow-up release review still needs to cover PR #11's source/history changes,
-provider behavior and exact optional PostgreSQL artifacts. In particular,
+The subsequent bounded PostgreSQL parity run passed **166 tests, with two
+skipped and one deselected, in 25.31 seconds**. It used the existing local
+PostgreSQL 14.15 executable with a fresh owned cluster, generated test password,
+private Unix socket and TCP listening disabled. Verified cached psycopg 3.2.13
+wheels were installed only into a temporary package target; no network package
+installation or live database was used. The fixture capped connections and
+workers, enforced a 45-second suite budget and stopped the server before
+removing its cluster, socket, package target and password. The two skips are
+SQLite legacy-adoption/demo-isolation cases; the deselection is the SQLite
+backup test. Both PostgreSQL migration cases ran. This covers synthetic
+database parity, not production migration, TLS, backup/restore or real OAuth.
+
+Current merged-source mobile verification also passed offline: decoder vendor
+provenance, TypeScript, ESLint, **127 serial Jest tests in 15.71 seconds** and
+four scene-plugin tests. Two opt-in live-contract tests stayed skipped. The
+dependency manifests/lock/vendor tree are unchanged from the earlier verified
+preparation, so the check reused those local modules with a clean environment,
+no inherited provider settings and a 45-second process budget. The temporary
+module link was removed afterward. This adds the explicit Google-provider
+handoff regression; it does not replace signed-device/provider acceptance or
+claim a fresh production export.
+
+The bounded current-source/history scan at local preparation commit
+`0dd995b65bf26f1e2d9bf060c3c9e7c6ef7b45ee` covered **858 objects in 30.22
+seconds**, with no truncation. Its 23 candidate records were reviewed locally:
+11 URL-credential records are synthetic CI/test values or setup placeholders;
+two private-key records are detector fixtures; ten email-address records are
+upstream metadata/copyright or synthetic detector fixtures. No live credential
+or real job/resume record was confirmed in this scope. All 13 historical binary
+objects match the assets reviewed earlier; the scan adds no new pixel or device
+acceptance claim. The source authentication follow-up is recorded in
+SECURITY_REVIEW.md. Reports and matched values remain outside Git.
+
+Provider acceptance and exact optional PostgreSQL artifacts retain separate
+release gates. In particular,
 `psycopg[binary]==3.2.13` was outside the original 37-entry base Python-wheel
 inventory. A subsequent local review now records exact verified core and
 CPython 3.12 macOS ARM64/Linux x86_64 binary wheels, dependency markers and
 LGPL-3.0-only metadata in `optional_python_postgres`. The driver license and
 artifact hashes are retained under `docs/notices/psycopg/`. Its native client
 libraries still need target-specific component notices/source review before
-any binary redistribution. No package was installed or imported for this audit.
+any binary redistribution. The license-inspection phase did not install or
+import packages; the later parity phase used temporary targets as described
+above.
 
 The new PostgreSQL job's floating action tags and default checkout persistence
 are corrected in the local source proposal using the same previously verified
 immutable commits and `persist-credentials: false` as the other jobs. Repository
 grants/settings were not changed and the proposal has not run on GitHub.
+Read-only GitHub checks reconfirmed repository ID 1403668252, public visibility
+and default branch `main`. Actions is enabled with `allowed_actions: all`;
+default workflow permissions are `read`, and workflows cannot approve pull
+requests. This is the observed policy, not a settings change. The checked-in
+workflows explicitly use the narrower read-only permissions and pinned actions.
 The Python source manifest also includes the new provider/database setup docs
 and optional-driver evidence so archive readers retain the linked information.
 
@@ -190,8 +230,17 @@ PUBLIC_METADATA_REVIEW.md. Identifier values are omitted.
 - [ ] Resolve the two unpatched tooling advisories or explicitly accept their
   documented exposure for the intended release process. Review exact bundled
   native/data/font artifacts and required notices before distributing binaries.
+- [ ] Choose the exact PostgreSQL distribution targets, if any, and retain
+  their component notices and applicable source/relinking arrangements. The
+  optional-wheel inventory and local parity pass do not clear redistribution.
+- [ ] Complete owner-approved real-provider and signed-device acceptance for
+  the merged Google/native login paths; synthetic source tests do not establish
+  production configuration, accessibility, session recovery or live writes.
 - [ ] Enable private vulnerability reporting or provide a private maintainer
   contact. A read-only GitHub check found private reporting **disabled**.
+- [ ] Review the existing Actions allow-all policy for the intended contributor
+  process. Current workflow pinning does not restrict actions in future workflow
+  edits; changing repository policy requires a separate owner decision.
 - [x] Exercise the revised Docker image: the existing PR CI passed its runtime,
   root-owned disk, privileges, PORT and restart checks. Local Docker remains
   unavailable. Signed-device/accessibility/session/live-write acceptance remains

@@ -1,9 +1,57 @@
 # Scoped security review — 2026-10-13
 
-This is a historical review of the preparation source before PR #11's Google
-owner sign-in and optional PostgreSQL backend. Its byte-identity, provider and
-CI claims apply to the baseline stated below. See RELEASE_READINESS.md's
-merged-main follow-up for the current scope and remaining review gates.
+The merged-main follow-up below applies to source baseline `92bcae4` and local
+preparation commit `0dd995b`. The historical preparation review after it covers
+the earlier pre-PR-#11 source; its byte-identity, provider and CI claims apply
+only to the baseline stated there. See RELEASE_READINESS.md for test counts,
+artifact evidence and remaining release gates.
+
+## Merged-main local follow-up
+
+The Google code flow uses an independently configured owner subject and does
+not enroll/link an identity from an email claim. The source validates RS256
+signatures, issuer, audience, required identity/time claims, nonce and authorized
+party for multiple audiences. The callback requires the random state to match
+its secure HTTP-only cookie, consumes the hashed five-minute flow before the
+provider exchange, and uses PKCE S256. An explicit public origin binds the
+configured HTTPS callback to the canonical origin. Provider failures return a
+generic denial without echoing claims, tokens, secrets or provider exception
+text. These are scoped source observations with mocked transport/JWKS and
+ephemeral signing-key tests; no real provider or owner credential was used.
+The current mobile change selects an explicit Apple/Google provider within the
+existing PKCE handoff. Offline vendor, type, lint and serial-test checks passed
+on this merged source, including its provider-selection regression; no signed
+app, real callback or device session was exercised.
+
+The optional database boundary retains parameterized values, rejects unsupported
+SQLite-specific SQL, and takes a transaction advisory lock for serialized
+PostgreSQL decisions. Offline migration accepts the documented legacy/version-1
+sources and rejects incompatible markers before destination mutation. The
+default SQLite suite and a separate owned PostgreSQL 14.15 fixture passed; the
+latter used a private Unix socket and temporary driver target, then removed its
+cluster and test password. Production TLS, restore and live migration remain
+outside this verification. No authentication/database runtime source was changed
+by this follow-up.
+
+A 45-second-budget history/index scan completed all 858 objects in 30.22
+seconds. All 23 candidate records were classified locally as synthetic
+credentials/placeholders, detector fixtures or upstream metadata/copyright.
+No live credential or real job/resume record was confirmed in that scope. Its
+13 binary objects are byte-identical to the previously reviewed inventory.
+Ignored/private working files, remote-only/deleted objects, encoded secrets
+and semantic personal-data guarantees remain outside the scan. No matched
+values or private report were added to the repository or sent to a service.
+
+The local CI proposal gives all three jobs 15-minute bounds, immutable action
+commits and non-persisted checkout credentials with read-only contents access.
+No GitHub workflow, repository grant/security-setting change or new publication
+was performed for this follow-up. Read-only repository checks found Actions
+enabled with all actions permitted, read-only default workflow permissions and
+pull-request approval by workflows disabled. Native optional-driver redistribution rights
+remain an artifact-specific gate even though the application wheel does not
+embed the inspected driver libraries.
+
+## Historical preparation review
 
 A separate review pass examined the local preparation commit `7019a89` and the
 incremental dependency/asset changes against main baseline `977ed94`. This is a

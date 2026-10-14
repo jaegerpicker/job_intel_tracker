@@ -6,7 +6,8 @@ retains the exact driver license from the verified pure-Python wheel.
 
 UPSTREAM.json records three SHA256-verified artifacts: the pure-Python driver
 and CPython 3.12 macOS ARM64 / manylinux x86_64 binary wheels. They were read as
-ZIP data, never installed or imported. The binary wheels contain respectively
+ZIP data without installation or imports during the rights-inspection phase.
+The binary wheels contain respectively
 13 and 16 native files, including their two Python bindings. Client libraries
 include libpq, OpenSSL, Kerberos, LDAP and SASL; the Linux wheel has additional
 libraries listed in the inventory. Library versions and component licenses are
@@ -21,6 +22,9 @@ retained section 4 before choosing an artifact distribution plan.
 
 The application wheel declares the optional dependency instead of embedding
 these libraries. Default SQLite installation does not select this extra.
+The later local parity phase installed the verified core/macOS wheels only into
+a disposable package target for an owned PostgreSQL fixture, then removed it.
+See RELEASE_READINESS.md; executing that test does not clear distribution rights.
 For any proposed PostgreSQL container or native redistribution, first choose
 the exact target artifact and review all bundled component notices, source
 provenance and applicable obligations. No binary release is authorized here.
