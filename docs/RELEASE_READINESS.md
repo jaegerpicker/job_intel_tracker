@@ -1,9 +1,119 @@
 # Release-readiness checkpoint — 2026-10-13
 
-**Source PR #12 is open; release decisions remain.**
+**Source PR #12 was merged by the owner; release decisions remain.**
 No merge, visibility/settings change, deployment, live tracker access, credential
-revocation or shared-history rewrite was performed. The owner reports that the
-automatic third-party integration uses its free plan with no payment added.
+revocation or shared-history rewrite was performed by this audit lane.
+
+## Authorized source handoff
+
+The owner has now authorized publishing the ready source follow-up with a normal
+pull request and an actual repository Markdown announcement draft. The intended
+scope remains source/default SQLite first. The working material is in
+[HACKER_NEWS_DRAFT.md](HACKER_NEWS_DRAFT.md); it contains public project facts and
+synthetic-demo guidance, with no private records or account credentials.
+Announcement timing and the final human-authored submission remain the
+owner's choice. No Hacker News post or deployment is authorized by this handoff.
+
+Current remote `main` was reconfirmed at `92bcae4`. Runtime code, mobile source
+and dependency locks remain unchanged from the recorded passing checks below.
+The publication review therefore retains those scoped results and checks the
+changed source-archive/privacy fixture, workflow safeguards and new text. No
+substantial local build, full-suite rerun, real-provider login or live tracker
+operation is part of this handoff. The historical local-review statements below
+describe their original pre-publication phase; they do not claim results for a
+new GitHub run or clearance for bundled native artifacts.
+
+Focused handoff verification passed: the synthetic source/wheel privacy fixture
+(one test, 1.09 seconds), Ruff check and format, and mypy on 14 source files.
+Both workflow files parse with standard Ubuntu runners, read-only contents
+permissions, 15-minute bounds, immutable action commits and non-persisted
+checkout credentials. The retained driver license hash was verified. Changed
+text was reviewed without exposing candidate values; the only credential-shaped
+match is the existing isolated CI database fixture. Draft source links resolve
+and its title is below 80 characters. The Markdown draft is a Git repository
+document, not an added runtime dependency or binary-distribution artifact.
+
+## Current merged-main follow-up
+
+The owner merged PR #12 on 2026-10-13 at 4:01:06 PM EDT, producing
+`fd65469396800fc1cc432fbe4926a1fc46cd3035`. Current source was fetched and
+verified at `92bcae4c1709b2a63e440daa903d1d81504476db`, which also includes
+PR #11's optional PostgreSQL backend and explicit Google owner sign-in.
+The earlier architecture, dependency and provider evidence below records the
+pre-PR-#11 source scope; it does not establish clearance for those additions.
+
+The new PostgreSQL CI job lacked a timeout. This local follow-up gives it the
+same 15-minute bound as the existing backend and mobile jobs. All three job
+bounds were verified by parsing the workflow YAML. At that local-review stage,
+the follow-up was unpublished and did not start CI or change provider
+configuration. The source handoff above records the later publication authority.
+
+Fresh default-backend verification on the merged source: **167 passed, two
+skipped in 11.92 seconds**. Google token transport/JWKS are mocked and signing
+keys are ephemeral fixtures. Tests used a clean environment with a temporary
+data directory; no inherited provider/database settings were used. The two
+skips are PostgreSQL migration cases. That default-backend run did not connect
+to PostgreSQL. Real OAuth and signed-device acceptance were not attempted.
+Ruff check/format and mypy passed. The existing Starlette/httpx deprecation
+warning remains.
+
+The subsequent bounded PostgreSQL parity run passed **166 tests, with two
+skipped and one deselected, in 25.31 seconds**. It used the existing local
+PostgreSQL 14.15 executable with a fresh owned cluster, generated test password,
+private Unix socket and TCP listening disabled. Verified cached psycopg 3.2.13
+wheels were installed only into a temporary package target; no network package
+installation or live database was used. The fixture capped connections and
+workers, enforced a 45-second suite budget and stopped the server before
+removing its cluster, socket, package target and password. The two skips are
+SQLite legacy-adoption/demo-isolation cases; the deselection is the SQLite
+backup test. Both PostgreSQL migration cases ran. This covers synthetic
+database parity, not production migration, TLS, backup/restore or real OAuth.
+
+Current merged-source mobile verification also passed offline: decoder vendor
+provenance, TypeScript, ESLint, **127 serial Jest tests in 15.71 seconds** and
+four scene-plugin tests. Two opt-in live-contract tests stayed skipped. The
+dependency manifests/lock/vendor tree are unchanged from the earlier verified
+preparation, so the check reused those local modules with a clean environment,
+no inherited provider settings and a 45-second process budget. The temporary
+module link was removed afterward. This adds the explicit Google-provider
+handoff regression; it does not replace signed-device/provider acceptance or
+claim a fresh production export.
+
+The bounded current-source/history scan at local preparation commit
+`0dd995b65bf26f1e2d9bf060c3c9e7c6ef7b45ee` covered **858 objects in 30.22
+seconds**, with no truncation. Its 23 candidate records were reviewed locally:
+11 URL-credential records are synthetic CI/test values or setup placeholders;
+two private-key records are detector fixtures; ten email-address records are
+upstream metadata/copyright or synthetic detector fixtures. No live credential
+or real job/resume record was confirmed in this scope. All 13 historical binary
+objects match the assets reviewed earlier; the scan adds no new pixel or device
+acceptance claim. The source authentication follow-up is recorded in
+SECURITY_REVIEW.md. Reports and matched values remain outside Git.
+
+Provider acceptance and exact optional PostgreSQL artifacts retain separate
+release gates. In particular,
+`psycopg[binary]==3.2.13` was outside the original 37-entry base Python-wheel
+inventory. A subsequent local review now records exact verified core and
+CPython 3.12 macOS ARM64/Linux x86_64 binary wheels, dependency markers and
+LGPL-3.0-only metadata in `optional_python_postgres`. The driver license and
+artifact hashes are retained under `docs/notices/psycopg/`. Its native client
+libraries still need target-specific component notices/source review before
+any binary redistribution. The license-inspection phase did not install or
+import packages; the later parity phase used temporary targets as described
+above.
+
+The new PostgreSQL job's floating action tags and default checkout persistence
+are corrected in the local source proposal using the same previously verified
+immutable commits and `persist-credentials: false` as the other jobs. Repository
+grants/settings were not changed; the local-review phase did not run the proposal
+on GitHub.
+Read-only GitHub checks reconfirmed repository ID 1403668252, public visibility
+and default branch `main`. Actions is enabled with `allowed_actions: all`;
+default workflow permissions are `read`, and workflows cannot approve pull
+requests. This is the observed policy, not a settings change. The checked-in
+workflows explicitly use the narrower read-only permissions and pinned actions.
+The Python source manifest also includes the new provider/database setup docs
+and optional-driver evidence so archive readers retain the linked information.
 
 ## Verified source and architecture
 
@@ -125,10 +235,9 @@ exclusion. The contributor guide distinguishes this Python source archive
 from the full mobile Git checkout. All 132 backend/web tests passed in 10.84
 seconds; Ruff check/format and mypy passed.
 
-The existing Greptile integration started automatically when the PR opened.
-The owner subsequently reported its free plan and absence of a payment method
-and approved the follow-up push. No invoice or billing telemetry was inspected;
-no direct Greptile request or settings change was made by this lane.
+An existing third-party review integration started automatically when PR #12
+opened. No direct review-service request or integration settings change was
+made by this lane.
 
 Final npm audit: **49 high, 0 moderate, 0 critical** dependency-chain entries
 from **two distinct advisories/two installed instances** (braces and node-forge).
@@ -142,23 +251,32 @@ PUBLIC_METADATA_REVIEW.md. Identifier values are omitted.
 
 ## Owner decisions and remaining release gates
 
-- [ ] Review the exact proposed tree and confirm screenshot visual/privacy content,
-  synthetic-only visual content and intended public signing metadata.
-- [ ] Choose whether to retain reviewed historical operator context or produce
-  a reviewed clean release export. Local removals do not erase already-public
-  history; no destructive rewrite or visibility change is authorized here.
-- [ ] Resolve the two unpatched tooling advisories or explicitly accept their
-  documented exposure for the intended release process. Review exact bundled
-  native/data/font artifacts and required notices before distributing binaries.
-- [ ] Enable private vulnerability reporting or provide a private maintainer
-  contact. A read-only GitHub check found private reporting **disabled**.
-- [x] Exercise the revised Docker image: the existing PR CI passed its runtime,
-  root-owned disk, privileges, PORT and restart checks. Local Docker remains
-  unavailable. Signed-device/accessibility/session/live-write acceptance remains
-  separate, using owner-approved disposable fixtures where needed.
-- [x] Owner authorized the sanitized source branch push and PR on 2026-10-13.
-- [ ] Independently authorize any merge, package distribution, hosting,
-  deployment, signing or changes to the owner's instance.
+These choices apply to a new release or the unpublished local follow-up. The
+previously approved source pushes and owner merges are complete and do not need
+repeat approval. The project's existing MIT declaration and retained dependency
+choices are unchanged; no new agreement was accepted. Local rights inspection
+and test execution are complete within the stated scope.
+
+| Decision | Options and recommendation | What it actually blocks |
+| --- | --- | --- |
+| Intended release artifact | Source/default SQLite, or a PostgreSQL container/native/signed artifact. Recommend source/default SQLite first; select exact targets before preparing bundled artifacts. | A new publication needs authorization. Bundled native artifacts additionally need component notices/provenance and applicable source/relinking review; the optional psycopg inventory does not clear them. This does not block source preparation or local tests. |
+| Two recorded tooling advisories | Retain the compatible pinned toolchain and documented exposure under existing accepted decisions, or review/test separate upstream fixes or a major migration for a future scope. Recommend retaining the tested pins for this source handoff. | A claim of clean release/build/signing tooling remains unsupported. Existing accepted dependency decisions stay in force and are not reopened; a different future build/signing scope needs its own review. No dependency or agreement changes are proposed here. |
+| Provider/device acceptance | Ship source with these limits documented, or perform owner-approved disposable real-provider/signed-device acceptance. Recommend acceptance before claiming production login/device readiness. | Production callback/configuration, signed links, accessibility, session recovery and live-write acceptance claims. It is not a technical blocker to a clearly scoped source release. No owner's live tracker or credentials should be used for development checks. |
+| Public history and final assets | Retain the reviewed public history, or prepare/review a clean release export. Recommend retaining history unless the owner wants a different artifact; no live secret was confirmed in the reviewed scope. | Optional packaging/privacy preference. Existing public copies cannot be undone by local removal. Newly selected screenshots/signing metadata need review if they differ from the already reviewed source; destructive history rewriting remains unauthorized. |
+| Vulnerability reporting channel | Enable GitHub private reporting, or name a private maintainer contact. Recommend a private channel before inviting outside contributions. | Optional maintainer-policy improvement; private reporting was observed disabled. No setting/contact change is authorized here. |
+| Actions policy | Keep read-only defaults and pinned workflows, or additionally restrict allowed actions. Recommend retaining the verified safeguards; consider an allowlist when organizing external contribution review. | Optional policy improvement. Actions currently permits all actions, defaults to read-only permissions and cannot approve PRs. Current workflow pins do not constrain future workflow edits. No grants/security settings were changed. |
+
+Completed technical gates: the revised Docker image passed the existing PR CI
+runtime, root-owned disk, privileges, PORT and restart checks. Default SQLite,
+disposable PostgreSQL parity and offline merged-source mobile checks passed.
+The reviewed synthetic captures, public signing metadata and baseline source
+cleanup have scoped evidence above; they are not reasons to request the same
+source publication approval again.
+
+The owner has authorized pushing the ready local source follow-up and opening
+its PR as recorded above. Package distribution, signing, hosting/deployment,
+public announcements and changes to the owner's instance still require separate
+authorization; none is implied by source publication or local verification.
 
 The scan excludes ignored/untracked and unstaged files, dangling/force-deleted
 remote objects, GitHub PR-only refs, reflogs, submodules, LFS payloads, encoded

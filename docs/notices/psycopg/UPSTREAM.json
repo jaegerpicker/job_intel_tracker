@@ -1,0 +1,142 @@
+{
+  "schema": 1,
+  "source": "PyPI 3.2.13 release metadata and SHA256-verified exact wheels",
+  "scope": "pure Python driver plus CPython 3.12 macOS ARM64 and manylinux x86_64 binary wheels; no install or execution",
+  "artifacts": [
+    {
+      "name": "psycopg",
+      "version": "3.2.13",
+      "artifact": "psycopg-3.2.13-py3-none-any.whl",
+      "url": "https://files.pythonhosted.org/packages/a9/14/f2724bd1986158a348316e86fdd0837a838b14a711df3f00e47fba597447/psycopg-3.2.13-py3-none-any.whl",
+      "sha256": "a481374514f2da627157f767a9336705ebefe93ea7a0522a6cbacba165da179a",
+      "bytes": 206797,
+      "license_expression": null,
+      "license_metadata": "LGPL-3.0-only",
+      "requires_dist": [
+        "backports.zoneinfo>=0.2.0; python_version < \"3.9\"",
+        "typing-extensions>=4.6; python_version < \"3.13\"",
+        "tzdata; sys_platform == \"win32\"",
+        "psycopg-c==3.2.13; implementation_name != \"pypy\" and extra == \"c\"",
+        "psycopg-binary==3.2.13; implementation_name != \"pypy\" and extra == \"binary\"",
+        "psycopg-pool; extra == \"pool\"",
+        "anyio>=4.0; extra == \"test\"",
+        "mypy>=1.14; extra == \"test\"",
+        "pproxy>=2.7; extra == \"test\"",
+        "pytest>=6.2.5; extra == \"test\"",
+        "pytest-cov>=3.0; extra == \"test\"",
+        "pytest-randomly>=3.5; extra == \"test\"",
+        "ast-comments>=1.1.2; extra == \"dev\"",
+        "black>=24.1.0; extra == \"dev\"",
+        "codespell>=2.2; extra == \"dev\"",
+        "dnspython>=2.1; extra == \"dev\"",
+        "flake8>=4.0; extra == \"dev\"",
+        "isort[colors]>=6.0; extra == \"dev\"",
+        "isort-psycopg; extra == \"dev\"",
+        "mypy>=1.14; extra == \"dev\"",
+        "pre-commit>=4.0.1; extra == \"dev\"",
+        "types-setuptools>=57.4; extra == \"dev\"",
+        "types-shapely>=2.0; extra == \"dev\"",
+        "wheel>=0.37; extra == \"dev\"",
+        "Sphinx>=5.0; extra == \"docs\"",
+        "furo==2022.6.21; extra == \"docs\"",
+        "sphinx-autobuild>=2021.3.14; extra == \"docs\"",
+        "sphinx-autodoc-typehints>=1.12; extra == \"docs\""
+      ],
+      "license_files": [
+        {
+          "path": "psycopg-3.2.13.dist-info/licenses/LICENSE.txt",
+          "bytes": 7652,
+          "sha256": "e3a994d82e644b03a792a930f574002658412f62407f5fee083f2555c5f23118"
+        }
+      ],
+      "native_files": []
+    },
+    {
+      "name": "psycopg-binary",
+      "version": "3.2.13",
+      "artifact": "psycopg_binary-3.2.13-cp312-cp312-macosx_11_0_arm64.whl",
+      "url": "https://files.pythonhosted.org/packages/12/42/7d55f515ee3e2ced5ff9bc493fb2308f5187686b6d9583cd6a9c880d2053/psycopg_binary-3.2.13-cp312-cp312-macosx_11_0_arm64.whl",
+      "sha256": "b67f06a68d68b4621b6a411f9e583df876977afa06b1ba270b1b347d40aa93fc",
+      "bytes": 4070567,
+      "license_expression": null,
+      "license_metadata": "LGPL-3.0-only",
+      "requires_dist": [],
+      "license_files": [
+        {
+          "path": "psycopg_binary-3.2.13.dist-info/licenses/LICENSE.txt",
+          "bytes": 7652,
+          "sha256": "e3a994d82e644b03a792a930f574002658412f62407f5fee083f2555c5f23118"
+        }
+      ],
+      "native_files": [
+        "psycopg_binary/_psycopg.cpython-312-darwin.so",
+        "psycopg_binary/pq.cpython-312-darwin.so",
+        "psycopg_binary/.dylibs/libcom_err.3.0.dylib",
+        "psycopg_binary/.dylibs/libldap.2.dylib",
+        "psycopg_binary/.dylibs/libpq.5.dylib",
+        "psycopg_binary/.dylibs/libsasl2.3.dylib",
+        "psycopg_binary/.dylibs/libssl.3.dylib",
+        "psycopg_binary/.dylibs/libcrypto.3.dylib",
+        "psycopg_binary/.dylibs/libgssapi_krb5.2.2.dylib",
+        "psycopg_binary/.dylibs/liblber.2.dylib",
+        "psycopg_binary/.dylibs/libkrb5.3.3.dylib",
+        "psycopg_binary/.dylibs/libkrb5support.1.1.dylib",
+        "psycopg_binary/.dylibs/libk5crypto.3.1.dylib"
+      ]
+    },
+    {
+      "name": "psycopg-binary",
+      "version": "3.2.13",
+      "artifact": "psycopg_binary-3.2.13-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+      "url": "https://files.pythonhosted.org/packages/9a/31/bdbd6b2264bb7ae5fe8b775c5524da73329d8888c6137fd8b050ff9cabbc/psycopg_binary-3.2.13-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+      "sha256": "8f1189dc78553ef4b2e55d9e116fc74870191bc6a9a5f4442412a703c4cc6c3b",
+      "bytes": 4401656,
+      "license_expression": null,
+      "license_metadata": "LGPL-3.0-only",
+      "requires_dist": [],
+      "license_files": [
+        {
+          "path": "psycopg_binary-3.2.13.dist-info/licenses/LICENSE.txt",
+          "bytes": 7652,
+          "sha256": "e3a994d82e644b03a792a930f574002658412f62407f5fee083f2555c5f23118"
+        }
+      ],
+      "native_files": [
+        "psycopg_binary/_psycopg.cpython-312-x86_64-linux-gnu.so",
+        "psycopg_binary/pq.cpython-312-x86_64-linux-gnu.so",
+        "psycopg_binary.libs/libcom_err-2abe824b.so.2.1",
+        "psycopg_binary.libs/libcrypto-15969dba.so.3",
+        "psycopg_binary.libs/libgssapi_krb5-497db0c6.so.2.2",
+        "psycopg_binary.libs/libk5crypto-b1f99d5c.so.3.1",
+        "psycopg_binary.libs/libkeyutils-dfe70bd6.so.1.5",
+        "psycopg_binary.libs/libkrb5-fcafa220.so.3.3",
+        "psycopg_binary.libs/libkrb5support-d0bcff84.so.0.1",
+        "psycopg_binary.libs/liblber-f2656508.so.2.0.200",
+        "psycopg_binary.libs/libldap-be84c5ef.so.2.0.200",
+        "psycopg_binary.libs/libpcre-9513aab5.so.1.2.0",
+        "psycopg_binary.libs/libpq-9b38f5e3.so.5.17",
+        "psycopg_binary.libs/libsasl2-883649fd.so.3.0.0",
+        "psycopg_binary.libs/libselinux-0922c95c.so.1",
+        "psycopg_binary.libs/libssl-4a840876.so.3"
+      ]
+    }
+  ],
+  "declared_extra": "psycopg[binary]==3.2.13",
+  "limitations": [
+    "Selected CPython 3.12 wheels only; other OS/ABI/container targets are not covered.",
+    "No install, import, database connection, ABI/behavioral acceptance or vulnerability scan was performed.",
+    "Separate third-party component notices/source provenance were not present in the wheel license-file inventory; exact redistributed artifacts require further review.",
+    "No library is copied into the application wheel by declaring this optional dependency."
+  ],
+  "dependency_resolution_scope": {
+    "CPython 3.12 macOS/Linux binary extra": [
+      "typing-extensions>=4.6",
+      "psycopg-binary==3.2.13"
+    ],
+    "already_in_base_inventory": {
+      "typing_extensions": "4.16.0",
+      "tzdata": "2026.5"
+    },
+    "other_markers": "tzdata is required on Windows; backports.zoneinfo on Python <3.9 (outside project support). c/pool/test/dev/docs extras were not selected."
+  }
+}
