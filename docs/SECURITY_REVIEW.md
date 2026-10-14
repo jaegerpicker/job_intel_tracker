@@ -44,8 +44,10 @@ values or private report were added to the repository or sent to a service.
 
 The local CI proposal gives all three jobs 15-minute bounds, immutable action
 commits and non-persisted checkout credentials with read-only contents access.
-No GitHub workflow, repository grant/security-setting change or new publication
-was performed for this follow-up. Read-only repository checks found Actions
+During that local-review phase, no GitHub workflow, repository grant/security
+setting change or new publication was performed. The owner subsequently
+authorized source publication and a normal PR; RELEASE_READINESS.md records the
+handoff scope. Read-only repository checks found Actions
 enabled with all actions permitted, read-only default workflow permissions and
 pull-request approval by workflows disabled. Native optional-driver redistribution rights
 remain an artifact-specific gate even though the application wheel does not
