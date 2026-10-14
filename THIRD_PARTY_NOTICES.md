@@ -28,6 +28,16 @@ Python metadata came from the installed pinned wheels; npm metadata came from
 the updated lockfile, including optional platform packages. Package metadata
 is an inventory hint, not a determination of distribution rights.
 
+The later `postgres` extra adds `psycopg[binary]==3.2.13`, outside that original
+37-entry base inventory. `optional_python_postgres` now records the verified
+pure-Python driver and selected CPython 3.12 macOS ARM64/Linux x86_64 binary
+wheels. Both distributions declare LGPL-3.0-only. The actual license,
+checksums, dependency markers and native-file inventories are retained under
+[docs/notices/psycopg/](docs/notices/psycopg/README.md).
+The app wheel does not embed these drivers. A PostgreSQL container or other
+binary distribution still needs exact bundled-component notices/source review;
+the wheel's driver license alone does not clear its native client libraries.
+
 Most entries identify MIT, ISC, Apache or BSD licenses. Entries needing explicit
 distribution review include:
 

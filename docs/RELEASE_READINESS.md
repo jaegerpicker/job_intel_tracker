@@ -30,12 +30,20 @@ warning remains.
 
 Follow-up release review still needs to cover PR #11's source/history changes,
 provider behavior and exact optional PostgreSQL artifacts. In particular,
-`psycopg[binary]==3.2.13` is outside the existing 37-entry pinned Python-wheel
-inventory. That snapshot remains evidence for its declared original scope;
-it is not an inventory or license clearance of the optional extra. The new
-PostgreSQL job also uses floating action tags and default checkout persistence,
-unlike the earlier reviewed jobs; these settings were not changed under this
-follow-up's instruction to avoid security changes.
+`psycopg[binary]==3.2.13` was outside the original 37-entry base Python-wheel
+inventory. A subsequent local review now records exact verified core and
+CPython 3.12 macOS ARM64/Linux x86_64 binary wheels, dependency markers and
+LGPL-3.0-only metadata in `optional_python_postgres`. The driver license and
+artifact hashes are retained under `docs/notices/psycopg/`. Its native client
+libraries still need target-specific component notices/source review before
+any binary redistribution. No package was installed or imported for this audit.
+
+The new PostgreSQL job's floating action tags and default checkout persistence
+are corrected in the local source proposal using the same previously verified
+immutable commits and `persist-credentials: false` as the other jobs. Repository
+grants/settings were not changed and the proposal has not run on GitHub.
+The Python source manifest also includes the new provider/database setup docs
+and optional-driver evidence so archive readers retain the linked information.
 
 ## Verified source and architecture
 

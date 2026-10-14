@@ -9,6 +9,11 @@ include docs/RELEASE_READINESS.md
 include docs/SECURITY_REVIEW.md
 include docs/PUBLIC_METADATA_REVIEW.md
 include docs/ASSET_PROVENANCE.json
+include docs/GOOGLE_SETUP.md
+include docs/POSTGRES_SETUP.md
+include docs/notices/psycopg/README.md
+include docs/notices/psycopg/LICENSE.txt
+include docs/notices/psycopg/UPSTREAM.json
 recursive-include scripts *.py
 global-exclude private-* .env* *.sqlite3* *.db *.db-* *.pem *.p8 *.key *.p12 *.pfx *.encrypted.json
 include .env.example
