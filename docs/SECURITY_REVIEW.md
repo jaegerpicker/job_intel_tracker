@@ -1,5 +1,10 @@
 # Scoped security review — 2026-10-13
 
+This is a historical review of the preparation source before PR #11's Google
+owner sign-in and optional PostgreSQL backend. Its byte-identity, provider and
+CI claims apply to the baseline stated below. See RELEASE_READINESS.md's
+merged-main follow-up for the current scope and remaining review gates.
+
 A separate review pass examined the local preparation commit `7019a89` and the
 incremental dependency/asset changes against main baseline `977ed94`. This is a
 source and synthetic verification record, not live-provider/device acceptance

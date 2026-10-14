@@ -1,9 +1,41 @@
 # Release-readiness checkpoint — 2026-10-13
 
-**Source PR #12 is open; release decisions remain.**
+**Source PR #12 was merged by the owner; release decisions remain.**
 No merge, visibility/settings change, deployment, live tracker access, credential
-revocation or shared-history rewrite was performed. The owner reports that the
+revocation or shared-history rewrite was performed by this audit lane. The owner reports that the
 automatic third-party integration uses its free plan with no payment added.
+
+## Current merged-main follow-up
+
+The owner merged PR #12 on 2026-10-13 at 4:01:06 PM EDT, producing
+`fd65469396800fc1cc432fbe4926a1fc46cd3035`. Current source was fetched and
+verified at `92bcae4c1709b2a63e440daa903d1d81504476db`, which also includes
+PR #11's optional PostgreSQL backend and explicit Google owner sign-in.
+The earlier architecture, dependency and provider evidence below records the
+pre-PR-#11 source scope; it does not establish clearance for those additions.
+
+The new PostgreSQL CI job lacked a timeout. This local follow-up gives it the
+same 15-minute bound as the existing backend and mobile jobs. All three job
+bounds were verified by parsing the workflow YAML. This follow-up is unpublished
+and did not start CI, create a database service or change provider configuration.
+
+Fresh default-backend verification on the merged source: **167 passed, two
+skipped in 11.92 seconds**. Google token transport/JWKS are mocked and signing
+keys are ephemeral fixtures. Tests used a clean environment with a temporary
+data directory; no inherited provider/database settings were used. The two
+skips are PostgreSQL migration cases. This lane did not run `--postgres`,
+connect to a PostgreSQL service, invoke real OAuth, or perform device acceptance.
+Ruff check/format and mypy passed. The existing Starlette/httpx deprecation
+warning remains.
+
+Follow-up release review still needs to cover PR #11's source/history changes,
+provider behavior and exact optional PostgreSQL artifacts. In particular,
+`psycopg[binary]==3.2.13` is outside the existing 37-entry pinned Python-wheel
+inventory. That snapshot remains evidence for its declared original scope;
+it is not an inventory or license clearance of the optional extra. The new
+PostgreSQL job also uses floating action tags and default checkout persistence,
+unlike the earlier reviewed jobs; these settings were not changed under this
+follow-up's instruction to avoid security changes.
 
 ## Verified source and architecture
 
