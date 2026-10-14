@@ -222,32 +222,32 @@ PUBLIC_METADATA_REVIEW.md. Identifier values are omitted.
 
 ## Owner decisions and remaining release gates
 
-- [ ] Review the exact proposed tree and confirm screenshot visual/privacy content,
-  synthetic-only visual content and intended public signing metadata.
-- [ ] Choose whether to retain reviewed historical operator context or produce
-  a reviewed clean release export. Local removals do not erase already-public
-  history; no destructive rewrite or visibility change is authorized here.
-- [ ] Resolve the two unpatched tooling advisories or explicitly accept their
-  documented exposure for the intended release process. Review exact bundled
-  native/data/font artifacts and required notices before distributing binaries.
-- [ ] Choose the exact PostgreSQL distribution targets, if any, and retain
-  their component notices and applicable source/relinking arrangements. The
-  optional-wheel inventory and local parity pass do not clear redistribution.
-- [ ] Complete owner-approved real-provider and signed-device acceptance for
-  the merged Google/native login paths; synthetic source tests do not establish
-  production configuration, accessibility, session recovery or live writes.
-- [ ] Enable private vulnerability reporting or provide a private maintainer
-  contact. A read-only GitHub check found private reporting **disabled**.
-- [ ] Review the existing Actions allow-all policy for the intended contributor
-  process. Current workflow pinning does not restrict actions in future workflow
-  edits; changing repository policy requires a separate owner decision.
-- [x] Exercise the revised Docker image: the existing PR CI passed its runtime,
-  root-owned disk, privileges, PORT and restart checks. Local Docker remains
-  unavailable. Signed-device/accessibility/session/live-write acceptance remains
-  separate, using owner-approved disposable fixtures where needed.
-- [x] Owner authorized the sanitized source branch push and PR on 2026-10-13.
-- [ ] Independently authorize any merge, package distribution, hosting,
-  deployment, signing or changes to the owner's instance.
+These choices apply to a new release or the unpublished local follow-up. The
+previously approved source pushes and owner merges are complete and do not need
+repeat approval. The project's existing MIT declaration and retained dependency
+choices are unchanged; no new agreement was accepted. Local rights inspection
+and test execution are complete within the stated scope.
+
+| Decision | Options and recommendation | What it actually blocks |
+| --- | --- | --- |
+| Intended release artifact | Source/default SQLite, or a PostgreSQL container/native/signed artifact. Recommend source/default SQLite first; select exact targets before preparing bundled artifacts. | A new publication needs authorization. Bundled native artifacts additionally need component notices/provenance and applicable source/relinking review; the optional psycopg inventory does not clear them. This does not block source preparation or local tests. |
+| Two recorded tooling advisories | Keep the compatible pinned toolchain with documented exposure, or review/test separate upstream fixes or a major migration. Recommend retaining the compatible pins during source preparation rather than forcing an incompatible SDK/Jest change. | A claim of clean release/build/signing tooling is not supported. Record any existing owner acceptance of these exact braces/node-forge findings and close the decision if already covered; do not reopen accepted dependencies or request a new agreement. No exact advisory acceptance is evidenced in this lane's record. |
+| Provider/device acceptance | Ship source with these limits documented, or perform owner-approved disposable real-provider/signed-device acceptance. Recommend acceptance before claiming production login/device readiness. | Production callback/configuration, signed links, accessibility, session recovery and live-write acceptance claims. It is not a technical blocker to a clearly scoped source release. No owner's live tracker or credentials should be used for development checks. |
+| Public history and final assets | Retain the reviewed public history, or prepare/review a clean release export. Recommend retaining history unless the owner wants a different artifact; no live secret was confirmed in the reviewed scope. | Optional packaging/privacy preference. Existing public copies cannot be undone by local removal. Newly selected screenshots/signing metadata need review if they differ from the already reviewed source; destructive history rewriting remains unauthorized. |
+| Vulnerability reporting channel | Enable GitHub private reporting, or name a private maintainer contact. Recommend a private channel before inviting outside contributions. | Optional maintainer-policy improvement; private reporting was observed disabled. No setting/contact change is authorized here. |
+| Actions policy | Keep read-only defaults and pinned workflows, or additionally restrict allowed actions. Recommend retaining the verified safeguards; consider an allowlist when organizing external contribution review. | Optional policy improvement. Actions currently permits all actions, defaults to read-only permissions and cannot approve PRs. Current workflow pins do not constrain future workflow edits. No grants/security settings were changed. |
+
+Completed technical gates: the revised Docker image passed the existing PR CI
+runtime, root-owned disk, privileges, PORT and restart checks. Default SQLite,
+disposable PostgreSQL parity and offline merged-source mobile checks passed.
+The reviewed synthetic captures, public signing metadata and baseline source
+cleanup have scoped evidence above; they are not reasons to request the same
+source publication approval again.
+
+Local follow-up commits still require exact push/PR authorization if the owner
+wants them published. Package distribution, signing, hosting/deployment and
+changes to the owner's instance each require separate authorization; none is
+implied by the completed PR #12 push or local verification.
 
 The scan excludes ignored/untracked and unstaged files, dangling/force-deleted
 remote objects, GitHub PR-only refs, reflogs, submodules, LFS payloads, encoded
