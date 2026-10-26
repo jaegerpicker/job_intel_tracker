@@ -30,8 +30,9 @@
     },
     {
       "name": "certifi",
-      "version": "2026.7.22",
-      "license_metadata": "MPL-2.0"
+      "version": "2026.10.19",
+      "license_metadata": "MPL-2.0",
+      "audited_on": "2026-10-26"
     },
     {
       "name": "cffi",
