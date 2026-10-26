@@ -26,3 +26,32 @@ If the app sees the proxy's internal HTTP URL, configure `PUBLIC_BASE_URL=https:
 This setting declares that the public edge terminates TLS and the app's HTTP listener is confined to trusted ingress. Render documents that its public load balancer terminates SSL and forwards HTTP; the bound application port is not directly reachable from the public internet. However, same-workspace services in the same region can also reach the HTTP server privately. Treat that private workspace/network as trusted, and do not expose the container's HTTP port directly when self-hosting. The application cannot prove a request's original transport from canonical configuration alone. This explicit contract avoids trusting wildcard forwarded-header sources, but does not replace TLS or network isolation.
 
 References: https://render.com/docs/web-services and https://render.com/docs/private-network . Keep Uvicorn's forwarded-header allowlist narrow; do not add `FORWARDED_ALLOW_IPS=*` merely to bypass an origin failure.
+
+## October 2026 certificate remediation
+
+For the [Render eMudhra advisory](https://render.com/docs/advisory-emudhra),
+the Dockerfile refreshes the system CA store and both dependency files require
+Certifi `2026.10.19`. The direct project dependency covers Docker's `pip install .`,
+which does not read `requirements-lock.txt`. HTTPX uses this bundled store for
+Apple authentication and the local MCP client. The updated Certifi wheel retains
+its MPL-2.0 license and unmodified CA bundle.
+
+This server image contains no Node or PHP runtime. Node-based mobile/CI tooling
+is separate; [Render's Node version guidance](https://render.com/docs/node-version)
+applies if the actual service builds or runs Node. PHP2Shell does not apply to
+this Python image.
+
+After separate publication/deployment approval, build the reviewed security
+commit with a fresh base image and no stale package layers. Preserve the service's
+private storage and authentication settings. Record the deployed commit/image,
+Certifi version and system `ca-certificates` package version, then check health
+and access controls. From the running service, without credentials, verify that
+its actual HTTPX configuration rejects both advisory endpoints with certificate
+verification errors:
+
+- `https://dv-g3b-emudhra.we-have-a-problem.com/`
+- `https://dv-g3b-aaa-emudhra.we-have-a-problem.com/`
+
+Check normal HTTPS as a control. DNS failures/timeouts do not demonstrate
+certificate rejection. Inspect any custom CA overrides privately; never disable
+verification. Local tests do not establish deployed remediation.
