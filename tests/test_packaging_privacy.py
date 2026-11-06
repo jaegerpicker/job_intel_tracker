@@ -22,6 +22,11 @@ def test_source_and_wheel_exclude_private_assets_and_retain_public_ui(tmp_path):
         "requirements-lock.txt",
         ".env.example",
         "docs/sample-import.json",
+        "docs/GOOGLE_SETUP.md",
+        "docs/POSTGRES_SETUP.md",
+        "docs/notices/psycopg/README.md",
+        "docs/notices/psycopg/LICENSE.txt",
+        "docs/notices/psycopg/UPSTREAM.json",
     ]:
         destination = source / name
         destination.parent.mkdir(parents=True, exist_ok=True)
@@ -56,6 +61,10 @@ def test_source_and_wheel_exclude_private_assets_and_retain_public_ui(tmp_path):
         assert any(name.endswith("/.env.example") for name in names)
         assert any(name.endswith("/SECURITY.md") for name in names)
         assert any(name.endswith("/docs/sample-import.json") for name in names)
+        for public_setup in ["GOOGLE_SETUP.md", "POSTGRES_SETUP.md"]:
+            assert any(name.endswith("/docs/" + public_setup) for name in names)
+        for notice in ["README.md", "LICENSE.txt", "UPSTREAM.json"]:
+            assert any(name.endswith("/docs/notices/psycopg/" + notice) for name in names)
         setup_lock = next(name for name in names if name.endswith("/requirements-lock.txt"))
         lock_content = archive.extractfile(setup_lock)
         assert lock_content is not None
